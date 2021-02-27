@@ -1,6 +1,5 @@
 from strategies.strategy_base import StrategyBase
 from logger import logger
-from logger import log_events
 
 from trading.trend import TrendType
 

@@ -1,16 +1,20 @@
 from trading_interface.simulator.simulator import Simulator
 from trading_system.trading_system import TradingSystem
+
 from trading_signal_detectors.extremum.extremum_signal_detector import ExtremumSignalDetector
 from trading_signal_detectors.moving_average.moving_average_signal_detector import MovingAverageSignalDetector
+
 from logger.object_log import ObjectLog
 from logger import logger
+
+from trading.asset import AssetPair
 
 
 class StrategyRunner:
     def __init__(self):
         pass
 
-    def run_strategy(self, strategy, asset_pair, timeframe, from_ts, to_ts):
+    def run_strategy(self, strategy, asset_pair: AssetPair, timeframe, from_ts, to_ts):
         trading_interface = Simulator(candles_lifetime=15,
                                       asset_pair=asset_pair,
                                       timeframe=timeframe,

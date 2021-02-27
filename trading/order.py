@@ -1,5 +1,7 @@
 from enum import IntEnum
 
+from trading.asset import AssetPair
+
 
 class Direction(IntEnum):
     BUY = -1
@@ -7,7 +9,7 @@ class Direction(IntEnum):
 
 
 class Order:
-    def __init__(self, order_id, asset_pair, amount, price, direction: Direction):
+    def __init__(self, order_id: int, asset_pair: AssetPair, amount: int, price: float, direction: Direction):
         self.order_id = order_id
         self.asset_pair = asset_pair
         self.amount = amount
@@ -19,7 +21,7 @@ class Order:
 
     def __str__(self):
         return f"OrderId: {self.order_id} " \
-               f"AssetPair: {self.asset_pair.a1}-{self.asset_pair.a2} " \
+               f"AssetPair: {self.asset_pair.main_asset}-{self.asset_pair.secondary_asset} " \
                f"Amount: {self.amount} " \
                f"Price: {self.price} " \
                f"Direction: {self.direction}"

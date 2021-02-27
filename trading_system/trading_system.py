@@ -1,24 +1,26 @@
+from collections import defaultdict
+
 from trading_interface.trading_interface import TradingInterface
 from trading_system.candles_handler import CandlesHandler
 from trading_system.trend_handler import TrendHandler
 from trading_system.moving_average_handler import MovingAverageHandler
+
 from logger.log_events import BuyEvent, SellEvent, FilledOrderEvent
 from logger import logger
 
-from collections import defaultdict
+from trading.asset import AssetPair
+from trading.order import Order
 
 PRICE_EPS = 0.005
 
 
 class TradingSystem:
-    def __init__(self, trading_interface: TradingInterface,
-                 name='TradingSystem'):
-        self.name = name
-        self.logger = logger.get_logger(self.name)
+    def __init__(self, trading_interface: TradingInterface):
+        self.logger = logger.get_logger('TradingSystem')
         self.ti = trading_interface
         self.active_orders = []
         self.wallet = defaultdict(int)
-        self.logger.info(f'Trading system {self.name} initialized')
+        self.logger.info(f'Trading system TradingSystem initialized')
         self.handlers = {
             'CandlesHandler': CandlesHandler(trading_interface),
             'TrendHandler': TrendHandler(trading_interface),
@@ -37,21 +39,27 @@ class TradingSystem:
     def get_timestamp(self):
         return self.ti.get_timestamp()
 
-    def buy(self, asset_pair, amount, price):
+    def buy(self, asset_pair: AssetPair, amount: int, price: float):
         order = self.ti.buy(asset_pair, amount, price)
-        self.logger.trading(BuyEvent(asset_pair.a2, asset_pair.a1,
-                                     amount, price, order.order_id))
+        self.logger.trading(BuyEvent(asset_pair.main_asset,
+                                     asset_pair.secondary_asset,
+                                     amount,
+                                     price,
+                                     order.order_id))
         self.active_orders.append(order)
         return order
 
-    def sell(self, asset_pair, amount, price):
+    def sell(self, asset_pair: AssetPair, amount: int, price: float):
         order = self.ti.sell(asset_pair, amount, price)
-        self.logger.trading(SellEvent(asset_pair.a2, asset_pair.a1,
-                                      amount, price, order.order_id))
+        self.logger.trading(SellEvent(asset_pair.main_asset,
+                                      asset_pair.secondary_asset,
+                                      amount,
+                                      price,
+                                      order.order_id))
         self.active_orders.append(order)
         return order
 
-    def order_is_filled(self, order):
+    def order_is_filled(self, order: Order):
         order_filled = self.ti.order_is_filled(order)
         return order_filled
 
@@ -73,7 +81,7 @@ class TradingSystem:
         self.logger.info(f'Checking wallet: {self.wallet.items()}')
         return self.wallet
 
-    def get_last_n_candles(self, n):
+    def get_last_n_candles(self, n: int):
         return self.ti.get_last_n_candles(n)
 
     def __check_active_orders(self):

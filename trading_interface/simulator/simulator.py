@@ -1,16 +1,19 @@
+import datetime
+
 from trading_interface.trading_interface import TradingInterface
 from market_data_api.market_data_downloader import MarketDataDownloader
+
 from trading.order import Order, Direction
-import datetime
+from trading.asset import AssetPair
 
 PRICE_SHIFT = 0.001
 
 
 class Simulator(TradingInterface):
-    def __init__(self, candles_lifetime, asset_pair, timeframe, from_ts, to_ts):
+    def __init__(self, candles_lifetime, asset_pair: AssetPair, timeframe, from_ts, to_ts):
         ts_offset = int(datetime.timedelta(days=1).total_seconds())
-        self.candles = MarketDataDownloader(asset_pair).get_candles(
-            timeframe, from_ts - ts_offset, to_ts)
+        self.candles = MarketDataDownloader().get_candles(
+            asset_pair, timeframe, from_ts - ts_offset, to_ts)
         self.candles_lifetime = candles_lifetime
         self.seconds_per_candle = timeframe * 60
         self.candle_index_offset = ts_offset // self.seconds_per_candle
@@ -32,20 +35,20 @@ class Simulator(TradingInterface):
     def get_balance(self):
         return self.balance
 
-    def buy(self, asset_pair, amount, price):
+    def buy(self, asset_pair: AssetPair, amount: int, price: float):
         order = Order(self.__get_new_order_id(), asset_pair, amount, price, Direction.BUY)
         self.active_orders.append(order)
         return order
 
-    def sell(self, asset_pair, amount, price):
+    def sell(self, asset_pair: AssetPair, amount: int, price: float):
         order = Order(self.__get_new_order_id(), asset_pair, amount, price, Direction.SELL)
         self.active_orders.append(order)
         return order
 
-    def cancel_order(self, order):
+    def cancel_order(self, order: Order):
         pass
 
-    def order_is_filled(self, order):
+    def order_is_filled(self, order: Order):
         return order.order_id in self.filled_order_ids
 
     def get_sell_price(self):
@@ -54,7 +57,7 @@ class Simulator(TradingInterface):
     def get_buy_price(self):
         return self.__get_current_price() * (1 - PRICE_SHIFT)
 
-    def get_last_n_candles(self, n):
+    def get_last_n_candles(self, n: int):
         candle_index = self.__get_current_candle_index()
         return self.candles[max(0, candle_index - n): candle_index]
 
