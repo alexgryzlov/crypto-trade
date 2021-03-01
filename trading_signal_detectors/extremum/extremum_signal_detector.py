@@ -1,5 +1,5 @@
 from trading_signal_detectors.trading_signal_detector import TradingSignalDetector
-from trading_signal_detectors.signal import Signal
+from trading.signal import Signal
 from logger import logger
 from trading.trend import TrendType
 
