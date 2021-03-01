@@ -1,3 +1,6 @@
+from trading.asset import Asset
+
+
 class LogEvent:
     def __init__(self, msg, obj):
         self.msg = msg
@@ -12,7 +15,7 @@ class TrendLinesEvent(LogEvent):
 
 
 class BuyEvent(LogEvent):
-    def __init__(self, buy_asset, sell_asset, amount, price, order_id):
+    def __init__(self, buy_asset: Asset, sell_asset: Asset, amount: int, price: float, order_id):
         super().__init__(f'Buying {amount} of {buy_asset} for {price} '
                          f'{sell_asset}, order {order_id}',
                          {'buy_asset': buy_asset,
@@ -23,7 +26,7 @@ class BuyEvent(LogEvent):
 
 
 class SellEvent(LogEvent):
-    def __init__(self, sell_asset, buy_asset, amount, price, order_id):
+    def __init__(self, sell_asset: Asset, buy_asset: Asset, amount: int, price: float, order_id):
         super().__init__(f'Selling {amount} of {sell_asset} for {price} '
                          f'{buy_asset}, order {order_id}',
                          {'buy_asset': buy_asset,
