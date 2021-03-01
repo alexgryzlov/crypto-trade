@@ -5,12 +5,11 @@ from trading.trend import TrendType
 
 
 class TrendStrategy(StrategyBase):
-    def __init__(self, trading_system, asset_pair, name='TrendStrategy'):
+    def __init__(self, trading_system, asset_pair):
         self.ts = trading_system
         self.asset_pair = asset_pair
-        self.name = name
-        self.logger = logger.get_logger(name)
-        self.logger.info(f'Strategy {self.name} initialized')
+        self.logger = logger.get_logger('TrendStrategy')
+        self.logger.info(f'Strategy TrendStrategy initialized')
         self.order_balance = 0
         self.active_trends = []
 

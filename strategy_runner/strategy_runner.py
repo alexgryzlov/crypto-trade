@@ -24,7 +24,8 @@ class StrategyRunner:
         trading_system = TradingSystem(trading_interface)
         signal_detectors = [ExtremumSignalDetector(trading_system, 2),
                             MovingAverageSignalDetector(trading_system, 25, 50)]
-        strategy = strategy(trading_system, asset_pair)
+        strategy = strategy(trading_system=trading_system,
+                            asset_pair=asset_pair)
 
         while trading_interface.is_alive():
             trading_system.update()
