@@ -5,6 +5,7 @@ from market_data_api.market_data_downloader import MarketDataDownloader
 
 from trading.order import Order, Direction
 from trading.asset import AssetPair
+from trading_interface.simulator.price_simulator import PriceSimulator
 
 PRICE_SHIFT = 0.001
 
@@ -22,6 +23,7 @@ class Simulator(TradingInterface):
         self.filled_order_ids = set()
         self.iteration = 0
         self.balance = 0
+        self.price_simulator = PriceSimulator(candles_lifetime)
 
     def is_alive(self):
         self.__fill_orders()
@@ -72,7 +74,7 @@ class Simulator(TradingInterface):
 
     def __get_current_price(self):
         candle = self.candles[self.__get_current_candle_index()]
-        return candle.get_delta() * (self.__get_current_candle_lifetime() / self.candles_lifetime) + candle.open
+        return self.price_simulator.get_price(candle, self.__get_current_candle_lifetime())
 
     def __get_current_candle_lifetime(self):
         return self.iteration % self.candles_lifetime
