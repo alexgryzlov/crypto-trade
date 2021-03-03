@@ -1,10 +1,11 @@
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from copy import copy
 
 from trading_interface.trading_interface import TradingInterface
 from trading_system.candles_handler import CandlesHandler
+from trading_system.trading_system_handler import TradingSystemHandler
 from trading_system.trend_handler import TrendHandler
-from trading_system.moving_average_handler import MovingAverageHandler
+from trading_system.indicators import *
 from trading_system.orders_handler import OrdersHandler
 
 from logger.log_events import BuyEvent, SellEvent
@@ -17,6 +18,13 @@ from trading.signal import Signal
 PRICE_EPS = 0.005
 
 
+class Handlers(OrderedDict):
+    def add(self, handler: TradingSystemHandler):
+        handler.pre_add(self)
+        self[handler.get_name()] = handler
+        return self
+
+
 class TradingSystem:
     def __init__(self, trading_interface: TradingInterface):
         self.logger = logger.get_logger('TradingSystem')
@@ -24,13 +32,12 @@ class TradingSystem:
         self.wallet = defaultdict(int)
         self.trading_signals = []
         self.logger.info(f'Trading system TradingSystem initialized')
-        self.handlers = {
-            'CandlesHandler': CandlesHandler(trading_interface),
-            'OrdersHandler': OrdersHandler(trading_interface),
-            'TrendHandler': TrendHandler(trading_interface),
-            'MovingAverageHandler25': MovingAverageHandler(trading_interface, 25),
-            'MovingAverageHandler50': MovingAverageHandler(trading_interface, 50)
-        }
+        self.handlers = Handlers()\
+            .add(CandlesHandler(trading_interface))\
+            .add(OrdersHandler(trading_interface))\
+            .add(TrendHandler(trading_interface))\
+            .add(MovingAverageHandler(trading_interface, 25))\
+            .add(MovingAverageHandler(trading_interface, 50))
 
     def update(self):
         for handler in self.handlers.values():
