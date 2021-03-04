@@ -1,4 +1,6 @@
 import logging
+
+from logger.clock import Clock
 from logger.object_log import ObjectLog
 
 _log_format = (f'[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s ',
@@ -36,7 +38,7 @@ def __trading_handler(self, log_event, *args, **kws):
         self._object_log.add_event(log_event.obj)
 
 
-def set_clock(clock):
+def set_clock(clock: Clock):
     global _clock
     _clock = clock
 

@@ -1,5 +1,6 @@
 import datetime
 
+from trading_interface.simulator.clock_simulator import ClockSimulator
 from trading_interface.trading_interface import TradingInterface
 from market_data_api.market_data_downloader import MarketDataDownloader
 
@@ -10,12 +11,12 @@ PRICE_SHIFT = 0.001
 
 
 class Simulator(TradingInterface):
-    def __init__(self, asset_pair: AssetPair, timeframe, from_ts, to_ts, clock):
+    def __init__(self, asset_pair: AssetPair, from_ts, to_ts, clock: ClockSimulator):
         ts_offset = int(datetime.timedelta(days=1).total_seconds())
         self.candles = MarketDataDownloader().get_candles(
-            asset_pair, timeframe, from_ts - ts_offset, to_ts)
-        self.candle_index_offset = ts_offset // (timeframe * 60)
+            asset_pair, clock.get_timeframe(), from_ts - ts_offset, to_ts)
         self.clock = clock
+        self.candle_index_offset = ts_offset // clock.get_seconds_per_candle()
         self.active_orders = []
         self.last_used_order_id = 0
         self.filled_order_ids = set()
@@ -73,7 +74,7 @@ class Simulator(TradingInterface):
                candle.get_delta() * (self.clock.get_current_candle_lifetime() / self.clock.candles_lifetime)
 
     def __get_current_candle_index(self, truncated_index=True):
-        index = self.candle_index_offset + self.clock.get_iterated_candles_cnt()
+        index = self.candle_index_offset + self.clock.get_iterated_candles_count()
         if not truncated_index:
             return index
         return min(index, len(self.candles) - 1)

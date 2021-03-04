@@ -6,4 +6,4 @@ class Clock:
         pass
 
     def get_timestamp(self):
-        return datetime.now().timestamp()
+        return int(datetime.now().timestamp())
