@@ -14,6 +14,13 @@ class TrendLinesEvent(LogEvent):
                           'upper_trend_line': upper_trend_line})
 
 
+class MovingAverageEvent(LogEvent):
+    def __init__(self, average_value, window_size):
+        super().__init__(f'New average of last {window_size} elements {average_value}',
+                         {'average_value': average_value,
+                          'window_size': window_size})
+
+
 class BuyEvent(LogEvent):
     def __init__(self, buy_asset: Asset, sell_asset: Asset, amount: int, price: float, order_id):
         super().__init__(f'Buying {amount} of {buy_asset} for {price} '
