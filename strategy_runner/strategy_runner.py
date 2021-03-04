@@ -1,3 +1,4 @@
+from trading_interface.simulator.clock_simulator import ClockSimulator
 from trading_interface.simulator.simulator import Simulator
 from trading_system.trading_system import TradingSystem
 
@@ -15,12 +16,12 @@ class StrategyRunner:
         pass
 
     def run_strategy(self, strategy, asset_pair: AssetPair, timeframe, from_ts, to_ts):
-        trading_interface = Simulator(candles_lifetime=15,
-                                      asset_pair=asset_pair,
-                                      timeframe=timeframe,
+        clock = ClockSimulator(from_ts, timeframe, candles_lifetime=15)
+        trading_interface = Simulator(asset_pair=asset_pair,
                                       from_ts=from_ts,
-                                      to_ts=to_ts)
-        logger.set_timer(trading_interface)
+                                      to_ts=to_ts,
+                                      clock=clock)
+        logger.set_clock(clock)
         trading_system = TradingSystem(trading_interface)
         signal_detectors = [ExtremumSignalDetector(trading_system, 2),
                             MovingAverageSignalDetector(trading_system, 25, 50)]
