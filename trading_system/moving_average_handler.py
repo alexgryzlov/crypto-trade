@@ -10,7 +10,7 @@ class MovingAverageHandler(TradingSystemHandler):
         self.ti = trading_interface
         self.window_size = window_size
         self.average_values = []
-        self.logger = logger.get_logger("MovingAverageHandler" + str(self.window_size))
+        self.logger = logger.get_logger(f"MovingAverageHandler{self.window_size}")
 
     def update(self):
         if not super().received_new_candle():

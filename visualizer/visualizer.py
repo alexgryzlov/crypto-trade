@@ -115,9 +115,7 @@ class GraphicLayer:
                               y=moving_averages,
                               mode='lines',
                               name=f'Moving Average {window_size}',
-                              line=dict(
-                                  color=color
-                              )
+                              line=dict(color=color)
                               )
         self.ma_traces.append(ma_trace)
 
