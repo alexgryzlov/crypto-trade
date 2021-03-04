@@ -20,8 +20,9 @@ PRICE_EPS = 0.005
 
 class Handlers(OrderedDict):
     def add(self, handler: TradingSystemHandler):
-        handler.pre_add(self)
-        self[handler.get_name()] = handler
+        if handler.get_name() not in self:
+            handler.pre_add(self)
+            self[handler.get_name()] = handler
         return self
 
 
