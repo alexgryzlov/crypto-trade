@@ -1,6 +1,6 @@
 from trading_system.trading_system_handler import TradingSystemHandler
 from trading_interface.trading_interface import TradingInterface
-from logger import logger
+from logger.logger import Logger
 from logger.log_events import MovingAverageEvent
 
 
@@ -10,7 +10,7 @@ class MovingAverageHandler(TradingSystemHandler):
         self.ti = trading_interface
         self.window_size = window_size
         self.average_values = []
-        self.logger = logger.get_logger(f"MovingAverageHandler{self.window_size}")
+        self.logger = Logger(f"MovingAverageHandler{self.window_size}")
 
     def update(self):
         if not super().received_new_candle():
