@@ -16,7 +16,6 @@ class Logger:
     def __getattr__(self, item):
         return getattr(self.logger, item)
 
-    @staticmethod
     def __trading_handler(self, log_event, *args, **kws):
         if self.isEnabledFor(logging.TRADING):
             log_event.obj['ts'] = Logger._clock.get_timestamp()
@@ -57,8 +56,8 @@ class Logger:
     logging.TRADING = logging.WARNING + 5
     logging.addLevelName(logging.TRADING, "TRADING")
     logging.Logger.trading = __trading_handler
-    logging.Logger._object_log = ObjectLog()
 
+    logging.Logger._object_log = ObjectLog()
     _clock = Clock()
     _log_format = (f'[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s ',
                    '%m-%d %H:%M:%S')
