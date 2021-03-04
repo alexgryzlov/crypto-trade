@@ -1,20 +1,33 @@
 import numpy as np
 
 from trading.candle import Candle
+from logger import logger
 
 
 class PriceSimulator:
-    def __init__(self, candles_lifetime):
+    def __init__(self, candles_lifetime, type):
         self.candles_lifetime = candles_lifetime
         self.current_ts = None
-        self.prices = []
-        self.noise = lambda: np.random.normal(0, 0.1)
+        self.prices = [0] * candles_lifetime
+        self.noise = np.random.normal
+        self.type = type
+        self.logger = logger.get_logger('PriceSimulator')
 
     def get_price(self, candle: Candle, current_lifetime):
         if candle.ts != self.current_ts:
             self.current_ts = candle.ts
-            self.prices = self._high_to_low(candle) if hash(str(candle.ts)) % 2 == 0 else self._low_to_high(candle)
+            try:
+                self.prices = self.__getattribute__(self.type)(candle)
+            except AttributeError:
+                self.logger.exception('Unknown PriceSimulator type.')
         return self.prices[current_lifetime]
+
+    def three_interval_path(self, candle):
+        return self._high_to_low(candle) if hash(str(candle.ts)) % 2 == 0 else self._low_to_high(candle)
+
+    def three_interval_path_noise(self, candle):
+        self.noise = lambda: np.random.normal(0, (candle.high - candle.low) / self.candles_lifetime)
+        return self._high_to_low(candle, True) if hash(str(candle.ts)) % 2 == 0 else self._low_to_high(candle, True)
 
     def _uniform(self, candle: Candle):
         return [candle.get_delta() * (i / self.candles_lifetime) + candle.open for i in range(self.candles_lifetime)]
