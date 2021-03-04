@@ -28,7 +28,7 @@ class MovingAverageHandler(TradingSystemHandler):
 
         candle_values = list(map(lambda c: c.get_mid_price(), candles))
         self.values.append(self.get_from(candle_values))
-        self.logger.trading(MovingAverageEvent(self.get_n_average_values(1), self.window_size))
+        self.logger.trading(MovingAverageEvent(self.get_last_n_values(1), self.window_size))
 
     def get_last_n_values(self, n):
         return self.values[-n:]
