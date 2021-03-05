@@ -9,7 +9,7 @@ class VolumeRelativeStrengthIndexHandler(TradingSystemHandler):
          VORS = (Average Up-Volume) / (Average Down-Volume)
      """
 
-    def __init__(self, trading_interface: TradingInterface, window_size: int = 14):
+    def __init__(self, trading_interface: TradingInterface, window_size: int = 14) -> None:
         super().__init__(trading_interface)
         self.ti = trading_interface
 
@@ -17,7 +17,7 @@ class VolumeRelativeStrengthIndexHandler(TradingSystemHandler):
 
         self.values = []
 
-    def update(self):
+    def update(self) -> None:
         if not super().received_new_candle():
             return
 
@@ -29,5 +29,5 @@ class VolumeRelativeStrengthIndexHandler(TradingSystemHandler):
         down_volume = sum([-candle.volume if candle.get_delta < 0 else 0 for candle in candles])
         self.values.append(100 - 100 / (1 + up_volume / down_volume))
 
-    def get_last_n_values(self, n):
+    def get_last_n_values(self, n) -> list:
         return self.values[-n:]
