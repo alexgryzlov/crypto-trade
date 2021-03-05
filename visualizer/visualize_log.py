@@ -2,6 +2,7 @@ import sys
 
 sys.path.append('.')
 
+import os
 import pickle
 import logger.log_events as log_events
 import typing as tp
@@ -15,15 +16,8 @@ def get_log_path():
     path = Path(sys.argv[1] if len(sys.argv) == 2 else PATH_TO_DUMPS)
     logs = list(path.rglob('*.dump')) if path.is_dir() else [path]
     if len(logs) == 0:
-        return ''
-    elif len(logs) == 1:
-        return Path(logs[0])
-    else:
-        print('Select one of the following files:')
-        for i, log in enumerate(logs):
-            print(f'({i + 1})', log)
-        print('Enter number:', end=' ')
-        return logs[int(input()) - 1]
+        return None
+    return max(logs, key=os.path.getctime)
 
 
 def load_log(filename):
@@ -64,6 +58,7 @@ def decompose_moving_average(moving_averages):
 
 if __name__ == '__main__':
     path = get_log_path()
+    print(path)
     log = load_log(path)
     decomposed_log = decompose_log(log)
     vis = Visualizer()
