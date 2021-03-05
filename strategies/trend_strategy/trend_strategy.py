@@ -6,7 +6,7 @@ from trading import TrendType
 
 
 class TrendStrategy(StrategyBase):
-    def __init__(self, trading_system, asset_pair):
+    def __init__(self, trading_system, asset_pair, **kwargs):
         self.ts = trading_system
         self.asset_pair = asset_pair
         self.logger = Logger('TrendStrategy')

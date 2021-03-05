@@ -2,20 +2,28 @@ from trading_interface.simulator.clock_simulator import ClockSimulator
 from trading_interface.simulator.simulator import Simulator
 from trading_system.trading_system import TradingSystem
 
-from trading_signal_detectors.extremum.extremum_signal_detector import ExtremumSignalDetector
-from trading_signal_detectors.moving_average.moving_average_signal_detector import MovingAverageSignalDetector
+from trading_signal_detectors.extremum.extremum_signal_detector \
+    import ExtremumSignalDetector
+from trading_signal_detectors.moving_average.moving_average_signal_detector \
+    import MovingAverageSignalDetector
 
 from logger.object_log import ObjectLog
 from logger.logger import Logger
 
 from trading import AssetPair, Timeframe
 
+from pathlib import Path
+from typing import Optional
+import json
+
 
 class StrategyRunner:
     def __init__(self):
         pass
 
-    def run_strategy(self, strategy, asset_pair: AssetPair, timeframe: Timeframe, from_ts, to_ts):
+    def run_strategy(
+            self, strategy, asset_pair: AssetPair, timeframe, from_ts, to_ts,
+            path_to_config: Optional[Path] = None):
         clock = ClockSimulator(from_ts, timeframe, candles_lifetime=15)
         trading_interface = Simulator(asset_pair=asset_pair,
                                       from_ts=from_ts,
@@ -23,10 +31,17 @@ class StrategyRunner:
                                       clock=clock)
         Logger.set_clock(clock)
         trading_system = TradingSystem(trading_interface)
-        signal_detectors = [ExtremumSignalDetector(trading_system, 2),
-                            MovingAverageSignalDetector(trading_system, 25, 50)]
+        signal_detectors = [
+            ExtremumSignalDetector(trading_system, 2),
+            MovingAverageSignalDetector(trading_system, 25, 50)]
+
+        try:
+            config = json.load(open(path_to_config, 'r'))
+        except:
+            config = {}
         strategy = strategy(trading_system=trading_system,
-                            asset_pair=asset_pair)
+                            asset_pair=asset_pair,
+                            **config)
 
         while trading_interface.is_alive():
             trading_system.update()
@@ -34,7 +49,8 @@ class StrategyRunner:
             for detector in signal_detectors:
                 signals += detector.get_trading_signals()
             for signal in signals:
-                strategy.__getattribute__(f'handle_{signal.name}_signal')(signal.content)
+                strategy.__getattribute__(
+                    f'handle_{signal.name}_signal')(signal.content)
             strategy.update()
 
         print(trading_system.get_balance())
