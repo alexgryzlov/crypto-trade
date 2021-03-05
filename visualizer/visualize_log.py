@@ -33,8 +33,16 @@ def process_buy_sell_events(events):
     meta = events.copy()
     for i, item in enumerate(meta):
         item.pop('event_type')
-        meta[i] = '<br>'.join(str(key) + ': ' + str(value) for key, value in item.items())
+        meta[i] = '<br>'.join(
+            str(key) + ': ' + str(value) for key, value in item.items())
     return timestamps, prices, amounts, meta
+
+
+def decompose_moving_average(moving_averages):
+    ma_by_window = defaultdict(list)
+    for event in moving_averages:
+        ma_by_window[event['window_size']].append(event)
+    return ma_by_window
 
 
 if __name__ == '__main__':
@@ -43,6 +51,9 @@ if __name__ == '__main__':
     vis = Visualizer()
     vis.add_candles(get_candles(decomposed_log[log_events.NewCandleEvent]))
     vis.add_trend_lines(decomposed_log[log_events.TrendLinesEvent])
+    for window_size, moving_average in decompose_moving_average(
+            decomposed_log[log_events.MovingAverageEvent]).items():
+        vis.add_moving_average(moving_average, window_size)
     vis.add_buy_events(
         *process_buy_sell_events(decomposed_log[log_events.BuyEvent]))
     vis.add_sell_events(

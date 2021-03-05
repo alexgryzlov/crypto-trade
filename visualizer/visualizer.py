@@ -1,5 +1,6 @@
 import numpy as np
 import plotly.graph_objects as go
+import plotly.express as px
 from datetime import datetime
 import typing as tp
 import bisect
@@ -34,6 +35,7 @@ class GraphicLayer:
         self.buy_trace = None
         self.sell_trace = None
         self.trend_traces = []
+        self.ma_traces = []
         self.ts_line = go.Scatter(visible=False,
                                   x=[to_time(ts), to_time(ts)],
                                   y=[visualizer._y_min, visualizer._y_max],
@@ -89,7 +91,8 @@ class GraphicLayer:
             name='future WAVES/USDN'  # TODO: normal title
         )
 
-    def add_trend_line(self, trend_line: TrendLine, trend_length=30, name_suffix=""):
+    def add_trend_line(self, trend_line: TrendLine, trend_length=30,
+                       name_suffix=""):
         from_ts = self.ts - trend_length * 300  # TODO: deal with trend_length
         to_ts = self.ts + trend_length * 300
         timestamps = np.array([from_ts, to_ts])
@@ -104,6 +107,17 @@ class GraphicLayer:
                                      width=1,
                                  ))
         self.trend_traces.append(trend_trace)
+
+    def add_moving_average(self, moving_averages, timestamps, window_size):
+        color = px.colors.qualitative.Pastel[len(self.ma_traces)]
+        ma_trace = go.Scatter(visible=False,
+                              x=timestamps,
+                              y=moving_averages,
+                              mode='lines',
+                              name=f'Moving Average {window_size}',
+                              line=dict(color=color)
+                              )
+        self.ma_traces.append(ma_trace)
 
     def add_buy_events(self, timestamps, prices, amount, meta):
         self.buy_trace = go.Scatter(visible=False,
@@ -134,11 +148,12 @@ class GraphicLayer:
     def get_traces(self):
         return [self.ts_line, self.left_candle_trace, self.right_candle_trace,
                 self.sell_trace, self.buy_trace,
-                *self.trend_traces]
+                *self.trend_traces,
+                *self.ma_traces]
 
     def get_visibility_params(self, candles_history=None, candles_future=None,
                               ts_line=None, trends=None, buy=None, sell=None,
-                              default_visibility=True):
+                              ma=None, default_visibility=True):
         visibility = [default_visibility if ts_line is None else ts_line,
                       default_visibility if candles_history is None else
                       candles_history,
@@ -148,6 +163,8 @@ class GraphicLayer:
                       default_visibility if buy is None else buy]
         for i in range(len(self.trend_traces)):
             visibility.append(default_visibility if trends is None else trends)
+        for i in range(len(self.ma_traces)):
+            visibility.append(default_visibility if ma is None else ma)
         return visibility
 
 
@@ -220,6 +237,18 @@ class Visualizer:
                 self._layers[ind].add_trend_line(lower_trend_line,
                                                  trend_length,
                                                  name_suffix="lower line")
+
+    def add_moving_average(self, moving_averages, window_size):
+        averages = []
+        timestamps = []
+        for event in moving_averages:
+            average_value = event['average_value']
+            averages.append(average_value)
+            ts = event['ts']
+            timestamps.append(to_time(ts))
+            ind = self.__get_ind_by_ts(ts)
+            self._layers[ind].add_moving_average(averages, timestamps,
+                                                 window_size)
 
     def add_buy_events(self, timestamps, prices, amount, meta):
         self.__add_buy_sell_events(timestamps, prices, amount, meta,

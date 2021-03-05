@@ -1,5 +1,6 @@
 import datetime
 
+from trading_interface.simulator.clock_simulator import ClockSimulator
 from trading_interface.trading_interface import TradingInterface
 from market_data_api.market_data_downloader import MarketDataDownloader
 
@@ -11,29 +12,26 @@ PRICE_SHIFT = 0.001
 
 
 class Simulator(TradingInterface):
-    def __init__(self, candles_lifetime, asset_pair: AssetPair, timeframe, from_ts, to_ts,
+    def __init__(self, asset_pair: AssetPair, from_ts, to_ts, clock: ClockSimulator,
                  price_simulator_type='three_interval_path'):
         ts_offset = int(datetime.timedelta(days=1).total_seconds())
         self.candles = MarketDataDownloader().get_candles(
-            asset_pair, timeframe, from_ts - ts_offset, to_ts)
-        self.candles_lifetime = candles_lifetime
-        self.seconds_per_candle = timeframe * 60
-        self.candle_index_offset = ts_offset // self.seconds_per_candle
+            asset_pair, clock.get_timeframe(), from_ts - ts_offset, to_ts)
+        self.clock = clock
+        self.candle_index_offset = ts_offset // clock.get_seconds_per_candle()
         self.active_orders = []
         self.last_used_order_id = 0
         self.filled_order_ids = set()
-        self.iteration = 0
         self.balance = 0
-        self.price_simulator = PriceSimulator(candles_lifetime, price_simulator_type)
+        self.price_simulator = PriceSimulator(self.clock.candles_lifetime, price_simulator_type)
 
     def is_alive(self):
         self.__fill_orders()
-        self.iteration += 1
+        self.clock.next_iteration()
         return self.__get_current_candle_index(truncated_index=False) < len(self.candles)
 
     def get_timestamp(self):
-        return self.candles[self.__get_current_candle_index()].ts + \
-               self.__get_current_candle_lifetime() // self.candles_lifetime * self.seconds_per_candle
+        return self.clock.get_timestamp()
 
     def get_balance(self):
         return self.balance
@@ -75,13 +73,10 @@ class Simulator(TradingInterface):
 
     def __get_current_price(self):
         candle = self.candles[self.__get_current_candle_index()]
-        return self.price_simulator.get_price(candle, self.__get_current_candle_lifetime())
-
-    def __get_current_candle_lifetime(self):
-        return self.iteration % self.candles_lifetime
+        return self.price_simulator.get_price(candle, self.clock.get_current_candle_lifetime())
 
     def __get_current_candle_index(self, truncated_index=True):
-        index = self.candle_index_offset + self.iteration // self.candles_lifetime
+        index = self.candle_index_offset + self.clock.get_iterated_candles_count()
         if not truncated_index:
             return index
         return min(index, len(self.candles) - 1)
