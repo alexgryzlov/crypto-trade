@@ -26,11 +26,26 @@ class RelativeStrengthIndexHandler(TradingSystemHandler):
         if len(candles) < self.window_size:
             return
 
-        upwards = list(map(lambda c: max(c.get_delta(), 0), candles))
-        downwards = list(map(lambda c: max(-c.get_delta(), 0), candles))
-        self.relative_strength.append(ExpMovingAverageHandler.get_from(upwards, self.alpha) /
-                                      ExpMovingAverageHandler.get_from(downwards, self.alpha))
-        self.values.append(100 - 100 / (1 + self.relative_strength[-1]))
+        deltas = list(map(lambda c: c.get_delta(), candles))
+        rs, rsi = self.get_from(deltas, self.alpha)
+        self.relative_strength.append(rs)
+        self.values.append(rsi)
 
     def get_last_n_values(self, n):
         return self.values[-n:]
+
+    @staticmethod
+    def get_from(deltas, alpha=None) -> [float, float]:
+        """ Returns relative strength value and relative strength index. """
+        if alpha is None:
+            alpha = 1 / len(deltas)
+
+        average_gain = ExpMovingAverageHandler.get_from(list(map(lambda x: max(x, 0), deltas)), alpha)
+        average_loss = ExpMovingAverageHandler.get_from(list(map(lambda x: max(-x, 0), deltas)), alpha)
+
+        if average_loss == 0:  # Avoid RuntimeWarning with zero division
+            relative_strength = 1 if average_gain == 0 else float('inf')
+        else:
+            relative_strength = average_gain / average_loss
+        relative_strength_index = 100 - 100 / (1 + relative_strength)
+        return relative_strength, relative_strength_index

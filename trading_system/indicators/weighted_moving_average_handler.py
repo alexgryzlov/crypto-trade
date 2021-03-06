@@ -35,5 +35,5 @@ class WeightedMovingAverageHandler(TradingSystemHandler):
 
     @staticmethod
     def get_from(values):
-        coefs = np.arange(1, len(values))
+        coefs = np.arange(1, len(values) + 1)
         return np.sum(coefs * values) / (len(values) * (len(values) + 1) / 2)

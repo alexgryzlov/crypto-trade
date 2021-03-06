@@ -37,5 +37,5 @@ class ExpMovingAverageHandler(TradingSystemHandler):
         if alpha is None:
             alpha = 2 / (1 + len(values))
 
-        coefs = np.logspace(0, len(values) - 1, num=len(values), base=1 - alpha)
+        coefs = np.logspace(len(values) - 1, 0, num=len(values), base=1 - alpha)
         return alpha * np.sum(coefs * values)
