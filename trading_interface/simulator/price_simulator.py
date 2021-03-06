@@ -5,6 +5,13 @@ from logger import logger
 
 
 class PriceSimulator:
+    """
+    Simulates price changes within single candle.
+    Depending on the parity of timestamp hash chooses between:
+        1. open -> high -> low -> close
+        2. open -> low -> high -> close
+    Noise can be optionally added
+    """
     def __init__(self, candles_lifetime, type):
         self.candles_lifetime = candles_lifetime
         self.current_ts = None
@@ -39,6 +46,10 @@ class PriceSimulator:
         return self.__three_interval_path(candle.open, candle.low, candle.high, candle.close, self.candles_lifetime, noise)
 
     def __three_interval_path(self, one, two, three, four, total_steps, noise=False):
+        """
+        returns 'total_steps' evenly distributed points on the way one -> two -> three -> four
+        one, two, three, four are always among the result
+        """
         total_path = abs(one - two) + abs(two - three) + abs(three - four)
         first_segment_steps = int((abs(one - two)) / total_path * (total_steps - 4)) + 2
         second_segment_steps = int(abs(two - three) / total_path * (total_steps - 4)) + 1
@@ -52,39 +63,3 @@ class PriceSimulator:
             for ind in filter(lambda x: prices[x] not in [one, two, three, four], range(len(prices))):
                 prices[ind] = min(max(prices[ind] + self.noise(), low), high)
         return prices
-
-
-if __name__ == '__main__':
-    for lifetime in range(4, 25):
-        ps = PriceSimulator(lifetime)
-        for i in range(1000):
-            vals = sorted(np.random.random(4))
-            candle_up = Candle(i, vals[1], vals[2], vals[0], vals[3])
-            candle_down = Candle(i, vals[2], vals[1], vals[0], vals[3])
-            htl = ps._high_to_low(candle_up)
-            lth = ps._low_to_high(candle_up)
-            assert (len(lth) == lifetime)
-            assert (len(htl) == lifetime)
-            assert (htl[1] >= htl[0])
-            assert (lth[1] <= lth[0])
-            assert (candle_up.low in htl and candle_up.low in lth)
-            assert (candle_up.high in htl and candle_up.high in lth)
-            assert (candle_up.open in htl and candle_up.open in lth)
-            assert (candle_up.close in htl and candle_up.close in lth)
-            htl = ps._high_to_low(candle_down)
-            lth = ps._low_to_high(candle_down)
-            assert (len(lth) == lifetime)
-            assert (len(htl) == lifetime)
-            assert (htl[1] >= htl[0])
-            assert (lth[1] <= lth[0])
-            assert (candle_up.low in htl and candle_up.low in lth)
-            assert (candle_up.high in htl and candle_up.high in lth)
-            assert (candle_up.open in htl and candle_up.open in lth)
-            assert (candle_up.close in htl and candle_up.close in lth)
-
-            htl_noise = ps._high_to_low(candle_up, True)
-            lth_noise = ps._low_to_high(candle_up, True)
-            assert (candle_up.low == min(*htl_noise) and candle_up.low == min(*lth_noise))
-            assert (candle_up.high == max(*htl_noise) and candle_up.high == max(*lth_noise))
-            assert (candle_up.open in htl_noise and candle_up.open in lth_noise)
-            assert (candle_up.close in htl_noise and candle_up.close in lth_noise)
