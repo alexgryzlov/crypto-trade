@@ -1,7 +1,7 @@
 from trading_system.trading_system_handler import TradingSystemHandler
 from trading_interface.trading_interface import TradingInterface
 from logger.log_events import TrendLinesEvent
-from logger import logger
+from logger.logger import Logger
 from trading.trend import TrendLine
 import base.geometry.convex_hull as geom
 
@@ -16,7 +16,7 @@ class TrendHandler(TradingSystemHandler):
     def __init__(self, trading_interface: TradingInterface):
         super().__init__(trading_interface)
         self.ti = trading_interface
-        self.logger = logger.get_logger("TrendHandler")
+        self.logger = Logger("TrendHandler")
 
     def update(self):
         if not super().received_new_candle():

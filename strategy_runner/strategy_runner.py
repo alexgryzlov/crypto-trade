@@ -6,7 +6,7 @@ from trading_signal_detectors.extremum.extremum_signal_detector import ExtremumS
 from trading_signal_detectors.moving_average.moving_average_signal_detector import MovingAverageSignalDetector
 
 from logger.object_log import ObjectLog
-from logger import logger
+from logger.logger import Logger
 
 from trading.asset import AssetPair
 
@@ -21,7 +21,7 @@ class StrategyRunner:
                                       from_ts=from_ts,
                                       to_ts=to_ts,
                                       clock=clock)
-        logger.set_clock(clock)
+        Logger.set_clock(clock)
         trading_system = TradingSystem(trading_interface)
         signal_detectors = [ExtremumSignalDetector(trading_system, 2),
                             MovingAverageSignalDetector(trading_system, 25, 50)]

@@ -1,6 +1,6 @@
 from trading_system.trading_system_handler import TradingSystemHandler
 from trading_interface.trading_interface import TradingInterface
-from logger import logger
+from logger.logger import Logger
 from logger.log_events import MovingAverageEvent
 
 
@@ -13,7 +13,7 @@ class MovingAverageHandler(TradingSystemHandler):
         self.window_size = window_size
 
         self.values = []
-        self.logger = logger.get_logger(self.get_name())
+        self.logger = Logger(self.get_name())
 
     def get_name(self):
         return f'{type(self).__name__}{self.window_size}'

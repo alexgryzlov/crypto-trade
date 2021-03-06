@@ -9,7 +9,7 @@ from trading_system.indicators import *
 from trading_system.orders_handler import OrdersHandler
 
 from logger.log_events import BuyEvent, SellEvent
-from logger import logger
+from logger.logger import Logger
 
 from trading.asset import AssetPair
 from trading.order import Order
@@ -28,7 +28,7 @@ class Handlers(OrderedDict):
 
 class TradingSystem:
     def __init__(self, trading_interface: TradingInterface):
-        self.logger = logger.get_logger('TradingSystem')
+        self.logger = Logger('TradingSystem')
         self.ti = trading_interface
         self.wallet = defaultdict(int)
         self.trading_signals = []
