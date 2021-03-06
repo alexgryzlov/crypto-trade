@@ -9,13 +9,14 @@ from logger.object_log import ObjectLog
 from logger import logger
 
 from trading.asset import AssetPair
+from trading.timeframe import Timeframe
 
 
 class StrategyRunner:
     def __init__(self):
         pass
 
-    def run_strategy(self, strategy, asset_pair: AssetPair, timeframe, from_ts, to_ts):
+    def run_strategy(self, strategy, asset_pair: AssetPair, timeframe: Timeframe, from_ts, to_ts):
         clock = ClockSimulator(from_ts, timeframe, candles_lifetime=15)
         trading_interface = Simulator(asset_pair=asset_pair,
                                       from_ts=from_ts,

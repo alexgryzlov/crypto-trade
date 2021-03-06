@@ -1,11 +1,12 @@
 from logger.clock import Clock
+from trading.timeframe import Timeframe
 
 
 class ClockSimulator(Clock):
-    def __init__(self, start, timeframe, candles_lifetime):
+    def __init__(self, start, timeframe: Timeframe, candles_lifetime):
         self.start = start
         self.timeframe = timeframe
-        self.seconds_per_candle = timeframe * 60
+        self.seconds_per_candle = timeframe.to_seconds()
         self.candles_lifetime = candles_lifetime
         self.iteration = 0
 

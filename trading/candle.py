@@ -24,5 +24,5 @@ class Candle:
                f"Open: {self.open} " \
                f"Close: {self.close} " \
                f"Low: {self.low} " \
-               f"High: {self.high}" \
+               f"High: {self.high} " \
                f"Volume: {self.volume}"
