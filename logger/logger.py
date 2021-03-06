@@ -1,9 +1,11 @@
 import logging
+
+from logger.clock import Clock
 from logger.object_log import ObjectLog
 
 _log_format = (f'[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s ',
                '%m-%d %H:%M:%S')
-_timer = None
+_clock = None
 logging.TRADING = logging.WARNING + 5
 
 
@@ -30,20 +32,20 @@ def __get_stream_handler():
 
 def __trading_handler(self, log_event, *args, **kws):
     if self.isEnabledFor(logging.TRADING):
-        log_event.obj['ts'] = _timer.get_timestamp()
+        log_event.obj['ts'] = _clock.get_timestamp()
         log_event.obj['event_type'] = log_event.__class__
         self._log(logging.TRADING, log_event.msg, args, **kws)
         self._object_log.add_event(log_event.obj)
 
 
-def set_timer(timer):
-    global _timer
-    _timer = timer
+def set_clock(clock: Clock):
+    global _clock
+    _clock = clock
 
 
 class TimestampFilter(logging.Filter):
     def filter(self, record):
-        record.created = _timer.get_timestamp()
+        record.created = _clock.get_timestamp()
         return True
 
 
