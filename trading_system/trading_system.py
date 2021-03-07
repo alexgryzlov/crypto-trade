@@ -10,9 +10,7 @@ from trading_system.orders_handler import OrdersHandler
 from logger.log_events import BuyEvent, SellEvent
 from logger.logger import Logger
 
-from trading.asset import AssetPair
-from trading.order import Order
-from trading.signal import Signal
+from trading import AssetPair, Signal, Order
 
 PRICE_EPS = 0.005
 

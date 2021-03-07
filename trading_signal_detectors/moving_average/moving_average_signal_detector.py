@@ -1,10 +1,11 @@
-from trading_signal_detectors.trading_signal_detector import TradingSignalDetector
-from trading.signal import Signal
-from trading_system.moving_average_handler import MovingAverageHandler
-from trading.trend import TrendType
-from logger.logger import Logger
-
 import numpy as np
+
+from trading_signal_detectors.trading_signal_detector import TradingSignalDetector
+from trading_system.moving_average_handler import MovingAverageHandler
+
+from trading import Signal, TrendType
+
+from logger.logger import Logger
 
 PRICE_EPS = 0.05
 

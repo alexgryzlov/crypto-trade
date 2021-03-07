@@ -4,8 +4,7 @@ from trading_interface.simulator.clock_simulator import ClockSimulator
 from trading_interface.trading_interface import TradingInterface
 from market_data_api.market_data_downloader import MarketDataDownloader
 
-from trading.order import Order, Direction
-from trading.asset import AssetPair
+from trading import Order, Direction, AssetPair
 
 PRICE_SHIFT = 0.001
 

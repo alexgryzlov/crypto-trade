@@ -1,7 +1,7 @@
 from trading_system.trading_system_handler import TradingSystemHandler
 from trading_interface.trading_interface import TradingInterface
 
-from trading.order import Order
+from trading import Order
 
 from logger.log_events import FilledOrderEvent
 from logger.logger import Logger
