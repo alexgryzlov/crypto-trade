@@ -1,4 +1,4 @@
-from trading.trend import Trend, TrendType
+from trading import Trend, TrendType
 
 
 class StrategyBase:

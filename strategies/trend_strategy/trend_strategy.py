@@ -1,7 +1,6 @@
 from strategies.strategy_base import StrategyBase
 from logger import logger
-
-from trading.trend import TrendType
+from trading import TrendType
 
 
 class TrendStrategy(StrategyBase):

@@ -3,8 +3,7 @@ from dateutil import parser
 from strategy_runner.strategy_runner import StrategyRunner
 from strategies.trend_strategy.trend_strategy import TrendStrategy
 
-from trading.asset import AssetPair, Asset
-from trading.timeframe import Timeframe
+from trading import AssetPair, Asset, Timeframe
 
 StrategyRunner().run_strategy(
     strategy=TrendStrategy,

@@ -8,8 +8,7 @@ from trading_signal_detectors.moving_average.moving_average_signal_detector impo
 from logger.object_log import ObjectLog
 from logger import logger
 
-from trading.asset import AssetPair
-from trading.timeframe import Timeframe
+from trading import AssetPair, Timeframe
 
 
 class StrategyRunner:

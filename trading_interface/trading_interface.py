@@ -1,5 +1,4 @@
-from trading.asset import AssetPair
-from trading.order import Order
+from trading import AssetPair, Order
 
 
 class TradingInterface:

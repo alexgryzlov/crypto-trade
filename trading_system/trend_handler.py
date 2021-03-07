@@ -2,7 +2,7 @@ from trading_system.trading_system_handler import TradingSystemHandler
 from trading_interface.trading_interface import TradingInterface
 from logger.log_events import TrendLinesEvent
 from logger import logger
-from trading.trend import TrendLine
+from trading import TrendLine
 import base.geometry.convex_hull as geom
 
 import numpy as np

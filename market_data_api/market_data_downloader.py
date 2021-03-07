@@ -3,9 +3,7 @@ import requests
 from dateutil.parser import isoparse
 from copy import copy
 
-from trading.candle import Candle
-from trading.asset import AssetPair
-from trading.timeframe import Timeframe
+from trading import Candle, AssetPair, Timeframe
 
 # API restriction
 # https://api.wavesplatform.com/v0/docs/#/candles/getCandles

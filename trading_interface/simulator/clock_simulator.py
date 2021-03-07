@@ -1,5 +1,5 @@
 from logger.clock import Clock
-from trading.timeframe import Timeframe
+from trading import Timeframe
 
 
 class ClockSimulator(Clock):
