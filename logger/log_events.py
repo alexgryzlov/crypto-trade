@@ -1,4 +1,4 @@
-from trading.asset import Asset
+from trading import Asset
 
 
 class LogEvent:

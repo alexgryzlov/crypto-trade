@@ -21,7 +21,8 @@ class TradingInterfaceMock(TradingInterface):
                 values[i],
                 values[i + 1],
                 min(values[i], values[i + 1]),
-                max(values[i], values[i + 1]))
+                max(values[i], values[i + 1]),
+                1)
             )
         return cls(candles)
 

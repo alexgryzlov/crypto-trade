@@ -1,7 +1,10 @@
 import logging
+from datetime import datetime
+from pathlib import Path
 
 from logger.clock import Clock
-from logger.object_log import ObjectLog
+from logger.object_log import ObjectLog, PATH_TO_FULL_LOGS, \
+    PATH_TO_SHORT_LOGS, PATH_TO_DUMPS
 
 
 def _trading_handler(self, log_event, *args, **kws):
@@ -36,18 +39,32 @@ class Logger:
         Logger._clock = clock
 
     @staticmethod
+    def set_log_file_name(name):
+        Logger._file_name = name
+
+    @staticmethod
+    def __get_file_handler(filename: Path, level):
+        if filename not in Logger._file_handlers:
+            filename.parent.mkdir(parents=True, exist_ok=True)
+            file_handler = logging.FileHandler(filename, mode='w')
+            file_handler.setLevel(level)
+            file_handler.setFormatter(logging.Formatter(*Logger._log_format))
+            Logger._file_handlers[filename] = file_handler
+        return Logger._file_handlers[filename]
+
+    @staticmethod
     def __get_trading_file_handler():
-        file_handler = logging.FileHandler('short.log')
-        file_handler.setLevel(logging.TRADING)
-        file_handler.setFormatter(logging.Formatter(*Logger._log_format))
-        return file_handler
+        filename = datetime.now().strftime('short-%d-%m-%Y_%H-%M-%S.log') if \
+            Logger._file_name is None else Logger._file_name + '_short.log'
+        return Logger.__get_file_handler(PATH_TO_SHORT_LOGS / filename,
+            logging.TRADING)
 
     @staticmethod
     def __get_info_file_handler():
-        file_handler = logging.FileHandler('full.log')
-        file_handler.setLevel(logging.INFO)
-        file_handler.setFormatter(logging.Formatter(*Logger._log_format))
-        return file_handler
+        filename = datetime.now().strftime('full-%d-%m-%Y_%H-%M-%S.log') if \
+            Logger._file_name is None else Logger._file_name + '_full.log'
+        return Logger.__get_file_handler(PATH_TO_FULL_LOGS / filename,
+            logging.INFO)
 
     @staticmethod
     def __get_stream_handler():
@@ -68,3 +85,5 @@ class Logger:
     _clock = Clock()
     _log_format = (f'[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s ',
                    '%m-%d %H:%M:%S')
+    _file_handlers = {}
+    _file_name = None
