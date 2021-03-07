@@ -27,7 +27,7 @@ class ExpMovingAverageHandler(TradingSystemHandler):
         if len(self.values) > 0:
             self.values.append(new_candle.get_mid_price() * self.alpha + self.values[-1] * (1 - self.alpha))
         else:
-            self.values.append(new_candle.close)
+            self.values.append(new_candle.get_mid_price())
 
     def get_last_n_values(self, n):
         return self.values[-n:]
@@ -38,4 +38,5 @@ class ExpMovingAverageHandler(TradingSystemHandler):
             alpha = 2 / (1 + len(values))
 
         coefs = np.logspace(len(values) - 1, 0, num=len(values), base=1 - alpha)
+        coefs[0] /= alpha
         return alpha * np.sum(coefs * values)
