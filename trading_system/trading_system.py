@@ -8,7 +8,7 @@ from trading_system.moving_average_handler import MovingAverageHandler
 from trading_system.orders_handler import OrdersHandler
 
 from logger.log_events import BuyEvent, SellEvent
-from logger import logger
+from logger.logger import Logger
 
 from trading import AssetPair, Signal, Order
 
@@ -17,7 +17,7 @@ PRICE_EPS = 0.005
 
 class TradingSystem:
     def __init__(self, trading_interface: TradingInterface):
-        self.logger = logger.get_logger('TradingSystem')
+        self.logger = Logger('TradingSystem')
         self.ti = trading_interface
         self.wallet = defaultdict(int)
         self.trading_signals = []

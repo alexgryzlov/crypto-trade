@@ -1,11 +1,14 @@
-from trading_system.trading_system_handler import TradingSystemHandler
-from trading_interface.trading_interface import TradingInterface
-from logger.log_events import TrendLinesEvent
-from logger import logger
-from trading import TrendLine
+import numpy as np
+
 import base.geometry.convex_hull as geom
 
-import numpy as np
+from trading_system.trading_system_handler import TradingSystemHandler
+from trading_interface.trading_interface import TradingInterface
+
+from trading import TrendLine
+
+from logger.log_events import TrendLinesEvent
+from logger.logger import Logger
 
 MIN_CANDLE_COUNT = 5
 MAX_LAST_CANDLE_COUNT = 40
@@ -16,7 +19,7 @@ class TrendHandler(TradingSystemHandler):
     def __init__(self, trading_interface: TradingInterface):
         super().__init__(trading_interface)
         self.ti = trading_interface
-        self.logger = logger.get_logger("TrendHandler")
+        self.logger = Logger("TrendHandler")
 
     def update(self):
         if not super().received_new_candle():

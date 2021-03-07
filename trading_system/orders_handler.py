@@ -4,14 +4,14 @@ from trading_interface.trading_interface import TradingInterface
 from trading import Order
 
 from logger.log_events import FilledOrderEvent
-from logger import logger
+from logger.logger import Logger
 
 
 class OrdersHandler(TradingSystemHandler):
     def __init__(self, trading_interface: TradingInterface):
         super().__init__(trading_interface)
         self.ti = trading_interface
-        self.logger = logger.get_logger("OrdersHandler")
+        self.logger = Logger("OrdersHandler")
         self.active_orders = []
         self.new_filled_orders = []
 
