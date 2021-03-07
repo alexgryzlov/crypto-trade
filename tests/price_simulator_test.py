@@ -4,7 +4,7 @@ import numpy as np
 
 
 class TestPriceSimulator:
-    def test_big_random(self):
+    def test_three_interval_big_random(self):
         for lifetime in range(4, 25):
             ps = PriceSimulator(lifetime, 'three_path_interval')
             for i in range(1000):
@@ -17,6 +17,7 @@ class TestPriceSimulator:
                 assert (htl[1] >= htl[0])
                 assert (lth[1] <= lth[0])
                 assert all([i in htl and i in lth for i in vals])
+
                 htl = ps._high_to_low(candle_down)
                 lth = ps._low_to_high(candle_down)
                 assert (len(lth) == lifetime and len(htl) == lifetime)
@@ -40,3 +41,14 @@ class TestPriceSimulator:
                 for candle in candles if hash(str(candle.ts)) % 2 == 1]
         assert(up.count(up[0]) == len(up) and down.count(down[0]) == len(down))
         assert(up[0] != down[0])
+
+    def test_multi_interval_big_random(self):
+        candles_lifetime = 25
+        total_steps = 2000
+        ps = PriceSimulator(candles_lifetime, 'three_interval_path')
+        for i in range(100):
+            intervals = [[np.random.uniform(0, 10), np.random.uniform(0, 10)]]
+            for j in range(1000):
+                intervals.append([intervals[-1][1], np.random.uniform(0, 10)])
+            path = ps._multi_interval_path(intervals, total_steps)
+            assert(len(path) == total_steps)

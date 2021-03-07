@@ -13,7 +13,7 @@ PRICE_SHIFT = 0.001
 
 class Simulator(TradingInterface):
     def __init__(self, asset_pair: AssetPair, from_ts, to_ts, clock: ClockSimulator,
-                 price_simulator_type='three_interval_path'):
+                 price_simulation_type='three_interval_path'):
         ts_offset = int(datetime.timedelta(days=1).total_seconds())
         self.candles = MarketDataDownloader().get_candles(
             asset_pair, clock.get_timeframe(), from_ts - ts_offset, to_ts)
@@ -23,7 +23,7 @@ class Simulator(TradingInterface):
         self.last_used_order_id = 0
         self.filled_order_ids = set()
         self.balance = 0
-        self.price_simulator = PriceSimulator(self.clock.candles_lifetime, price_simulator_type)
+        self.price_simulator = PriceSimulator(self.clock.candles_lifetime, price_simulation_type)
 
     def is_alive(self):
         self.__fill_orders()
