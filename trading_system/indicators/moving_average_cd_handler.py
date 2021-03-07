@@ -50,5 +50,6 @@ class MovingAverageCDHandler(TradingSystemHandler):
         self.macd_values.append(ema_short - ema_long)
         self.signal_values.append(ExpMovingAverageHandler.get_from(self.macd_values[-self.average:]))
 
-    def get_last_n_values(self, n):
-        return zip(self.macd_values[-n:], self.signal_values[-n:])
+    def get_last_n_values(self, n) -> list[(float, float)]:
+        """ Returns MACD and signal value. """
+        return list(zip(self.macd_values[-n:], self.signal_values[-n:]))
