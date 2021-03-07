@@ -2,14 +2,25 @@ import sys
 
 sys.path.append('.')
 
+import os
 import pickle
 import logger.log_events as log_events
 import typing as tp
+from pathlib import Path
 from collections import defaultdict
 from visualizer import Visualizer
+from logger.object_log import PATH_TO_DUMPS
 
 
-def load_log(filename='object_log.dump'):
+def get_log_path():
+    path = Path(sys.argv[1] if len(sys.argv) == 2 else PATH_TO_DUMPS)
+    logs = list(path.rglob('*.dump')) if path.is_dir() else [path]
+    if len(logs) == 0:
+        return None
+    return max(logs, key=os.path.getctime)
+
+
+def load_log(filename):
     with open(filename, 'rb') as f:
         log = pickle.load(f)
     return log
@@ -46,7 +57,9 @@ def decompose_moving_average(moving_averages):
 
 
 if __name__ == '__main__':
-    log = load_log()
+    path = get_log_path()
+    print(path)
+    log = load_log(path)
     decomposed_log = decompose_log(log)
     vis = Visualizer()
     vis.add_candles(get_candles(decomposed_log[log_events.NewCandleEvent]))
