@@ -45,7 +45,7 @@ class MarketDataDownloader:
                     volume=candle_data['volume'])
                 candles.append(new_candle)
 
-            if not len(candles):
+            if not candles:
                 break
             current_ts = candles[-1].ts + 1
 
