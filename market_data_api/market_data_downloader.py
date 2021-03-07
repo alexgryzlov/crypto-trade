@@ -3,7 +3,7 @@ import requests
 from dateutil.parser import isoparse
 from copy import copy
 
-from trading import Candle, AssetPair, Timeframe
+from trading import Candle, AssetPair, Timeframe, TimeRange
 
 # API restriction
 # https://api.wavesplatform.com/v0/docs/#/candles/getCandles
@@ -16,11 +16,11 @@ class MarketDataDownloader:
         self.exchange = ccxt.wavesexchange()
         self.exchange.load_markets()
 
-    def get_candles(self, asset_pair: AssetPair, timeframe: Timeframe, from_ts, to_ts):
+    def get_candles(self, asset_pair: AssetPair, timeframe: Timeframe, time_range: TimeRange):
         candles = []
-        current_ts = from_ts
+        current_ts = time_range.from_ts
 
-        while current_ts <= to_ts:
+        while current_ts <= time_range.to_ts:
             asset_pair_id = self.exchange.markets[str(asset_pair)]['id']
             response = requests.get(
                 f'{MARKET_DATA_HOST}/v0/candles/{asset_pair_id}',
@@ -28,7 +28,7 @@ class MarketDataDownloader:
                     'interval': timeframe.to_string(),
                     'timeStart': self.__to_milliseconds(current_ts),
                     'timeEnd': self.__to_milliseconds(
-                        min(current_ts + timeframe.to_seconds() * CANDLES_PER_REQUEST, to_ts))
+                        min(current_ts + timeframe.to_seconds() * CANDLES_PER_REQUEST, time_range.to_ts))
                 })
 
             if not response:

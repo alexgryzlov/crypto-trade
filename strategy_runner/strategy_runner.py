@@ -8,18 +8,17 @@ from trading_signal_detectors.moving_average.moving_average_signal_detector impo
 from logger.object_log import ObjectLog
 from logger.logger import Logger
 
-from trading import AssetPair, Timeframe
+from trading import AssetPair, Timeframe, TimeRange
 
 
 class StrategyRunner:
     def __init__(self):
         pass
 
-    def run_strategy(self, strategy, asset_pair: AssetPair, timeframe: Timeframe, from_ts, to_ts):
-        clock = ClockSimulator(from_ts, timeframe, candles_lifetime=15)
+    def run_strategy(self, strategy, asset_pair: AssetPair, timeframe: Timeframe, time_range: TimeRange):
+        clock = ClockSimulator(time_range.from_ts, timeframe, candles_lifetime=15)
         trading_interface = Simulator(asset_pair=asset_pair,
-                                      from_ts=from_ts,
-                                      to_ts=to_ts,
+                                      time_range=time_range,
                                       clock=clock)
         Logger.set_clock(clock)
         trading_system = TradingSystem(trading_interface)
@@ -42,3 +41,6 @@ class StrategyRunner:
         print(trading_system.get_wallet())
 
         ObjectLog().store_log()
+
+    def do_strategy_multiple_run(self, strategy, asset_pair: AssetPair, timeframe: Timeframe, time_range: TimeRange):
+        pass
