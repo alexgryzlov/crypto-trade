@@ -17,12 +17,12 @@ class TradingInterfaceMock(TradingInterface):
         candles = []
         for i in range(len(values) - 1):
             candles.append(Candle(
-                i,
-                values[i],
-                values[i + 1],
-                min(values[i], values[i + 1]),
-                max(values[i], values[i + 1]),
-                1)
+                ts=i,
+                open=values[i],
+                close=values[i + 1],
+                low=min(values[i], values[i + 1]),
+                high=max(values[i], values[i + 1]),
+                volume=1)
             )
         return cls(candles)
 

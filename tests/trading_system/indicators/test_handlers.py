@@ -8,7 +8,7 @@ from trading_system.trading_system import Handlers
 from trading_system.indicators import *
 
 
-one_values = [1 for _ in range(10)]
+one_values = [1] * 10
 increasing_values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 decreasing_values = list(reversed(increasing_values))
 real_values = [10.2717, 10.295706500000001, 10.3306, 10.332899999999999, 10.3265, 10.303550000000001, 10.3553,

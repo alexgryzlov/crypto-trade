@@ -5,7 +5,7 @@ from trading_system.indicators import *
 increasing_values = [10., 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9, 11.]
 decreasing_values = list(reversed(increasing_values))
 factorial_values = [120, 60, 40, 30, 24]  # 5! / 1, 5! / 2, ...
-one_values = [1 for _ in range(10)]
+one_values = [1] * 10
 
 
 def _get_deltas(values):
