@@ -8,8 +8,8 @@ def test_three_interval_big_random():
         ps = PriceSimulator(lifetime, 'three_path_interval')
         for i in range(1000):
             vals = sorted(np.random.random(4))
-            candle_up = Candle(i, vals[1], vals[2], vals[0], vals[3])
-            candle_down = Candle(i, vals[2], vals[1], vals[0], vals[3])
+            candle_up = Candle(i, vals[1], vals[2], vals[0], vals[3], 1)
+            candle_down = Candle(i, vals[2], vals[1], vals[0], vals[3], 1)
             htl = ps._high_to_low(candle_up)
             lth = ps._low_to_high(candle_up)
             assert (len(lth) == lifetime and len(htl) == lifetime)
@@ -34,7 +34,7 @@ def test_three_interval_big_random():
 def test_different_directions():
     candles_lifetime = 25
     ps = PriceSimulator(candles_lifetime, 'three_interval_path')
-    candles = [Candle(i, 1, 2, 0, 5) for i in range(1000)]
+    candles = [Candle(i, 1, 2, 0, 5, 1) for i in range(1000)]
     up = [[ps.get_price(candle, i) for i in range(candles_lifetime)]
           for candle in candles if hash(str(candle.ts)) % 2 == 0]
     down = [[ps.get_price(candle, i) for i in range(candles_lifetime)]
