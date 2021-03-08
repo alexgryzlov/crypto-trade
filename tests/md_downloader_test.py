@@ -1,5 +1,4 @@
 import pytest
-from dateutil import parser
 
 from market_data_api.market_data_downloader import MarketDataDownloader
 

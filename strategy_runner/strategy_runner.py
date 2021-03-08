@@ -64,6 +64,8 @@ class StrategyRunner:
 
         ObjectLog().store_log()
 
+        return trading_system.get_balance()
+
     def do_strategy_multiple_run(
             self,
             strategy,

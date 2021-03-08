@@ -1,7 +1,12 @@
 from datetime import datetime
+from dateutil import parser
 
 
 class Timestamp:
-    @classmethod
-    def to_iso_format(cls, ts: int):
-        return datetime.fromtimestamp(ts)
+    @staticmethod
+    def to_iso_format(ts: int) -> str:
+        return str(datetime.fromtimestamp(ts))
+
+    @staticmethod
+    def from_iso_format(ts: str) -> int:
+        return int(parser.parse(ts).timestamp())
