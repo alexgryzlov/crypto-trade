@@ -11,7 +11,7 @@ class ClockSimulator(Clock):
         self.iteration = 0
 
     def get_timestamp(self):
-        return self.start_ts + self.iteration / self.candles_lifetime * self.seconds_per_candle
+        return int(self.start_ts + self.iteration / self.candles_lifetime * self.seconds_per_candle)
 
     def get_timeframe(self):
         return self.timeframe
