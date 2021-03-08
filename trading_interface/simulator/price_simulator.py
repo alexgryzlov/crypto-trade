@@ -1,7 +1,7 @@
 import numpy as np
 
-from trading.candle import Candle
-from logger import logger
+from trading import Candle
+from logger.logger import Logger
 
 
 class PriceSimulator:
@@ -18,7 +18,7 @@ class PriceSimulator:
         self.current_ts = None
         self.prices = [0] * candles_lifetime
         self.simulation_type = simulation_type
-        self.logger = logger.get_logger('PriceSimulator')
+        self.logger = Logger('PriceSimulator')
 
     def get_price(self, candle: Candle, current_lifetime):
         if candle.ts != self.current_ts:

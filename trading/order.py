@@ -1,6 +1,6 @@
 from enum import IntEnum
 
-from trading.asset import AssetPair
+from trading import AssetPair
 
 
 class Direction(IntEnum):
