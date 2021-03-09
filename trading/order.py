@@ -30,4 +30,6 @@ class Order:
         return self.order_id
 
     def __eq__(self, other):
-        return self.order_id == other.order_id
+        if isinstance(other, Order):
+            return self.order_id == other.order_id
+        return False

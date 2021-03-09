@@ -45,6 +45,9 @@ class Simulator(TradingInterface):
     def cancel_order(self, order: Order):
         self.active_orders.discard(order)
 
+    def cancel_all(self):
+        self.active_orders.clear()
+
     def order_is_filled(self, order: Order):
         return order.order_id in self.filled_order_ids
 
