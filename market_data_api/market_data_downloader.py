@@ -33,8 +33,9 @@ class MarketDataDownloader:
 
             if not response:
                 raise Exception(response.content)
+            candles_data = response.json()['data']
 
-            for candle in response.json()['data']:
+            for candle in candles_data:
                 candle_data = candle['data']
                 new_candle = Candle(
                     ts=int(isoparse(candle_data['time']).timestamp()),
@@ -45,7 +46,7 @@ class MarketDataDownloader:
                     volume=candle_data['volume'])
                 candles.append(new_candle)
 
-            if not candles:
+            if not candles_data:
                 break
             current_ts = candles[-1].ts + 1
 

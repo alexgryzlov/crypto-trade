@@ -15,8 +15,8 @@ class TimeRange:
     def to_iso_format(self):
         return f'{Timestamp.to_iso_format(self.from_ts)}-{Timestamp.to_iso_format(self.to_ts)}'
 
-    @staticmethod
-    def from_iso_format(from_ts: str, to_ts: str):
-        return TimeRange(
+    @classmethod
+    def from_iso_format(cls, from_ts: str, to_ts: str):
+        return cls(
             from_ts=Timestamp.from_iso_format(from_ts),
             to_ts=Timestamp.from_iso_format(to_ts))

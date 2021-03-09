@@ -8,7 +8,8 @@ StrategyRunner().do_strategy_multiple_run(
     asset_pair=AssetPair(Asset('WAVES'), Asset('USDN')),
     timeframe=Timeframe('5m'),
     time_range=TimeRange.from_iso_format(
-        from_ts='2021-02-10 00:00:00',
-        to_ts='2021-02-12 00:00:00'),
-    runs=4,
-    processes=2)
+        from_ts='2021-02-01 00:00:00',
+        to_ts='2021-02-10 00:00:00'),
+    runs=100,
+    processes=16,
+    visualize=False)

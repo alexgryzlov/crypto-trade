@@ -1,4 +1,5 @@
 import multiprocessing as mp
+import plotly.graph_objects as go
 import typing as tp
 
 from trading_interface.simulator.clock_simulator import ClockSimulator
@@ -11,7 +12,21 @@ from trading_signal_detectors.moving_average.moving_average_signal_detector impo
 from logger.object_log import ObjectLog
 from logger.logger import Logger
 
-from trading import AssetPair, Timeframe, TimeRange
+from trading import AssetPair, Timestamp, Timeframe, TimeRange
+
+
+class RunResult:
+    def __init__(self, time_range: TimeRange, balance: float):
+        self.time_range = time_range
+        self.balance = balance
+
+    @staticmethod
+    def get_balance_from(run_results: tp.List['RunResult']) -> tp.List[float]:
+        return [r.balance for r in run_results]
+
+    @staticmethod
+    def get_timestamp_from(run_results: tp.List['RunResult']) -> tp.List[str]:
+        return [Timestamp.to_iso_format(r.time_range.from_ts) for r in run_results]
 
 
 class StrategyRunner:
@@ -24,7 +39,8 @@ class StrategyRunner:
             asset_pair: AssetPair,
             timeframe: Timeframe,
             time_range: TimeRange,
-            candles_lifetime: int = 20):
+            candles_lifetime: int = 20) -> RunResult:
+
         clock = ClockSimulator(
             start_ts=time_range.from_ts,
             timeframe=timeframe,
@@ -64,7 +80,7 @@ class StrategyRunner:
 
         ObjectLog().store_log()
 
-        return trading_system.get_balance()
+        return RunResult(time_range, trading_system.get_balance())
 
     def do_strategy_multiple_run(
             self,
@@ -75,7 +91,9 @@ class StrategyRunner:
             candles_lifetime: int = 20,
             one_run_duration: tp.Optional[int] = None,
             runs: tp.Optional[int] = None,
+            visualize: bool = False,
             processes: int = 4):
+
         if one_run_duration is None and runs is None:
             raise ValueError('Run type not selected')
 
@@ -86,17 +104,34 @@ class StrategyRunner:
 
         pool = mp.Pool(processes=processes, maxtasksperchild=1)
         current_ts = time_range.from_ts
+        run_results = []
 
         for run_id in range(runs):
             next_ts = current_ts + one_run_duration
-            pool.apply_async(self.run_strategy, kwds={
-                'strategy': strategy,
-                'asset_pair': asset_pair,
-                'timeframe': timeframe,
-                'time_range': TimeRange(current_ts, next_ts),
-                'candles_lifetime': candles_lifetime
-            })
+            pool.apply_async(
+                self.run_strategy,
+                kwds={
+                    'strategy': strategy,
+                    'asset_pair': asset_pair,
+                    'timeframe': timeframe,
+                    'time_range': TimeRange(current_ts, next_ts),
+                    'candles_lifetime': candles_lifetime},
+                callback=lambda run_result: run_results.append(run_result))
             current_ts = next_ts
 
         pool.close()
         pool.join()
+        run_results.sort(key=lambda r: r.time_range.from_ts)
+
+        if visualize:
+            self.visualize_run_results(run_results)
+
+    @staticmethod
+    def visualize_run_results(run_results: tp.List[RunResult]):
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            x=RunResult.get_timestamp_from(run_results),
+            y=RunResult.get_balance_from(run_results),
+            marker_color=['green' if balance > 0 else 'red'
+                          for balance in RunResult.get_balance_from(run_results)]))
+        fig.show()
