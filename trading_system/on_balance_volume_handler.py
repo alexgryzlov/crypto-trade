@@ -2,6 +2,8 @@ from trading_system.trading_system_handler import TradingSystemHandler
 from trading_interface.trading_interface import TradingInterface
 from trading.candle import Candle
 
+import typing as tp
+
 
 class OnBalanceVolumeHandler(TradingSystemHandler):
     """
@@ -25,34 +27,37 @@ class OnBalanceVolumeHandler(TradingSystemHandler):
 
     def calculate_initial_values(self) -> None:
         candles = self.ti.get_last_n_candles(self.start_candle)
-        if not len(candles):
-            return
-
-        prev_candle = candles[0]
-        for candle in candles:
-            if not self.values:
-                self.values.append(0)
-                continue
-            self.calculate_next_value(candle, prev_candle)
-            prev_candle = candle
-
-    def calculate_next_value(self, new_candle: Candle, prev_candle: Candle) -> None:
-        if new_candle.close > prev_candle.close:
-            self.values.append(self.values[-1] + new_candle.volume)
-        elif new_candle.close == prev_candle.close:
-            self.values.append(self.values[-1])
-        else:
-            self.values.append(self.values[-1] - new_candle.volume)
+        self.values = self.calculate_from(candles)
 
     def update(self) -> None:
         if not super().received_new_candle():
             return
 
         candles = self.ti.get_last_n_candles(2)
-        if len(candles) <= 1:
+
+        if len(candles) < 2:
             return
 
-        self.calculate_next_value(candles[-1], candles[-2])
+        self.values.append(self.values[-1] + self.calculate_from(candles)[-1])
 
-    def get_last_n_values(self, n) -> list:
+    def get_last_n_values(self, n: int) -> tp.List[float]:
         return self.values[-n:]
+
+    @staticmethod
+    def calculate_from(candles: tp.List[Candle]) -> tp.List[float]:
+        """
+            Calculate OBV for given list of candles.
+            :param candles: list of candles.
+            :return: list of AD[i]
+        """
+        obv_values: tp.List[float] = [0]
+        if not candles:
+            return []
+        for i in range(len(candles) - 1):
+            if candles[i + 1].close > candles[i].close:
+                obv_values.append(obv_values[-1] + candles[i + 1].volume)
+            elif candles[i + 1].close == candles[i].close:
+                obv_values.append(obv_values[-1])
+            else:
+                obv_values.append(obv_values[-1] - candles[i + 1].volume)
+        return obv_values
