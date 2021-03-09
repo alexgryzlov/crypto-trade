@@ -1,11 +1,11 @@
 import numpy as np
 
 from trading_signal_detectors.trading_signal_detector import TradingSignalDetector
-from trading_system.moving_average_handler import MovingAverageHandler
-
 from trading import Signal, TrendType
 
+from trading_system.indicators.moving_average_handler import MovingAverageHandler
 from logger.logger import Logger
+
 
 PRICE_EPS = 0.05
 
@@ -21,8 +21,8 @@ class MovingAverageSignalDetector(TradingSignalDetector):
             trading_system.handlers[f'MovingAverageHandler{k_further}']
 
     def get_trading_signals(self):
-        further_values = self.further_handler.get_n_average_values(self.signal_length)
-        nearest_values = self.nearest_handler.get_n_average_values(self.signal_length)
+        further_values = self.further_handler.get_last_n_values(self.signal_length)
+        nearest_values = self.nearest_handler.get_last_n_values(self.signal_length)
 
         if len(further_values) < self.signal_length:
             return []

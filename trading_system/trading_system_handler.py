@@ -1,3 +1,5 @@
+import typing as tp
+
 from trading_interface.trading_interface import TradingInterface
 
 
@@ -5,6 +7,17 @@ class TradingSystemHandler:
     def __init__(self, trading_interface: TradingInterface):
         self.ti = trading_interface
         self.last_candle_timestamp = -1
+
+    def get_required_handlers(self) -> tp.List:
+        """ For dependent handlers. """
+        return []
+
+    def link_required_handlers(self, handlers):
+        pass
+
+    def get_name(self):
+        """ Should be unique. """
+        return type(self).__name__
 
     def received_new_candle(self):
         last_candle = self.ti.get_last_n_candles(1)
