@@ -27,14 +27,12 @@ class MovingAverageCDHandler(TradingSystemHandler):
     def get_name(self):
         return f'{type(self).__name__}_s{self.short}_l{self.long}'
 
-    def add_before(self):
-        def callback(handlers):
-            self.short_handler = handlers[0]
-            self.long_handler = handlers[1]
-        return (
-            [ExpMovingAverageHandler(self.ti, self.short), ExpMovingAverageHandler(self.ti, self.long)],
-            callback,
-        )
+    def get_required_handlers(self):
+        return [ExpMovingAverageHandler(self.ti, self.short), ExpMovingAverageHandler(self.ti, self.long)]
+
+    def link_required_handlers(self, handlers):
+        self.short_handler = handlers[0]
+        self.long_handler = handlers[1]
 
     def update(self):
         if not super().received_new_candle():

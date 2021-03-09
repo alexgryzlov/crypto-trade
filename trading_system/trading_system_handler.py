@@ -8,14 +8,12 @@ class TradingSystemHandler:
         self.ti = trading_interface
         self.last_candle_timestamp = -1
 
-    def add_before(self) -> tp.Tuple[tp.List, tp.Callable]:
-        """
-            For dependent handlers.
-            Returns handlers to add before this handler and callback on these handlers.
-        """
-        def callback(handlers):
-            pass
-        return [], callback
+    def get_required_handlers(self) -> tp.List:
+        """ For dependent handlers. """
+        return []
+
+    def link_required_handlers(self, handlers):
+        pass
 
     def get_name(self):
         """ Should be unique. """
