@@ -1,12 +1,12 @@
 from strategy_runner.strategy_runner import StrategyRunner
 from trading import AssetPair, Asset, Timeframe, TimeRange
 
-from tests.strategies.dummy_strategy import DummyStrategy
+from tests.strategies.strategy_mock import StrategyMock
 
 
 def test_dummy_strategy_run():
     StrategyRunner().run_strategy(
-        strategy=DummyStrategy,
+        strategy=StrategyMock,
         asset_pair=AssetPair(Asset('WAVES'), Asset('USDN')),
         timeframe=Timeframe('5m'),
         time_range=TimeRange.from_iso_format(
@@ -16,7 +16,7 @@ def test_dummy_strategy_run():
 
 def test_dummy_multiple_strategy_run():
     StrategyRunner().do_strategy_multiple_run(
-        strategy=DummyStrategy,
+        strategy=StrategyMock,
         asset_pair=AssetPair(Asset('USDN'), Asset('WAVES')),
         timeframe=Timeframe('15m'),
         time_range=TimeRange.from_iso_format(
