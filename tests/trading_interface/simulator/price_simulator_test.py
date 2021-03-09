@@ -2,6 +2,8 @@ from trading_interface.simulator.price_simulator import PriceSimulator
 from trading.candle import Candle
 import numpy as np
 
+from tests.logger.empty_logger_mock import empty_logger_mock
+
 
 def test_hash_and_eq():
     for i in range(1000):
@@ -14,7 +16,7 @@ def test_hash_and_eq():
         assert (candle != other_candle)
 
 
-def test_three_interval_big_random():
+def test_three_interval_big_random(empty_logger_mock):
     for lifetime in range(4, 25):
         ps = PriceSimulator(lifetime, 'three_path_interval')
         for i in range(500):
@@ -42,7 +44,7 @@ def test_three_interval_big_random():
             assert all([i in htl and i in lth for i in vals])
 
 
-def test_different_directions():
+def test_different_directions(empty_logger_mock):
     candles_lifetime = 25
     ps = PriceSimulator(candles_lifetime, 'three_interval_path')
     candles = [Candle(i, 1, 2, 0, 5, 1) for i in range(1000)]
@@ -54,7 +56,7 @@ def test_different_directions():
     assert(up[0] != down[0])
 
 
-def test_multi_interval_big_random():
+def test_multi_interval_big_random(empty_logger_mock):
     candles_lifetime = 25
     total_steps = 2000
     ps = PriceSimulator(candles_lifetime, 'three_interval_path')
