@@ -22,8 +22,8 @@ class StrategyRunner:
         pass
 
     def run_strategy(
-            self, strategy, asset_pair: AssetPair, timeframe, from_ts, to_ts,
-            path_to_config: Optional[Path] = None):
+            self, strategy, asset_pair: AssetPair, timeframe: Timeframe, 
+            from_ts, to_ts, path_to_config: Optional[Path] = None):
         clock = ClockSimulator(from_ts, timeframe, candles_lifetime=15)
         trading_interface = Simulator(asset_pair=asset_pair,
                                       from_ts=from_ts,
