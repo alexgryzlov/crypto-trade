@@ -1,17 +1,18 @@
-from trading_signal_detectors.trading_signal_detector import TradingSignalDetector
-from trading.signal import Signal
-from trading_system.moving_average_handler import MovingAverageHandler
-from trading.trend import TrendType
-from logger import logger
-
 import numpy as np
+
+from trading_signal_detectors.trading_signal_detector import TradingSignalDetector
+from trading_system.moving_average_handler import MovingAverageHandler
+
+from trading import Signal, TrendType
+
+from logger.logger import Logger
 
 PRICE_EPS = 0.05
 
 
 class MovingAverageSignalDetector(TradingSignalDetector):
     def __init__(self, trading_system, k_nearest, k_further, signal_length=5):
-        self.logger = logger.get_logger('MovingAverageSignalDetector')
+        self.logger = Logger('MovingAverageSignalDetector')
         self.ts = trading_system
         self.signal_length = signal_length
         self.nearest_handler: MovingAverageHandler = \
