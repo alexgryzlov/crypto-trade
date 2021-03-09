@@ -1,3 +1,5 @@
+from math import isclose
+
 from trading_system.indicators.exp_moving_average_handler import ExpMovingAverageHandler
 from trading_system.trading_system_handler import TradingSystemHandler
 from trading_interface.trading_interface import TradingInterface
@@ -27,7 +29,7 @@ class RelativeStrengthIndexHandler(TradingSystemHandler):
             return
 
         deltas = list(map(lambda c: c.get_delta(), candles))
-        rs, rsi = self.get_from(deltas, self.alpha)
+        rs, rsi = self.calculate_from(deltas, self.alpha)
         self.relative_strength.append(rs)
         self.values.append(rsi)
 
@@ -35,16 +37,16 @@ class RelativeStrengthIndexHandler(TradingSystemHandler):
         return self.values[-n:]
 
     @staticmethod
-    def get_from(deltas, alpha=None) -> [float, float]:
+    def calculate_from(deltas, alpha=None) -> [float, float]:
         """ Returns relative strength value and relative strength index. """
         if alpha is None:
             alpha = 1 / len(deltas)
 
-        average_gain = ExpMovingAverageHandler.get_from(list(map(lambda x: max(x, 0), deltas)), alpha)
-        average_loss = ExpMovingAverageHandler.get_from(list(map(lambda x: max(-x, 0), deltas)), alpha)
+        average_gain = ExpMovingAverageHandler.calculate_from(list(map(lambda x: max(x, 0), deltas)), alpha)
+        average_loss = ExpMovingAverageHandler.calculate_from(list(map(lambda x: max(-x, 0), deltas)), alpha)
 
         if average_loss == 0:  # Avoid RuntimeWarning with zero division
-            relative_strength = 1 if average_gain == 0 else float('inf')
+            relative_strength = 1 if isclose(average_gain, 0, abs_tol=1e-7) else float('inf')
         else:
             relative_strength = average_gain / average_loss
         relative_strength_index = 100 - 100 / (1 + relative_strength)

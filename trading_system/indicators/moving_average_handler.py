@@ -27,12 +27,12 @@ class MovingAverageHandler(TradingSystemHandler):
             return
 
         candle_values = list(map(lambda c: c.get_mid_price(), candles))
-        self.values.append(self.get_from(candle_values))
+        self.values.append(self.calculate_from(candle_values))
         self.logger.trading(MovingAverageEvent(self.get_last_n_values(1), self.window_size))
 
     def get_last_n_values(self, n):
         return self.values[-n:]
 
     @staticmethod
-    def get_from(values):
+    def calculate_from(values):
         return sum(values) / len(values)

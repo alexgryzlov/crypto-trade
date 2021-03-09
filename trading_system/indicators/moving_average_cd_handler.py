@@ -1,3 +1,5 @@
+from typing import List, Tuple
+
 from trading_system.indicators.exp_moving_average_handler import ExpMovingAverageHandler
 from trading_system.trading_system_handler import TradingSystemHandler
 from trading_interface.trading_interface import TradingInterface
@@ -25,16 +27,12 @@ class MovingAverageCDHandler(TradingSystemHandler):
     def get_name(self):
         return f'{type(self).__name__}_s{self.short}_l{self.long}'
 
-    def pre_add(self, handlers):
-        short_handler = ExpMovingAverageHandler(self.ti, self.short)
-        if short_handler.get_name() not in handlers:
-            handlers.add(short_handler)
-        self.short_handler = handlers[short_handler.get_name()]
+    def add_before(self):
+        return [ExpMovingAverageHandler(self.ti, self.short), ExpMovingAverageHandler(self.ti, self.long)]
 
-        long_handler = ExpMovingAverageHandler(self.ti, self.long)
-        if long_handler.get_name() not in handlers:
-            handlers.add(long_handler)
-        self.long_handler = handlers[long_handler.get_name()]
+    def added_handlers(self, handlers):
+        self.short_handler = handlers[0]
+        self.long_handler = handlers[1]
 
     def update(self):
         if not super().received_new_candle():
@@ -48,8 +46,8 @@ class MovingAverageCDHandler(TradingSystemHandler):
         ema_long = ema_long[0]
 
         self.macd_values.append(ema_short - ema_long)
-        self.signal_values.append(ExpMovingAverageHandler.get_from(self.macd_values[-self.average:]))
+        self.signal_values.append(ExpMovingAverageHandler.calculate_from(self.macd_values[-self.average:]))
 
-    def get_last_n_values(self, n) -> list[(float, float)]:
+    def get_last_n_values(self, n) -> List[Tuple[float, float]]:
         """ Returns MACD and signal value. """
         return list(zip(self.macd_values[-n:], self.signal_values[-n:]))

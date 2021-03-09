@@ -8,13 +8,6 @@ factorial_values = [120, 60, 40, 30, 24]  # 5! / 1, 5! / 2, ...
 one_values = [1] * 10
 
 
-def _get_deltas(values):
-    deltas = []
-    for i in range(len(values) - 1):
-        deltas.append(values[i + 1] - values[i])
-    return deltas
-
-
 @pytest.mark.parametrize(
     "values,alpha,expected",
     [
@@ -23,7 +16,7 @@ def _get_deltas(values):
     ]
 )
 def test_exp_moving_average(values, alpha, expected):
-    assert ExpMovingAverageHandler.get_from(values, 1) == pytest.approx(expected)
+    assert ExpMovingAverageHandler.calculate_from(values, 1) == pytest.approx(expected)
 
 
 @pytest.mark.parametrize(
@@ -35,20 +28,20 @@ def test_exp_moving_average(values, alpha, expected):
     ]
 )
 def test_moving_average(values, expected):
-    assert MovingAverageHandler.get_from(values) == pytest.approx(expected)
+    assert MovingAverageHandler.calculate_from(values) == pytest.approx(expected)
 
 
 @pytest.mark.parametrize(
     "deltas,alpha,expected_rs,expected_rsi",
     [
-        (_get_deltas(one_values), None, 1, 50),
-        (_get_deltas(increasing_values), None, float('inf'), 100),
-        (_get_deltas(decreasing_values), None, 0, 0),
+        (np.diff(one_values), None, 1, 50),
+        (np.diff(increasing_values), None, float('inf'), 100),
+        (np.diff(decreasing_values), None, 0, 0),
         ([1, -1], 2 / 3, 0.5, 100 / 3),
     ]
 )
 def test_relative_strength_index(deltas, alpha, expected_rs, expected_rsi):
-    rs, rsi = RelativeStrengthIndexHandler.get_from(deltas, alpha)
+    rs, rsi = RelativeStrengthIndexHandler.calculate_from(deltas, alpha)
     assert rs == pytest.approx(expected_rs)
     assert rsi == pytest.approx(expected_rsi)
 
@@ -61,4 +54,4 @@ def test_relative_strength_index(deltas, alpha, expected_rs, expected_rsi):
     ]
 )
 def test_weighted_moving_average(values, expected):
-    assert WeightedMovingAverageHandler.get_from(values) == pytest.approx(expected)
+    assert WeightedMovingAverageHandler.calculate_from(values) == pytest.approx(expected)

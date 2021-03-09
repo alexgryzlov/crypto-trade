@@ -9,11 +9,10 @@ from trading_system.indicators import *
 
 
 one_values = [1] * 10
-increasing_values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+increasing_values = list(range(1, 11))
 decreasing_values = list(reversed(increasing_values))
-real_values = [10.2717, 10.295706500000001, 10.3306, 10.332899999999999, 10.3265, 10.303550000000001, 10.3553,
-               10.341750000000001, 10.2776315, 10.27005, 10.2567625, 10.2300535, 10.27045, 10.2478715, 10.2515, 10.2637,
-               10.223600000000001, 10.2202, 10.22035, 10.2573, 10.31885, 10.29145, 10.2972, 10.2865, 10.289768500000001]
+real_values = [10.2717, 10.295, 10.330, 10.332, 10.326, 10.303, 10.355, 10.341, 10.277, 10.270, 10.256, 10.230, 10.270,
+               10.247, 10.251, 10.263, 10.223, 10.220, 10.220, 10.257, 10.318, 10.291, 10.297, 10.286, 10.289]
 
 ones_ti = TradingInterfaceMock.from_price_values(one_values)
 increasing_ti = TradingInterfaceMock.from_price_values(increasing_values)
@@ -49,14 +48,14 @@ def simulate_handler(ti: TradingInterfaceMock, handler: TradingSystemHandler):
 @pytest.mark.parametrize("values,ti", all_samples.values())
 @pytest.mark.parametrize("window_size", [5])
 def test_exp_moving_average_handler(values, ti: TradingInterfaceMock, window_size: int, empty_logger_mock):
-    """ Check equality with .get_from(). """
+    """ Check equality with .calculate_from(). """
     handler = ExpMovingAverageHandler(ti, window_size)
     simulate_handler(ti, handler)
 
     mid_prices = list(map(lambda c: c.get_mid_price(), ti.get_last_n_candles(len(values))))
     check_results(
         handler.get_last_n_values(len(values)),
-        [ExpMovingAverageHandler.get_from(mid_prices[0: i + 1], 2 / (1 + window_size)) for i in range(len(mid_prices))]
+        [ExpMovingAverageHandler.calculate_from(mid_prices[0: i + 1], 2 / (1 + window_size)) for i in range(len(mid_prices))]
     )
 
 
@@ -83,14 +82,14 @@ def test_moving_average_cd_handler(ti: TradingInterfaceMock, short: int, long: i
 @pytest.mark.parametrize("values,ti", all_samples.values())
 @pytest.mark.parametrize("window_size", [5])
 def test_moving_average_handler(values, ti: TradingInterfaceMock, window_size: int, empty_logger_mock):
-    """ Check equality with .get_from(). """
+    """ Check equality with .calculate_from(). """
     handler = MovingAverageHandler(ti, window_size)
     simulate_handler(ti, handler)
 
     mid_prices = list(map(lambda c: c.get_mid_price(), ti.get_last_n_candles(len(values))))
     check_results(
         handler.get_last_n_values(len(values)),
-        [MovingAverageHandler.get_from(mid_prices[i: i + window_size])
+        [MovingAverageHandler.calculate_from(mid_prices[i: i + window_size])
          for i in range(len(mid_prices) - window_size + 1)]
     )
 
@@ -98,14 +97,14 @@ def test_moving_average_handler(values, ti: TradingInterfaceMock, window_size: i
 @pytest.mark.parametrize("values,ti", all_samples.values())
 @pytest.mark.parametrize("window_size", [5])
 def test_relative_strength_index_handler(values, ti: TradingInterfaceMock, window_size: int, empty_logger_mock):
-    """ Check equality with .get_from(). """
+    """ Check equality with .calculate_from(). """
     handler = RelativeStrengthIndexHandler(ti, window_size)
     simulate_handler(ti, handler)
 
     deltas = list(map(lambda c: c.get_delta(), ti.get_last_n_candles(len(values))))
     check_results(
         handler.get_last_n_values(len(values)),
-        [RelativeStrengthIndexHandler.get_from(deltas[i: i + window_size])[1]
+        [RelativeStrengthIndexHandler.calculate_from(deltas[i: i + window_size])[1]
          for i in range(len(deltas) - window_size + 1)]
     )
 
@@ -113,13 +112,13 @@ def test_relative_strength_index_handler(values, ti: TradingInterfaceMock, windo
 @pytest.mark.parametrize("values,ti", all_samples.values())
 @pytest.mark.parametrize("window_size", [5])
 def test_weighted_moving_average_handler(values, ti: TradingInterfaceMock, window_size: int, empty_logger_mock):
-    """ Check equality with .get_from(). """
+    """ Check equality with .calculate_from(). """
     handler = WeightedMovingAverageHandler(ti, window_size)
     simulate_handler(ti, handler)
 
     mid_prices = list(map(lambda c: c.get_mid_price(), ti.get_last_n_candles(len(values))))
     check_results(
         handler.get_last_n_values(len(values)),
-        [WeightedMovingAverageHandler.get_from(mid_prices[i: i + window_size])
+        [WeightedMovingAverageHandler.calculate_from(mid_prices[i: i + window_size])
          for i in range(len(mid_prices) - window_size + 1)]
     )

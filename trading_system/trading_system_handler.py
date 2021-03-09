@@ -6,8 +6,11 @@ class TradingSystemHandler:
         self.ti = trading_interface
         self.last_candle_timestamp = -1
 
-    def pre_add(self, handlers):
+    def add_before(self):
         """ For dependent handlers. """
+        return []
+
+    def added_handlers(self, handlers):
         pass
 
     def get_name(self):

@@ -33,7 +33,7 @@ class ExpMovingAverageHandler(TradingSystemHandler):
         return self.values[-n:]
 
     @staticmethod
-    def get_from(values, alpha=None):
+    def calculate_from(values, alpha=None):
         if alpha is None:
             alpha = 2 / (1 + len(values))
 
