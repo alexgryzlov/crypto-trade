@@ -3,10 +3,21 @@ from trading.candle import Candle
 import numpy as np
 
 
+def test_hash_and_eq():
+    for i in range(1000):
+        vals = sorted(np.random.random(4))
+        candle = Candle(i, vals[1], vals[2], vals[0], vals[3], 1)
+        same_candle = Candle(i, vals[1], vals[2], vals[0], vals[3], 1)
+        other_candle = Candle(i, vals[2], vals[1], vals[0], vals[3], 1)
+        assert (candle == same_candle)
+        assert (hash(candle) == hash(same_candle))
+        assert (candle != other_candle)
+
+
 def test_three_interval_big_random():
     for lifetime in range(4, 25):
         ps = PriceSimulator(lifetime, 'three_path_interval')
-        for i in range(1000):
+        for i in range(500):
             vals = sorted(np.random.random(4))
             candle_up = Candle(i, vals[1], vals[2], vals[0], vals[3], 1)
             candle_down = Candle(i, vals[2], vals[1], vals[0], vals[3], 1)
@@ -36,9 +47,9 @@ def test_different_directions():
     ps = PriceSimulator(candles_lifetime, 'three_interval_path')
     candles = [Candle(i, 1, 2, 0, 5, 1) for i in range(1000)]
     up = [[ps.get_price(candle, i) for i in range(candles_lifetime)]
-          for candle in candles if hash(str(candle.ts)) % 2 == 0]
+          for candle in candles if hash(candle) % 2 == 0]
     down = [[ps.get_price(candle, i) for i in range(candles_lifetime)]
-            for candle in candles if hash(str(candle.ts)) % 2 == 1]
+            for candle in candles if hash(candle) % 2 == 1]
     assert(up.count(up[0]) == len(up) and down.count(down[0]) == len(down))
     assert(up[0] != down[0])
 

@@ -31,13 +31,13 @@ class PriceSimulator:
         return self.prices[current_lifetime]
 
     def three_interval_path(self, candle):
-        return self._high_to_low(candle) if hash(str(candle.ts)) % 2 == 0 else self._low_to_high(candle)
+        return self._high_to_low(candle) if hash(candle) % 2 == 0 else self._low_to_high(candle)
 
     def three_interval_path_noise(self, candle):
         def noise():
             return np.random.normal(0, (candle.high - candle.low) / self.candles_lifetime)
-        np.random.seed(hash(str(candle.ts)))
-        return self._high_to_low(candle, noise) if hash(str(candle.ts)) % 2 == 0 else self._low_to_high(candle, noise)
+        np.random.seed(hash(candle))
+        return self._high_to_low(candle, noise) if hash(candle) % 2 == 0 else self._low_to_high(candle, noise)
 
     def uniform(self, candle: Candle):
         return [candle.get_delta() * (i / self.candles_lifetime) + candle.open for i in range(self.candles_lifetime)]
