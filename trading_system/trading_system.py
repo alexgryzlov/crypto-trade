@@ -21,13 +21,14 @@ class Handlers(OrderedDict):
         if handler.get_name() in self.keys():
             return self
 
-        handlers = handler.add_before()
+        handlers, callback = handler.add_before()
         for i, dependent_handler in enumerate(handlers):
             if dependent_handler.get_name() in self.keys():
                 handlers[i] = self[dependent_handler.get_name()]
             else:
-                self[dependent_handler.get_name()] = dependent_handler
-        handler.added_handlers(handlers)
+                self.add(dependent_handler)
+
+        callback(handlers)
         self[handler.get_name()] = handler
         return self
 

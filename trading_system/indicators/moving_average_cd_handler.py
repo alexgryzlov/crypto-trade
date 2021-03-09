@@ -1,4 +1,4 @@
-from typing import List, Tuple
+import typing as tp
 
 from trading_system.indicators.exp_moving_average_handler import ExpMovingAverageHandler
 from trading_system.trading_system_handler import TradingSystemHandler
@@ -28,11 +28,13 @@ class MovingAverageCDHandler(TradingSystemHandler):
         return f'{type(self).__name__}_s{self.short}_l{self.long}'
 
     def add_before(self):
-        return [ExpMovingAverageHandler(self.ti, self.short), ExpMovingAverageHandler(self.ti, self.long)]
-
-    def added_handlers(self, handlers):
-        self.short_handler = handlers[0]
-        self.long_handler = handlers[1]
+        def callback(handlers):
+            self.short_handler = handlers[0]
+            self.long_handler = handlers[1]
+        return (
+            [ExpMovingAverageHandler(self.ti, self.short), ExpMovingAverageHandler(self.ti, self.long)],
+            callback,
+        )
 
     def update(self):
         if not super().received_new_candle():
@@ -48,6 +50,6 @@ class MovingAverageCDHandler(TradingSystemHandler):
         self.macd_values.append(ema_short - ema_long)
         self.signal_values.append(ExpMovingAverageHandler.calculate_from(self.macd_values[-self.average:]))
 
-    def get_last_n_values(self, n) -> List[Tuple[float, float]]:
+    def get_last_n_values(self, n) -> tp.List[tp.Tuple[float, float]]:
         """ Returns MACD and signal value. """
         return list(zip(self.macd_values[-n:], self.signal_values[-n:]))
