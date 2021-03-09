@@ -25,3 +25,9 @@ class Order:
                f"Amount: {self.amount} " \
                f"Price: {self.price} " \
                f"Direction: {self.direction}"
+
+    def __hash__(self):
+        return self.order_id
+
+    def __eq__(self, other):
+        return self.order_id == other.order_id

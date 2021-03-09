@@ -16,7 +16,7 @@ class Simulator(TradingInterface):
             asset_pair, clock.get_timeframe(), from_ts - ts_offset, to_ts)
         self.clock = clock
         self.candle_index_offset = ts_offset // clock.get_seconds_per_candle()
-        self.active_orders = []
+        self.active_orders = set()
         self.last_used_order_id = 0
         self.filled_order_ids = set()
         self.balance = 0
@@ -34,16 +34,16 @@ class Simulator(TradingInterface):
 
     def buy(self, asset_pair: AssetPair, amount: int, price: float):
         order = Order(self.__get_new_order_id(), asset_pair, amount, price, Direction.BUY)
-        self.active_orders.append(order)
+        self.active_orders.add(order)
         return order
 
     def sell(self, asset_pair: AssetPair, amount: int, price: float):
         order = Order(self.__get_new_order_id(), asset_pair, amount, price, Direction.SELL)
-        self.active_orders.append(order)
+        self.active_orders.add(order)
         return order
 
     def cancel_order(self, order: Order):
-        pass
+        self.active_orders.discard(order)
 
     def order_is_filled(self, order: Order):
         return order.order_id in self.filled_order_ids
@@ -61,8 +61,8 @@ class Simulator(TradingInterface):
     def __fill_orders(self):
         order_is_filled = lambda order: (order.direction == Direction.BUY and order.price > self.get_sell_price()) or \
                                         (order.direction == Direction.SELL and order.price < self.get_buy_price())
-        filled_orders = list(filter(order_is_filled, self.active_orders))
-        self.active_orders = list(filter(lambda order: not order_is_filled(order), self.active_orders))
+        filled_orders = set(filter(order_is_filled, self.active_orders))
+        self.active_orders = set(filter(lambda order: not order_is_filled(order), self.active_orders))
         for order in filled_orders:
             self.filled_order_ids.add(order.order_id)
             self.balance += int(order.direction) * order.price * order.amount
