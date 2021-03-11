@@ -2,29 +2,32 @@ from strategies.strategy_base import StrategyBase
 
 from logger.logger import Logger
 
-from trading import TrendType
+from trading import Trend, TrendType, AssetPair
+import trading_system.trading_system as ts
+import typing as tp
 
 
 class TrendStrategy(StrategyBase):
-    def __init__(self, trading_system, asset_pair, **kwargs):
+    def __init__(self, trading_system: ts.TradingSystem, asset_pair: AssetPair,
+                 **kwargs: tp.Any):
         self.ts = trading_system
         self.asset_pair = asset_pair
         self.logger = Logger('TrendStrategy')
         self.logger.info(f'Strategy TrendStrategy initialized')
         self.order_balance = 0
-        self.active_trends = []
+        self.active_trends: tp.List[Trend] = []
 
-    def update(self):
+    def update(self) -> None:
         active_trends = []
         for trend in self.active_trends:
             deactivated = False
             if trend.trend_type == TrendType.UPTREND:
-                if trend.lower_trend_line.get_value_at(
+                if trend.lower_trend_line.get_value_at(  # type: ignore
                         self.ts.get_timestamp()) >= self.ts.get_buy_price():
                     self.ts.sell(self.asset_pair, 1, self.ts.get_buy_price())
                     deactivated = True
             else:
-                if trend.upper_trend_line.get_value_at(
+                if trend.upper_trend_line.get_value_at(  # type: ignore
                         self.ts.get_timestamp()) <= self.ts.get_sell_price():
                     self.ts.buy(self.asset_pair, 1, self.ts.get_sell_price())
                     deactivated = True
@@ -34,7 +37,7 @@ class TrendStrategy(StrategyBase):
                 self.order_balance -= 1
         self.active_trends = active_trends
 
-    def handle_new_trend_signal(self, trend):
+    def handle_new_trend_signal(self, trend: Trend) -> None:
         self.logger.info(f'Strategy received trend of type {trend.trend_type}')
 
         if self.order_balance > 3:
@@ -42,8 +45,7 @@ class TrendStrategy(StrategyBase):
 
         if trend.trend_type == TrendType.UPTREND:
             self.ts.buy(self.asset_pair, 1, self.ts.get_sell_price())
-            self.active_trends.append(trend)
         else:
             self.ts.sell(self.asset_pair, 1, self.ts.get_buy_price())
-            self.active_trends.append(trend)
+        self.active_trends.append(trend)
         self.order_balance += 1
