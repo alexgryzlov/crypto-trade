@@ -1,4 +1,4 @@
-from trading_interface.simulator.price_simulator import PriceSimulator
+from trading_interface.simulator.price_simulator import PriceSimulator, PriceSimulatorType
 from trading.candle import Candle
 import numpy as np
 
@@ -18,7 +18,7 @@ def test_hash_and_eq():
 
 def test_three_interval_big_random(empty_logger_mock):
     for lifetime in range(4, 25):
-        ps = PriceSimulator(lifetime, 'three_path_interval')
+        ps = PriceSimulator(lifetime, PriceSimulatorType.ThreeIntervalPath)
         for i in range(500):
             vals = sorted(np.random.random(4))
             candle_up = Candle(i, vals[1], vals[2], vals[0], vals[3], 1)
@@ -46,7 +46,7 @@ def test_three_interval_big_random(empty_logger_mock):
 
 def test_different_directions(empty_logger_mock):
     candles_lifetime = 25
-    ps = PriceSimulator(candles_lifetime, 'three_interval_path')
+    ps = PriceSimulator(candles_lifetime, PriceSimulatorType.ThreeIntervalPath)
     candles = [Candle(i, 1, 2, 0, 5, 1) for i in range(1000)]
     up = [[ps.get_price(candle, i) for i in range(candles_lifetime)]
           for candle in candles if hash(candle) % 2 == 0]
@@ -59,7 +59,7 @@ def test_different_directions(empty_logger_mock):
 def test_multi_interval_big_random(empty_logger_mock):
     candles_lifetime = 25
     total_steps = 2000
-    ps = PriceSimulator(candles_lifetime, 'three_interval_path')
+    ps = PriceSimulator(candles_lifetime, PriceSimulatorType.ThreeIntervalPath)
     for i in range(100):
         intervals = [[np.random.uniform(0, 10), np.random.uniform(0, 10)]]
         for j in range(1000):

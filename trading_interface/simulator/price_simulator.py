@@ -2,6 +2,12 @@ import numpy as np
 
 from trading import Candle
 from logger.logger import Logger
+from enum import Enum
+
+
+class PriceSimulatorType(Enum):
+    ThreeIntervalPath = 'three_interval_path'
+    ThreeIntervalPathNoise = 'three_interval_path_noise'
 
 
 class PriceSimulator:
@@ -13,7 +19,7 @@ class PriceSimulator:
     Noise can be optionally added
     """
 
-    def __init__(self, candles_lifetime, simulation_type):
+    def __init__(self, candles_lifetime, simulation_type: PriceSimulatorType):
         self.candles_lifetime = candles_lifetime
         self.current_ts = None
         self.prices = [0] * candles_lifetime
@@ -24,7 +30,7 @@ class PriceSimulator:
         if candle.ts != self.current_ts:
             self.current_ts = candle.ts
             try:
-                self.prices = self.__getattribute__(self.simulation_type)(candle)
+                self.prices = self.__getattribute__(self.simulation_type.value)(candle)
             except AttributeError as exception:
                 self.logger.exception('Unknown PriceSimulator type.')
                 raise exception

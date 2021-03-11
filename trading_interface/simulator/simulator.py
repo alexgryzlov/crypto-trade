@@ -5,14 +5,14 @@ from trading_interface.trading_interface import TradingInterface
 from market_data_api.market_data_downloader import MarketDataDownloader
 
 from trading import Order, Direction, AssetPair
-from trading_interface.simulator.price_simulator import PriceSimulator
+from trading_interface.simulator.price_simulator import PriceSimulator, PriceSimulatorType
 
 PRICE_SHIFT = 0.001
 
 
 class Simulator(TradingInterface):
     def __init__(self, asset_pair: AssetPair, from_ts, to_ts, clock: ClockSimulator,
-                 price_simulation_type='three_interval_path'):
+                 price_simulation_type=PriceSimulatorType.ThreeIntervalPath):
         ts_offset = int(datetime.timedelta(days=1).total_seconds())
         self.candles = MarketDataDownloader().get_candles(
             asset_pair, clock.get_timeframe(), from_ts - ts_offset, to_ts)
