@@ -10,6 +10,9 @@ from trading import TrendLine
 from logger.log_events import TrendLinesEvent
 from logger.logger import Logger
 
+import typing as tp
+from mypy_extensions import Arg
+
 MIN_CANDLE_COUNT = 5
 MAX_LAST_CANDLE_COUNT = 40
 PRICE_SHIFT = 0.13
@@ -21,32 +24,37 @@ class TrendHandler(TradingSystemHandler):
         self.ti = trading_interface
         self.logger = Logger("TrendHandler")
 
-    def update(self):
+    def update(self) -> None:
         if not super().received_new_candle():
             return
         lower_trend_line, upper_trend_line = self.get_trend_lines()
-        self.logger.trading(TrendLinesEvent(lower_trend_line, upper_trend_line))
+        self.logger.trading(
+            TrendLinesEvent(lower_trend_line, upper_trend_line))
 
-    def get_trend_lines(self):  # -> Tuple[TrendLine, TrendLine]:
+    def get_trend_lines(self) -> tp.Tuple[TrendLine, TrendLine]:
         candles = self.ti.get_last_n_candles(MAX_LAST_CANDLE_COUNT)
 
         if len(candles) < MIN_CANDLE_COUNT:
-            return None, None
+            return None, None  # type: ignore
 
         ts_offset = candles[0].ts
-        max_price = max([candle.get_upper_price() for candle in candles])
+        max_price = max(candle.get_upper_price() for candle in candles)
         coef = max_price / (candles[1].ts - candles[0].ts) / 20
 
         lower_bound = np.array(
-            [((candles[index].ts - ts_offset) * coef, candles[index].get_lower_price()) for index in
+            [((candles[index].ts - ts_offset) * coef,
+              candles[index].get_lower_price()) for index in
              range(len(candles))])
 
         upper_bound = np.array(
-            [((candles[index].ts - ts_offset) * coef, candles[index].get_upper_price()) for index in
+            [((candles[index].ts - ts_offset) * coef,
+              candles[index].get_upper_price()) for index in
              range(len(candles))])
 
-        lower_trend_line = self.__calculate_trend_line(lower_bound, geom.get_lower_bound)
-        upper_trend_line = self.__calculate_trend_line(upper_bound, geom.get_upper_bound)
+        lower_trend_line = self.__calculate_trend_line(lower_bound,
+                                                       geom.get_lower_bound)
+        upper_trend_line = self.__calculate_trend_line(upper_bound,
+                                                       geom.get_upper_bound)
 
         if lower_trend_line is not None:
             lower_trend_line.k *= coef
@@ -60,24 +68,32 @@ class TrendHandler(TradingSystemHandler):
 
         return lower_trend_line, upper_trend_line
 
-    def __calculate_trend_line(self, points, calc_convex_bound):
+    def __calculate_trend_line(self, points: np.ndarray,
+                               calc_convex_bound: tp.Callable[
+                                   [np.ndarray, Arg(bool, 'is_sorted')],
+                                   np.ndarray]) -> TrendLine:
         BOUND = 0.005
         for iter in range(10):
             best_line = None
-            convex_bound = calc_convex_bound(points[-MIN_CANDLE_COUNT:], is_sorted=True)
+            convex_bound = calc_convex_bound(points[-MIN_CANDLE_COUNT:],
+                                             is_sorted=True)
             for point_count in range(MIN_CANDLE_COUNT + 1, len(points) + 1):
                 convex_bound = calc_convex_bound(
-                    np.concatenate([[points[len(points) - point_count]], convex_bound]), is_sorted=True)
+                    np.concatenate(
+                        [[points[len(points) - point_count]], convex_bound]),
+                    is_sorted=True)
                 line = geom.put_line(convex_bound)
-                if self.__calculate_penalty(convex_bound, TrendLine(*line)) < BOUND:
+                if self.__calculate_penalty(convex_bound,
+                                            TrendLine(*line)) < BOUND:
                     best_line = line
             if best_line is None:
                 BOUND *= 2
             else:
                 return TrendLine(*best_line)
-        return None
+        return None  # type: ignore
 
-    def __calculate_penalty(self, points, line: TrendLine):
+    def __calculate_penalty(self, points: np.ndarray,
+                            line: TrendLine) -> float:
         penalty = 0.0
         for p in points:
             penalty += (p[1] - line.get_value_at(p[0])) ** 2
