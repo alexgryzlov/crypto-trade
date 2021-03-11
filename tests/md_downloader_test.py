@@ -10,7 +10,7 @@ from trading import Timeframe, AssetPair, Asset
     ('15m', 9),
     ('1h', 3)
 ])
-def test_candle_count(timeframe, candle_count):
+def test_candle_count(timeframe: str, candle_count: int) -> None:
     md_downloader = MarketDataDownloader()
     candles = md_downloader.get_candles(
         asset_pair=AssetPair(Asset('WAVES'), Asset('USDN')),
