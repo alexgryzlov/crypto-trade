@@ -6,6 +6,8 @@ from market_data_api.market_data_downloader import MarketDataDownloader
 
 from trading import Order, Direction, AssetPair
 
+from copy import copy
+
 PRICE_SHIFT = 0.001
 
 
@@ -34,12 +36,12 @@ class Simulator(TradingInterface):
 
     def buy(self, asset_pair: AssetPair, amount: int, price: float):
         order = Order(self.__get_new_order_id(), asset_pair, amount, price, Direction.BUY)
-        self.active_orders.add(order)
+        self.active_orders.add(copy(order))
         return order
 
     def sell(self, asset_pair: AssetPair, amount: int, price: float):
         order = Order(self.__get_new_order_id(), asset_pair, amount, price, Direction.SELL)
-        self.active_orders.add(order)
+        self.active_orders.add(copy(order))
         return order
 
     def cancel_order(self, order: Order):
