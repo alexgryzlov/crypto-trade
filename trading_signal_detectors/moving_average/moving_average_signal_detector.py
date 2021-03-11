@@ -1,17 +1,22 @@
 import numpy as np
 
-from trading_signal_detectors.trading_signal_detector import TradingSignalDetector
+from trading_signal_detectors.trading_signal_detector import \
+    TradingSignalDetector
 from trading import Signal, TrendType
 
-from trading_system.indicators.moving_average_handler import MovingAverageHandler
+from trading_system.indicators.moving_average_handler import \
+    MovingAverageHandler
 from logger.logger import Logger
 
+import trading_system.trading_system as ts
+import typing as tp
 
 PRICE_EPS = 0.05
 
 
 class MovingAverageSignalDetector(TradingSignalDetector):
-    def __init__(self, trading_system, k_nearest, k_further, signal_length=5):
+    def __init__(self, trading_system: ts.TradingSystem,
+                 k_nearest: int, k_further: int, signal_length: int = 5):
         self.logger = Logger('MovingAverageSignalDetector')
         self.ts = trading_system
         self.signal_length = signal_length
@@ -20,27 +25,31 @@ class MovingAverageSignalDetector(TradingSignalDetector):
         self.further_handler: MovingAverageHandler = \
             trading_system.handlers[f'MovingAverageHandler{k_further}']
 
-    def get_trading_signals(self):
-        further_values = self.further_handler.get_last_n_values(self.signal_length)
-        nearest_values = self.nearest_handler.get_last_n_values(self.signal_length)
+    def get_trading_signals(self) -> tp.List[Signal]:
+        further_values = self.further_handler.get_last_n_values(
+            self.signal_length)
+        nearest_values = self.nearest_handler.get_last_n_values(
+            self.signal_length)
 
         if len(further_values) < self.signal_length:
             return []
         values = np.array(nearest_values) - np.array(further_values)
 
-        if values[0] < -PRICE_EPS and values[-1] > PRICE_EPS and self.__is_increasing(values):
+        if values[0] < -PRICE_EPS and values[
+            -1] > PRICE_EPS and self.__is_increasing(values):
             return [Signal("moving_average", TrendType.UPTREND)]
 
-        if values[0] > -PRICE_EPS and values[-1] < PRICE_EPS and self.__is_decreasing(values):
+        if values[0] > -PRICE_EPS and values[
+            -1] < PRICE_EPS and self.__is_decreasing(values):
             return [Signal("moving_average", TrendType.DOWNTREND)]
 
         return []
 
-    def __is_increasing(self, arr):
+    def __is_increasing(self, arr: tp.List[float]) -> bool:
         for i in range(len(arr) - 1):
             if arr[i] > arr[i + 1]:
                 return False
         return True
 
-    def __is_decreasing(self, arr):
+    def __is_decreasing(self, arr: tp.List[float]) -> bool:
         return self.__is_increasing(list(reversed(arr)))
