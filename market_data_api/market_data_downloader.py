@@ -2,6 +2,7 @@ import ccxt
 import requests
 from dateutil.parser import isoparse
 from copy import copy
+from retry import retry
 
 from trading import Candle, AssetPair, Timeframe, TimeRange
 
@@ -21,19 +22,11 @@ class MarketDataDownloader:
         current_ts = time_range.from_ts
 
         while current_ts <= time_range.to_ts:
-            asset_pair_id = self.exchange.markets[str(asset_pair)]['id']
-            response = requests.get(
-                f'{MARKET_DATA_HOST}/v0/candles/{asset_pair_id}',
-                params={
-                    'interval': timeframe.to_string(),
-                    'timeStart': self.__to_milliseconds(current_ts),
-                    'timeEnd': self.__to_milliseconds(
-                        min(current_ts + timeframe.to_seconds() * CANDLES_PER_REQUEST, time_range.to_ts))
-                })
-
-            if not response:
-                raise Exception(response.content)
-            candles_data = response.json()['data']
+            candles_data = self.__load_candles_batch(
+                asset_pair=asset_pair,
+                timeframe=timeframe,
+                time_range=TimeRange(current_ts,
+                                     min(current_ts + timeframe.to_seconds() * CANDLES_PER_REQUEST, time_range.to_ts)))
 
             for candle in candles_data:
                 candle_data = candle['data']
@@ -51,6 +44,20 @@ class MarketDataDownloader:
             current_ts = candles[-1].ts + 1
 
         return self.__fill_gaps(candles)
+
+    @retry(RuntimeError, tries=3, delay=2)
+    def __load_candles_batch(self, asset_pair: AssetPair, timeframe: Timeframe, time_range: TimeRange):
+        asset_pair_id = self.exchange.markets[str(asset_pair)]['id']
+        response = requests.get(
+            f'{MARKET_DATA_HOST}/v0/candles/{asset_pair_id}',
+            params={
+                'interval': timeframe.to_string(),
+                'timeStart': self.__to_milliseconds(time_range.from_ts),
+                'timeEnd': self.__to_milliseconds(time_range.to_ts)
+            })
+        if not response:
+            raise RuntimeError(response.content)
+        return response.json()['data']
 
     @staticmethod
     def __to_milliseconds(ts):

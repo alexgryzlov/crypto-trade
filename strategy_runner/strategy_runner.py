@@ -6,8 +6,10 @@ from trading_interface.simulator.clock_simulator import ClockSimulator
 from trading_interface.simulator.simulator import Simulator
 from trading_system.trading_system import TradingSystem
 
-from trading_signal_detectors.extremum.extremum_signal_detector import ExtremumSignalDetector
-from trading_signal_detectors.moving_average.moving_average_signal_detector import MovingAverageSignalDetector
+from trading_signal_detectors.extremum.extremum_signal_detector \
+    import ExtremumSignalDetector
+from trading_signal_detectors.moving_average.moving_average_signal_detector \
+    import MovingAverageSignalDetector
 
 from logger.object_log import ObjectLog
 from logger.logger import Logger
@@ -36,6 +38,7 @@ class StrategyRunner:
     def run_strategy(
             self,
             strategy,
+            strategy_config: tp.Dict[str, tp.Any],
             asset_pair: AssetPair,
             timeframe: Timeframe,
             time_range: TimeRange,
@@ -60,9 +63,9 @@ class StrategyRunner:
             ExtremumSignalDetector(trading_system, 2),
             MovingAverageSignalDetector(trading_system, 25, 50)]
 
-        strategy = strategy(
-            trading_system=trading_system,
-            asset_pair=asset_pair)
+        strategy = strategy(trading_system=trading_system,
+                            asset_pair=asset_pair,
+                            **strategy_config)
 
         while trading_interface.is_alive():
             trading_system.update()
@@ -70,7 +73,8 @@ class StrategyRunner:
             for detector in signal_detectors:
                 signals += detector.get_trading_signals()
             for signal in signals:
-                strategy.__getattribute__(f'handle_{signal.name}_signal')(signal.content)
+                strategy.__getattribute__(
+                    f'handle_{signal.name}_signal')(signal.content)
             strategy.update()
 
         print(time_range.to_iso_format())
@@ -82,36 +86,38 @@ class StrategyRunner:
 
         return RunResult(time_range, trading_system.get_balance())
 
-    def do_strategy_multiple_run(
+    def run_strategy_on_periods(
             self,
             strategy,
+            strategy_config: tp.Dict[str, tp.Any],
             asset_pair: AssetPair,
             timeframe: Timeframe,
             time_range: TimeRange,
             candles_lifetime: int = 20,
-            one_run_duration: tp.Optional[int] = None,
+            period: tp.Optional[int] = None,
             runs: tp.Optional[int] = None,
             visualize: bool = False,
             processes: int = 4):
 
-        if one_run_duration is None and runs is None:
+        if period is None and runs is None:
             raise ValueError('Run type not selected')
 
-        one_run_duration = one_run_duration if one_run_duration is not None else \
+        period = period if period is not None else \
             time_range.get_range() // runs
         runs = runs if runs is not None else \
-            time_range.get_range() // one_run_duration
+            time_range.get_range() // period
 
         pool = mp.Pool(processes=processes, maxtasksperchild=1)
         current_ts = time_range.from_ts
         run_results = []
 
         for run_id in range(runs):
-            next_ts = current_ts + one_run_duration
+            next_ts = current_ts + period
             pool.apply_async(
                 self.run_strategy,
                 kwds={
                     'strategy': strategy,
+                    'strategy_config': strategy_config,
                     'asset_pair': asset_pair,
                     'timeframe': timeframe,
                     'time_range': TimeRange(current_ts, next_ts),
