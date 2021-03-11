@@ -1,25 +1,26 @@
 class Candle:
-    def __init__(self, ts, open, close, low, high, volume):
+    def __init__(self, ts: int, open_price: float, close_price: float,
+                 low_price: float, high_price: float, volume: float):
         self.ts = ts
-        self.open = open
-        self.close = close
-        self.low = low
-        self.high = high
+        self.open = open_price
+        self.close = close_price
+        self.low = low_price
+        self.high = high_price
         self.volume = volume
 
-    def get_lower_price(self):
+    def get_lower_price(self) -> float:
         return min(self.open, self.close)
 
-    def get_upper_price(self):
+    def get_upper_price(self) -> float:
         return max(self.open, self.close)
 
-    def get_mid_price(self):
+    def get_mid_price(self) -> float:
         return (self.open + self.close) / 2
 
-    def get_delta(self):
+    def get_delta(self) -> float:
         return self.close - self.open
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Timestamp: {self.ts} " \
                f"Open: {self.open} " \
                f"Close: {self.close} " \

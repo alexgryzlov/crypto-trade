@@ -12,17 +12,17 @@ class Timeframe:
         self.value = int(timeframe[:-1])
         self.base = timeframe[-1]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.timeframe
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.to_seconds()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'Timeframe: {self.timeframe}'
 
-    def to_seconds(self):
+    def to_seconds(self) -> int:
         return _base_to_seconds[self.base] * self.value
 
-    def to_string(self):
+    def to_string(self) -> str:
         return self.timeframe

@@ -3,22 +3,21 @@ from trading_interface.trading_interface import TradingInterface
 
 
 class TradingInterfaceMock(TradingInterface):
-    def __init__(self, all_candles=[]):
+    def __init__(self, all_candles=None):
+        if all_candles is None:
+            all_candles = []
         self.all_candles = all_candles
         self.processed_candles = []
 
     @classmethod
     def from_price_values(cls, values):
-        candles = []
-        for i in range(len(values) - 1):
-            candles.append(Candle(
-                ts=i,
-                open=values[i],
-                close=values[i + 1],
-                low=min(values[i], values[i + 1]),
-                high=max(values[i], values[i + 1]),
-                volume=1)
-            )
+        candles = [Candle(
+            ts=i,
+            open_price=values[i],
+            close_price=values[i + 1],
+            low_price=min(values[i], values[i + 1]),
+            high_price=max(values[i], values[i + 1]),
+            volume=1) for i in range(len(values) - 1)]
         return cls(candles)
 
     def refresh(self):
@@ -26,7 +25,8 @@ class TradingInterfaceMock(TradingInterface):
 
     def update(self) -> bool:
         if len(self.processed_candles) < len(self.all_candles):
-            self.processed_candles.append(self.all_candles[len(self.processed_candles)])
+            self.processed_candles.append(
+                self.all_candles[len(self.processed_candles)])
             return True
         return False
 
