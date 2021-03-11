@@ -1,4 +1,5 @@
 from enum import Enum, auto
+import numpy as np
 import typing as tp
 
 
@@ -14,7 +15,7 @@ class TrendLine:
         self.k = k
         self.b = b
 
-    def get_value_at(self, x: float) -> float:
+    def get_value_at(self, x: tp.Union[float, np.ndarray]) -> float:
         return self.k * x + self.b
 
 

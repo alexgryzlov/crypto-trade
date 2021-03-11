@@ -18,7 +18,7 @@ from trading import Asset, AssetPair, Signal, Order, Candle
 PRICE_EPS = 0.005
 
 
-class Handlers(OrderedDict[str, TradingSystemHandler]):
+class Handlers(OrderedDict):
     def add(self, handler: TradingSystemHandler) -> Handlers:
         if handler.get_name() in self.keys():
             return self
