@@ -38,7 +38,7 @@ class OnBalanceVolumeHandler(TradingSystemHandler):
         if len(candles) < 2:
             return
 
-        self.values.append(self.values[-1] + self.calculate_from(candles)[-1])
+        self.values.append(self.calculate_from(candles)[-1] + (self.values[-1] if self.values else 0))
 
     def get_last_n_values(self, n: int) -> tp.List[float]:
         return self.values[-n:]
@@ -51,8 +51,6 @@ class OnBalanceVolumeHandler(TradingSystemHandler):
             :return: list of AD[i]
         """
         obv_values: tp.List[float] = [0]
-        if not candles:
-            return []
         for i in range(len(candles) - 1):
             if candles[i + 1].close > candles[i].close:
                 obv_values.append(obv_values[-1] + candles[i + 1].volume)

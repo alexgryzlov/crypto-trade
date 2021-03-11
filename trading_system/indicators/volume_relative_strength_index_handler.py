@@ -25,15 +25,16 @@ class VolumeRelativeStrengthIndexHandler(TradingSystemHandler):
             return
 
         candles = self.ti.get_last_n_candles(self.window_size)
-        self.values.append(self.calculate_from(candles)[0])
+        if len(candles) < self.window_size:
+            return
+        self.values.append(self.calculate_from(candles, self.window_size)[0])
 
     def get_last_n_values(self, n: int) -> tp.List[float]:
         return self.values[-n:]
 
     @staticmethod
-    def calculate_from(candles: tp.List[Candle], window_size: int = 14) -> tp.List[float]:
+    def calculate_from(candles: tp.List[Candle], window_size: int) -> tp.List[float]:
         vrsi_values: tp.List[float] = []
-
         for i in range(window_size, len(candles) + 1):
             total_volume = sum([candle.volume for candle in candles[i - window_size:i]])
             up_volume = sum([candle.volume if candle.get_delta() >= 0 else 0 for candle in candles[i - window_size:i]])
