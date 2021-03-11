@@ -1,7 +1,7 @@
 import pickle
 from pathlib import Path
 from datetime import datetime
-from log_events import LogEvent
+from logger.log_events import LogEvent
 import typing as tp
 
 PATH_TO_FULL_LOGS = Path('logs/full/')
