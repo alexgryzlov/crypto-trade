@@ -3,3 +3,4 @@
 *.log
 *.dump
 .idea
+.mypy_cache
