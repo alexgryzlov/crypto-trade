@@ -16,7 +16,8 @@ class MarketDataDownloader:
         self.exchange = ccxt.wavesexchange()
         self.exchange.load_markets()
 
-    def get_candles(self, asset_pair: AssetPair, timeframe: Timeframe, from_ts, to_ts):
+    def get_candles(self, asset_pair: AssetPair, timeframe: Timeframe, from_ts,
+                    to_ts):
         candles = []
         current_ts = from_ts
 
@@ -28,7 +29,9 @@ class MarketDataDownloader:
                     'interval': timeframe.to_string(),
                     'timeStart': self.__to_milliseconds(current_ts),
                     'timeEnd': self.__to_milliseconds(
-                        min(current_ts + timeframe.to_seconds() * CANDLES_PER_REQUEST, to_ts))
+                        min(
+                            current_ts + timeframe.to_seconds() * CANDLES_PER_REQUEST,
+                            to_ts))
                 })
 
             if not response:
@@ -38,10 +41,10 @@ class MarketDataDownloader:
                 candle_data = candle['data']
                 new_candle = Candle(
                     ts=int(isoparse(candle_data['time']).timestamp()),
-                    open=candle_data['open'],
-                    close=candle_data['close'],
-                    low=candle_data['low'],
-                    high=candle_data['high'],
+                    open_price=candle_data['open'],
+                    close_price=candle_data['close'],
+                    low_price=candle_data['low'],
+                    high_price=candle_data['high'],
                     volume=candle_data['volume'])
                 candles.append(new_candle)
 

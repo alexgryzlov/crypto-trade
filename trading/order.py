@@ -9,17 +9,18 @@ class Direction(IntEnum):
 
 
 class Order:
-    def __init__(self, order_id: int, asset_pair: AssetPair, amount: int, price: float, direction: Direction):
+    def __init__(self, order_id: int, asset_pair: AssetPair, amount: int,
+                 price: float, direction: Direction):
         self.order_id = order_id
         self.asset_pair = asset_pair
         self.amount = amount
         self.price = price
         self.direction = direction
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Order{self.order_id}"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"OrderId: {self.order_id} " \
                f"AssetPair: {self.asset_pair.main_asset}-{self.asset_pair.secondary_asset} " \
                f"Amount: {self.amount} " \
