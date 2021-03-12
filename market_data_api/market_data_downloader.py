@@ -9,6 +9,7 @@ from trading import Candle, AssetPair, Timeframe, TimeRange, Timestamp
 # https://api.wavesplatform.com/v0/docs/#/candles/getCandles
 CANDLES_PER_REQUEST = 1400
 MARKET_DATA_HOST = 'https://api.wavesplatform.com'
+MATCHER_HOST = "https://matcher.waves.exchange"
 
 
 class MarketDataDownloader:
@@ -70,3 +71,11 @@ class MarketDataDownloader:
                 candles[index] = copy(candles[index - 1])
                 candles[index].ts = ts
         return candles
+
+    def get_orderbook(self, asset_pair: AssetPair, depth=50):
+        response = requests.get(
+            f'{MATCHER_HOST}/matcher/orderbook/'
+            f'{asset_pair.main_asset.to_waves_format()}/'
+            f'{asset_pair.secondary_asset.to_waves_format()}?depth='
+            f'{depth}')
+        return response.json()
