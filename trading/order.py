@@ -30,7 +30,7 @@ class Order:
     def __hash__(self):
         return self.order_id
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, Order):
             return self.order_id == other.order_id
         return False
