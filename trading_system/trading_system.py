@@ -10,7 +10,7 @@ from trading_system.trend_handler import TrendHandler
 from trading_system.indicators import *
 from trading_system.orders_handler import OrdersHandler
 
-from logger.log_events import BuyEvent, SellEvent
+from logger.log_events import BuyEvent, SellEvent, CancelEvent
 from logger.logger import Logger
 
 from trading import Asset, AssetPair, Signal, Order, Candle
@@ -91,6 +91,19 @@ class TradingSystem:
         tp.cast(OrdersHandler,
                 self.handlers['OrdersHandler']).add_new_order(copy(order))
         return order
+
+    def cancel_order(self, order: Order) -> None:
+        self.ti.cancel_order(order)
+
+        self.logger.trading(CancelEvent(order))
+        self.handlers['OrdersHandler'].cancel_order(order)
+
+    def cancel_all(self) -> None:
+        self.ti.cancel_all()
+
+        for order in self.handlers['OrderHandler'].get_active_orders():
+            self.logger.trading(CancelEvent(order))
+        self.handlers['OrdersHandler'].cancel_all()
 
     def order_is_filled(self, order: Order) -> bool:
         return self.ti.order_is_filled(order)

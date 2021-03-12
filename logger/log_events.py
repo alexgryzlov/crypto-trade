@@ -1,4 +1,4 @@
-from trading import Asset, TrendLine, Candle
+from trading import Asset, TrendLine, Candle, Order
 import typing as tp
 
 
@@ -47,6 +47,16 @@ class SellEvent(LogEvent):
                           'amount': amount,
                           'price': price,
                           'order_id': order_id})
+
+
+class CancelEvent(LogEvent):
+    def __init__(self, order: Order):
+        super().__init__(f'Cancel order {order.order_id}',
+                         {'buy_asset': order.asset_pair.main_asset,
+                          'sell_asset': order.asset_pair.secondary_asset,
+                          'amount': order.amount,
+                          'price': order.price,
+                          'order_id': order.order_id})
 
 
 class FilledOrderEvent(LogEvent):
