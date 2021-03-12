@@ -158,15 +158,15 @@ class GraphicLayer:
                 *self.ma_traces]
 
     def get_visibility_params(self,
-                              candles_history: tp.Union[bool, None] = None,
-                              candles_future: tp.Union[bool, None] = None,
-                              ts_line: tp.Union[bool, None] = None,
-                              trends: tp.Union[bool, None] = None,
-                              buy: tp.Union[bool, None] = None,
-                              sell: tp.Union[bool, None] = None,
-                              ma: tp.Union[bool, None] = None,
-                              default_visibility: bool = True) -> tp.List[
-        bool]:
+                              candles_history: tp.Optional[bool] = None,
+                              candles_future: tp.Optional[bool] = None,
+                              ts_line: tp.Optional[bool] = None,
+                              trends: tp.Optional[bool] = None,
+                              buy: tp.Optional[bool] = None,
+                              sell: tp.Optional[bool] = None,
+                              ma: tp.Optional[bool] = None,
+                              default_visibility: bool = True) \
+            -> tp.List[bool]:
         visibility = [default_visibility if ts_line is None else ts_line,
                       default_visibility if candles_history is None else
                       candles_history,

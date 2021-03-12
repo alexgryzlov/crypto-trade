@@ -40,7 +40,7 @@ class ExpMovingAverageHandler(TradingSystemHandler):
 
     @staticmethod
     def calculate_from(values: tp.List[float],
-                       alpha: tp.Union[None, float] = None) -> float:
+                       alpha: tp.Optional[float] = None) -> float:
         if alpha is None:
             alpha = 2 / (1 + len(values))
 

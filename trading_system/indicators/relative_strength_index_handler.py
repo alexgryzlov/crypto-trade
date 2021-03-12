@@ -42,7 +42,7 @@ class RelativeStrengthIndexHandler(TradingSystemHandler):
 
     @staticmethod
     def calculate_from(deltas: tp.List[float],
-                       alpha: tp.Union[None, float] = None) \
+                       alpha: tp.Optional[float] = None) \
             -> tp.Tuple[float, float]:
         """ Returns relative strength value and relative strength index. """
         if alpha is None:
