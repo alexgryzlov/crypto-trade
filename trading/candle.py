@@ -26,3 +26,12 @@ class Candle:
                f"Low: {self.low} " \
                f"High: {self.high} " \
                f"Volume: {self.volume}"
+
+    def __hash__(self):
+        return hash((self.ts, self.open, self.close, self.low, self.high, self.volume))
+
+    def __eq__(self, other):
+        if isinstance(other, Candle):
+            return (self.ts, self.open, self.close, self.low, self.high, self.volume) \
+                   == (other.ts, other.open, other.close, other.low, other.high, other.volume)
+        return False
