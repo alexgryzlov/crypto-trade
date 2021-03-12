@@ -89,4 +89,4 @@ class Logger:
     _log_format = (f'[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s ',
                    '%m-%d %H:%M:%S')
     _file_handlers: tp.Dict[Path, logging.FileHandler] = {}
-    _file_name: tp.Union[None, str] = None
+    _file_name: tp.Optional[str] = None

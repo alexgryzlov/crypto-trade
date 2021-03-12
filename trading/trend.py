@@ -21,8 +21,8 @@ class TrendLine:
 
 class Trend:
     def __init__(self, trend_type: TrendType,
-                 lower_trend_line: tp.Union[TrendLine, None] = None,
-                 upper_trend_line: tp.Union[TrendLine, None] = None):
+                 lower_trend_line: tp.Optional[TrendLine] = None,
+                 upper_trend_line: tp.Optional[TrendLine] = None):
         self.trend_type = trend_type
         self.lower_trend_line = lower_trend_line
         self.upper_trend_line = upper_trend_line
