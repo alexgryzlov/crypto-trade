@@ -5,6 +5,7 @@ from trading.candle import Candle
 from trading.asset import AssetPair
 
 MARKET_DATA_ADDRESS = "http://marketdata.wavesplatform.com"
+MATCHER_ADDRESS = "https://matcher.waves.exchange"
 
 
 class MarketDataDownloader:
@@ -30,3 +31,11 @@ class MarketDataDownloader:
                 candles[index] = copy(candles[index - 1])
                 candles[index].ts = ts
         return candles
+
+    def get_orderbook(self, asset_pair: AssetPair, depth=50):
+        response = requests.get(
+            f'{MATCHER_ADDRESS}/matcher/orderbook/'
+            f'{asset_pair.main_asset.to_waves_format()}/'
+            f'{asset_pair.secondary_asset.to_waves_format()}?depth='
+            f'{depth}')
+        return response.json()
