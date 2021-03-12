@@ -1,10 +1,9 @@
 import ccxt
 import requests
-from dateutil.parser import isoparse
 from copy import copy
 from retry import retry
 
-from trading import Candle, AssetPair, Timeframe, TimeRange
+from trading import Candle, AssetPair, Timeframe, TimeRange, Timestamp
 
 # API restriction
 # https://api.wavesplatform.com/v0/docs/#/candles/getCandles
@@ -31,7 +30,7 @@ class MarketDataDownloader:
             for candle in candles_data:
                 candle_data = candle['data']
                 new_candle = Candle(
-                    ts=int(isoparse(candle_data['time']).timestamp()),
+                    ts=Timestamp.from_iso_format(candle_data['time']),
                     open=candle_data['open'],
                     close=candle_data['close'],
                     low=candle_data['low'],

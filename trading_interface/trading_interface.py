@@ -20,6 +20,9 @@ class TradingInterface:
     def cancel_order(self, order: Order):
         pass
 
+    def cancel_all(self):
+        pass
+
     def order_is_filled(self, order: Order):
         pass
 
