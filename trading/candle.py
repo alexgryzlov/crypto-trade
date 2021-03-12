@@ -1,10 +1,11 @@
 class Candle:
-    def __init__(self, ts, open, close, low, high):
+    def __init__(self, ts, open, close, low, high, volume):
         self.ts = ts
         self.open = open
         self.close = close
         self.low = low
         self.high = high
+        self.volume = volume
 
     def get_lower_price(self):
         return min(self.open, self.close)
@@ -23,4 +24,14 @@ class Candle:
                f"Open: {self.open} " \
                f"Close: {self.close} " \
                f"Low: {self.low} " \
-               f"High: {self.high}"
+               f"High: {self.high} " \
+               f"Volume: {self.volume}"
+
+    def __hash__(self):
+        return hash((self.ts, self.open, self.close, self.low, self.high, self.volume))
+
+    def __eq__(self, other):
+        if isinstance(other, Candle):
+            return (self.ts, self.open, self.close, self.low, self.high, self.volume) \
+                   == (other.ts, other.open, other.close, other.low, other.high, other.volume)
+        return False

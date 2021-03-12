@@ -5,8 +5,7 @@ from datetime import datetime
 import typing as tp
 import bisect
 
-from trading.trend import TrendLine, \
-    TrendType
+from trading import TrendLine, TrendType
 
 
 def to_time(ts):

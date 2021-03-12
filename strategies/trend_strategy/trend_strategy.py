@@ -1,14 +1,15 @@
 from strategies.strategy_base import StrategyBase
-from logger import logger
 
-from trading.trend import TrendType
+from logger.logger import Logger
+
+from trading import TrendType
 
 
 class TrendStrategy(StrategyBase):
-    def __init__(self, trading_system, asset_pair):
+    def __init__(self, trading_system, asset_pair, **kwargs):
         self.ts = trading_system
         self.asset_pair = asset_pair
-        self.logger = logger.get_logger('TrendStrategy')
+        self.logger = Logger('TrendStrategy')
         self.logger.info(f'Strategy TrendStrategy initialized')
         self.order_balance = 0
         self.active_trends = []

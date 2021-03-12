@@ -1,36 +1,51 @@
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from copy import copy
 
 from trading_interface.trading_interface import TradingInterface
 from trading_system.candles_handler import CandlesHandler
+from trading_system.trading_system_handler import TradingSystemHandler
 from trading_system.trend_handler import TrendHandler
-from trading_system.moving_average_handler import MovingAverageHandler
+from trading_system.indicators import *
 from trading_system.orders_handler import OrdersHandler
 
-from logger.log_events import BuyEvent, SellEvent
-from logger import logger
+from logger.log_events import BuyEvent, SellEvent, CancelEvent
+from logger.logger import Logger
 
-from trading.asset import AssetPair
-from trading.order import Order
-from trading.signal import Signal
+from trading import AssetPair, Signal, Order
 
 PRICE_EPS = 0.005
 
 
+class Handlers(OrderedDict):
+    def add(self, handler: TradingSystemHandler):
+        if handler.get_name() in self.keys():
+            return self
+
+        handlers = handler.get_required_handlers()
+        for i, dependent_handler in enumerate(handlers):
+            if dependent_handler.get_name() in self.keys():
+                handlers[i] = self[dependent_handler.get_name()]
+            else:
+                self.add(dependent_handler)
+
+        handler.link_required_handlers(handlers)
+        self[handler.get_name()] = handler
+        return self
+
+
 class TradingSystem:
     def __init__(self, trading_interface: TradingInterface):
-        self.logger = logger.get_logger('TradingSystem')
+        self.logger = Logger('TradingSystem')
         self.ti = trading_interface
         self.wallet = defaultdict(int)
         self.trading_signals = []
-        self.logger.info(f'Trading system TradingSystem initialized')
-        self.handlers = {
-            'CandlesHandler': CandlesHandler(trading_interface),
-            'OrdersHandler': OrdersHandler(trading_interface),
-            'TrendHandler': TrendHandler(trading_interface),
-            'MovingAverageHandler25': MovingAverageHandler(trading_interface, 25),
-            'MovingAverageHandler50': MovingAverageHandler(trading_interface, 50)
-        }
+        self.logger.info('Trading system TradingSystem initialized')
+        self.handlers = Handlers() \
+            .add(CandlesHandler(trading_interface)) \
+            .add(OrdersHandler(trading_interface)) \
+            .add(TrendHandler(trading_interface)) \
+            .add(MovingAverageHandler(trading_interface, 25)) \
+            .add(MovingAverageHandler(trading_interface, 50))
 
     def update(self):
         for handler in self.handlers.values():
@@ -69,6 +84,19 @@ class TradingSystem:
                                       order.order_id))
         self.handlers['OrdersHandler'].add_new_order(copy(order))
         return order
+
+    def cancel_order(self, order: Order):
+        self.ti.cancel_order(order)
+
+        self.logger.trading(CancelEvent(order))
+        self.handlers['OrdersHandler'].cancel_order(order)
+
+    def cancel_all(self):
+        self.ti.cancel_all()
+
+        for order in self.handlers['OrderHandler'].get_active_orders():
+            self.logger.trading(CancelEvent(order))
+        self.handlers['OrdersHandler'].cancel_all()
 
     def order_is_filled(self, order: Order):
         return self.ti.order_is_filled(order)

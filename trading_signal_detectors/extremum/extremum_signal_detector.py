@@ -1,14 +1,15 @@
 from trading_signal_detectors.trading_signal_detector import TradingSignalDetector
-from trading.signal import Signal
-from logger import logger
-from trading.trend import TrendType
+
+from trading import Signal, TrendType
+
+from logger.logger import Logger
 
 PRICE_SHIFT = 0.005
 
 
 class ExtremumSignalDetector(TradingSignalDetector):
     def __init__(self, trading_system, extremum_count):
-        self.logger = logger.get_logger('ExtremumSignalDetector')
+        self.logger = Logger('ExtremumSignalDetector')
         self.ts = trading_system
         self.extremum_count = extremum_count
         self.local_maximums = []

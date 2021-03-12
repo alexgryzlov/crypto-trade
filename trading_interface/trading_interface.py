@@ -1,5 +1,4 @@
-from trading.asset import AssetPair
-from trading.order import Order
+from trading import AssetPair, Order
 
 
 class TradingInterface:
@@ -19,6 +18,9 @@ class TradingInterface:
         pass
 
     def cancel_order(self, order: Order):
+        pass
+
+    def cancel_all(self):
         pass
 
     def order_is_filled(self, order: Order):

@@ -1,6 +1,6 @@
 from enum import IntEnum
 
-from trading.asset import AssetPair
+from trading import AssetPair
 
 
 class Direction(IntEnum):
@@ -25,3 +25,11 @@ class Order:
                f"Amount: {self.amount} " \
                f"Price: {self.price} " \
                f"Direction: {self.direction}"
+
+    def __hash__(self):
+        return self.order_id
+
+    def __eq__(self, other):
+        if isinstance(other, Order):
+            return self.order_id == other.order_id
+        return False

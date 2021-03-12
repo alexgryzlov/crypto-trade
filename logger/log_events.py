@@ -1,4 +1,4 @@
-from trading.asset import Asset
+from trading import Asset
 
 
 class LogEvent:
@@ -41,6 +41,16 @@ class SellEvent(LogEvent):
                           'amount': amount,
                           'price': price,
                           'order_id': order_id})
+
+
+class CancelEvent(LogEvent):
+    def __init__(self, order):
+        super().__init__(f'Cancel order {order.order_id}',
+                         {'buy_asset': order.asset_pair.main_asset,
+                          'sell_asset': order.asset_pair.secondary_asset,
+                          'amount': order.amount,
+                          'price': order.price,
+                          'order_id': order.order_id})
 
 
 class FilledOrderEvent(LogEvent):
