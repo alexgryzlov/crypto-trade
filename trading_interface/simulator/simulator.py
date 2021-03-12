@@ -1,23 +1,25 @@
 import datetime
+from copy import copy
 
 from trading_interface.simulator.clock_simulator import ClockSimulator
 from trading_interface.trading_interface import TradingInterface
 from market_data_api.market_data_downloader import MarketDataDownloader
 
-from trading import Order, Direction, AssetPair
+from trading import Order, Direction, AssetPair, TimeRange
 from trading_interface.simulator.price_simulator import PriceSimulator, PriceSimulatorType
-
-from copy import copy
 
 PRICE_SHIFT = 0.001
 
 
 class Simulator(TradingInterface):
-    def __init__(self, asset_pair: AssetPair, from_ts, to_ts, clock: ClockSimulator,
-                 price_simulation_type=PriceSimulatorType.ThreeIntervalPath):
+    def __init__(self,
+                 asset_pair: AssetPair,
+                 time_range: TimeRange,
+                 clock: ClockSimulator,
+                 price_simulation_type: PriceSimulatorType = PriceSimulatorType.ThreeIntervalPath):
         ts_offset = int(datetime.timedelta(days=1).total_seconds())
         self.candles = MarketDataDownloader().get_candles(
-            asset_pair, clock.get_timeframe(), from_ts - ts_offset, to_ts)
+            asset_pair, clock.get_timeframe(), TimeRange(time_range.from_ts - ts_offset, time_range.to_ts))
         self.clock = clock
         self.candle_index_offset = ts_offset // clock.get_seconds_per_candle()
         self.active_orders = set()

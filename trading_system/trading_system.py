@@ -39,12 +39,12 @@ class TradingSystem:
         self.ti = trading_interface
         self.wallet = defaultdict(int)
         self.trading_signals = []
-        self.logger.info(f'Trading system TradingSystem initialized')
-        self.handlers = Handlers()\
-            .add(CandlesHandler(trading_interface))\
-            .add(OrdersHandler(trading_interface))\
-            .add(TrendHandler(trading_interface))\
-            .add(MovingAverageHandler(trading_interface, 25))\
+        self.logger.info('Trading system TradingSystem initialized')
+        self.handlers = Handlers() \
+            .add(CandlesHandler(trading_interface)) \
+            .add(OrdersHandler(trading_interface)) \
+            .add(TrendHandler(trading_interface)) \
+            .add(MovingAverageHandler(trading_interface, 25)) \
             .add(MovingAverageHandler(trading_interface, 50))
 
     def update(self):

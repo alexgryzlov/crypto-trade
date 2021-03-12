@@ -3,15 +3,15 @@ from trading import Timeframe
 
 
 class ClockSimulator(Clock):
-    def __init__(self, start, timeframe: Timeframe, candles_lifetime):
-        self.start = start
+    def __init__(self, start_ts: int, timeframe: Timeframe, candles_lifetime):
+        self.start_ts = start_ts
         self.timeframe = timeframe
         self.seconds_per_candle = timeframe.to_seconds()
         self.candles_lifetime = candles_lifetime
         self.iteration = 0
 
     def get_timestamp(self):
-        return self.start + self.iteration / self.candles_lifetime * self.seconds_per_candle
+        return int(self.start_ts + self.iteration / self.candles_lifetime * self.seconds_per_candle)
 
     def get_timeframe(self):
         return self.timeframe
