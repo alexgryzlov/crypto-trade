@@ -45,7 +45,7 @@ class SellEvent(LogEvent):
 
 class CancelEvent(LogEvent):
     def __init__(self, order):
-        super().__init__(f' Cancel order {order.order_id}',
+        super().__init__(f'Cancel order {order.order_id}',
                          {'buy_asset': order.asset_pair.main_asset,
                           'sell_asset': order.asset_pair.secondary_asset,
                           'amount': order.amount,
