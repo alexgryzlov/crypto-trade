@@ -114,7 +114,7 @@ class TradingSystem:
     def get_sell_price(self) -> float:
         return self.ti.get_sell_price() + PRICE_EPS
 
-    def get_active_orders(self) -> tp.List[Order]:
+    def get_active_orders(self) -> tp.Set[Order]:
         return tp.cast(OrdersHandler,
                        self.handlers['OrdersHandler']).get_active_orders()
 

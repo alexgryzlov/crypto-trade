@@ -21,7 +21,7 @@ class TradingInterface:
     def cancel_order(self, order: Order) -> None:
         pass
 
-    def cancel_all(self):
+    def cancel_all(self) -> None:
         pass
 
     def order_is_filled(self, order: Order) -> bool:

@@ -33,7 +33,7 @@ class Candle:
     def __hash__(self) -> int:
         return hash((self.ts, self.open, self.close, self.low, self.high, self.volume))
 
-    def __eq__(self, other: Candle) -> bool:
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, Candle):
             return (self.ts, self.open, self.close, self.low, self.high, self.volume) \
                    == (other.ts, other.open, other.close, other.low, other.high, other.volume)
