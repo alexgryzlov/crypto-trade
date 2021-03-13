@@ -8,6 +8,7 @@ from enum import Enum
 class PriceSimulatorType(Enum):
     ThreeIntervalPath = 'three_interval_path'
     ThreeIntervalPathNoise = 'three_interval_path_noise'
+    Uniform = 'uniform'
 
 
 class PriceSimulator:
@@ -73,7 +74,7 @@ class PriceSimulator:
             total_path += abs(interval[1] - interval[0])
 
         if total_path == 0:
-            return intervals[0][0] * total_steps
+            return [intervals[0][0]] * total_steps
 
         prices = []
 

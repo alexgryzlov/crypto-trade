@@ -3,6 +3,7 @@ from trading.candle import Candle
 import numpy as np
 
 from tests.logger.empty_logger_mock import empty_logger_mock
+import pytest
 
 
 def test_three_interval_big_random(empty_logger_mock):
@@ -55,3 +56,14 @@ def test_multi_interval_big_random(empty_logger_mock):
             intervals.append([intervals[-1][1], np.random.uniform(0, 10)])
         path = ps._build_multi_interval_path(intervals, total_steps)
         assert(len(path) == total_steps)
+
+
+@pytest.mark.parametrize("candles_lifetime", [25])
+@pytest.mark.parametrize("total_steps", [100])
+def test_same_values(candles_lifetime: int, total_steps: int, empty_logger_mock: empty_logger_mock):
+    ps = PriceSimulator(candles_lifetime, PriceSimulatorType.ThreeIntervalPath)
+    intervals = [[1, 1], [1, 1], [1, 1]]
+    res = ps._build_multi_interval_path(intervals, total_steps)
+    print(res)
+    assert isinstance(res, list)
+    assert len(res) == total_steps
