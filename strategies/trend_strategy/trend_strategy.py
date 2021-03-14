@@ -1,3 +1,4 @@
+import trading_system.trading_system as ts
 from strategies.strategy_base import StrategyBase
 
 from logger.logger import Logger
@@ -6,15 +7,17 @@ from trading import TrendType
 
 
 class TrendStrategy(StrategyBase):
-    def __init__(self, trading_system, asset_pair, **kwargs):
-        self.ts = trading_system
+    def __init__(self, asset_pair, **kwargs) -> None:
         self.asset_pair = asset_pair
         self.logger = Logger('TrendStrategy')
-        self.logger.info(f'Strategy TrendStrategy initialized')
         self.order_balance = 0
         self.active_trends = []
+        self.ts = None
 
-    def update(self):
+    def init_trading(self, trading_system: ts.TradingSystem) -> None:
+        self.ts = trading_system
+
+    def update(self) -> None:
         active_trends = []
         for trend in self.active_trends:
             deactivated = False
@@ -34,7 +37,7 @@ class TrendStrategy(StrategyBase):
                 self.order_balance -= 1
         self.active_trends = active_trends
 
-    def handle_new_trend_signal(self, trend):
+    def handle_new_trend_signal(self, trend) -> None:
         self.logger.info(f'Strategy received trend of type {trend.trend_type}')
 
         if self.order_balance > 3:
