@@ -8,10 +8,12 @@ from trading_system.trend_handler import TrendHandler
 from trading_system.indicators import *
 from trading_system.orders_handler import OrdersHandler
 
+from trading_system.trading_statistics import TradingStatistics
+
 from logger.log_events import BuyEvent, SellEvent, CancelEvent
 from logger.logger import Logger
 
-from trading import AssetPair, Signal, Order
+from trading import Asset, AssetPair, Signal, Order
 
 PRICE_EPS = 0.005
 
@@ -37,20 +39,31 @@ class TradingSystem:
     def __init__(self, trading_interface: TradingInterface):
         self.logger = Logger('TradingSystem')
         self.ti = trading_interface
+        self.stats = TradingStatistics()
         self.wallet = defaultdict(int)
         self.trading_signals = []
-        self.logger.info('Trading system TradingSystem initialized')
         self.handlers = Handlers() \
             .add(CandlesHandler(trading_interface)) \
             .add(OrdersHandler(trading_interface)) \
             .add(TrendHandler(trading_interface)) \
             .add(MovingAverageHandler(trading_interface, 25)) \
             .add(MovingAverageHandler(trading_interface, 50))
+        self.logger.info('Trading system TradingSystem initialized')
+
+    def stop_trading(self) -> None:
+        for asset, amount in self.wallet.items():
+            self.create_order(asset_pair=AssetPair(asset, Asset('USDN')),
+                              amount=-amount)
+        self.cancel_all()
+
+    def get_trading_statistics(self) -> TradingStatistics:
+        return copy(self.stats)
 
     def update(self):
         for handler in self.handlers.values():
             handler.update()
         for order in self.handlers['OrdersHandler'].get_new_filled_orders():
+            self.stats.add_filled_order(copy(order))
             self.wallet[order.asset_pair.main_asset] -= int(order.direction) * order.amount
             self.trading_signals.append(Signal('filled_order', copy(order)))
 
@@ -65,7 +78,14 @@ class TradingSystem:
     def get_timestamp(self):
         return self.ti.get_timestamp()
 
-    def buy(self, asset_pair: AssetPair, amount: int, price: float):
+    def create_order(self, asset_pair: AssetPair, amount: int) -> tp.Optional[Order]:
+        if amount > 0:
+            return self.buy(asset_pair, amount, self.get_buy_price())
+        elif amount < 0:
+            return self.sell(asset_pair, amount, self.get_sell_price())
+        return None
+
+    def buy(self, asset_pair: AssetPair, amount: int, price: float) -> Order:
         order = self.ti.buy(asset_pair, amount, price)
         self.logger.trading(BuyEvent(asset_pair.main_asset,
                                      asset_pair.secondary_asset,
@@ -75,7 +95,7 @@ class TradingSystem:
         self.handlers['OrdersHandler'].add_new_order(copy(order))
         return order
 
-    def sell(self, asset_pair: AssetPair, amount: int, price: float):
+    def sell(self, asset_pair: AssetPair, amount: int, price: float) -> Order:
         order = self.ti.sell(asset_pair, amount, price)
         self.logger.trading(SellEvent(asset_pair.main_asset,
                                       asset_pair.secondary_asset,
@@ -87,13 +107,11 @@ class TradingSystem:
 
     def cancel_order(self, order: Order):
         self.ti.cancel_order(order)
-
         self.logger.trading(CancelEvent(order))
         self.handlers['OrdersHandler'].cancel_order(order)
 
     def cancel_all(self):
         self.ti.cancel_all()
-
         for order in self.handlers['OrderHandler'].get_active_orders():
             self.logger.trading(CancelEvent(order))
         self.handlers['OrdersHandler'].cancel_all()

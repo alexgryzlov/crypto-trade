@@ -77,6 +77,8 @@ class StrategyRunner:
                     f'handle_{signal.name}_signal')(signal.content)
             strategy.update()
 
+        trading_system.stop_trading()
+
         print(time_range.to_iso_format())
         print(trading_system.get_balance())
         print(trading_system.get_active_orders())
