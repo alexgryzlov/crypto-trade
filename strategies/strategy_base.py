@@ -3,10 +3,10 @@ import trading_system.trading_system as ts
 
 
 class StrategyBase:
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         pass
 
-    def init_trading(self, trading_system: ts.TradingSystem):
+    def init_trading(self, trading_system: ts.TradingSystem) -> None:
         pass
 
     def update(self) -> None:
