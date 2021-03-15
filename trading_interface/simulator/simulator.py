@@ -25,7 +25,7 @@ class Simulator(TradingInterface):
         self.active_orders = set()
         self.last_used_order_id = 0
         self.filled_order_ids = set()
-        self.balance = 0
+        self.balance = 10
         self.price_simulator = PriceSimulator(self.clock.candles_lifetime, price_simulation_type)
 
     def is_alive(self):

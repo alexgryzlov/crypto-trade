@@ -39,7 +39,7 @@ class TradingSystem:
     def __init__(self, trading_interface: TradingInterface):
         self.logger = Logger('TradingSystem')
         self.ti = trading_interface
-        self.stats = TradingStatistics()
+        self.stats = TradingStatistics(self.ti.get_balance())
         self.wallet = defaultdict(int)
         self.trading_signals = []
         self.handlers = Handlers() \
@@ -48,7 +48,7 @@ class TradingSystem:
             .add(TrendHandler(trading_interface)) \
             .add(MovingAverageHandler(trading_interface, 25)) \
             .add(MovingAverageHandler(trading_interface, 50))
-        self.logger.info('Trading system TradingSystem initialized')
+        self.logger.info('Trading system initialized')
 
     def stop_trading(self) -> None:
         for asset, amount in self.wallet.items():
@@ -57,6 +57,7 @@ class TradingSystem:
         self.cancel_all()
 
     def get_trading_statistics(self) -> TradingStatistics:
+        self.stats.set_final_balance(self.get_balance())
         return copy(self.stats)
 
     def update(self):
@@ -80,9 +81,9 @@ class TradingSystem:
 
     def create_order(self, asset_pair: AssetPair, amount: int) -> tp.Optional[Order]:
         if amount > 0:
-            return self.buy(asset_pair, amount, self.get_buy_price())
+            return self.buy(asset_pair, amount, self.get_sell_price())
         elif amount < 0:
-            return self.sell(asset_pair, amount, self.get_sell_price())
+            return self.sell(asset_pair, amount, self.get_buy_price())
         return None
 
     def buy(self, asset_pair: AssetPair, amount: int, price: float) -> Order:
@@ -112,7 +113,7 @@ class TradingSystem:
 
     def cancel_all(self):
         self.ti.cancel_all()
-        for order in self.handlers['OrderHandler'].get_active_orders():
+        for order in self.handlers['OrdersHandler'].get_active_orders():
             self.logger.trading(CancelEvent(order))
         self.handlers['OrdersHandler'].cancel_all()
 

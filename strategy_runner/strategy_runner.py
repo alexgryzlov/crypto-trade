@@ -80,9 +80,7 @@ class StrategyRunner:
         trading_system.stop_trading()
 
         print(time_range.to_iso_format())
-        print(trading_system.get_balance())
-        print(trading_system.get_active_orders())
-        print(trading_system.get_wallet(), end='\n\n')
+        print(str(trading_system.get_trading_statistics()))
 
         ObjectLog().store_log()
 
