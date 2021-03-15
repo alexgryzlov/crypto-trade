@@ -1,3 +1,5 @@
+from base.config_parser import ConfigParser
+
 from strategy_runner.strategy_runner import StrategyRunner
 from strategies.trend_strategy.trend_strategy import TrendStrategy
 
@@ -7,6 +9,7 @@ from trading import AssetPair, Asset, Timeframe, TimeRange
 #     StrategyRunner().run_strategy_on_periods(
 #         strategy=TrendStrategy,
 #         strategy_config={},
+#         base_config=ConfigParser().load_config('configs/base.ini'),
 #         asset_pair=AssetPair(Asset('WAVES'), Asset('USDN')),
 #         timeframe=Timeframe('5m'),
 #         time_range=TimeRange.from_iso_format(
@@ -16,11 +19,15 @@ from trading import AssetPair, Asset, Timeframe, TimeRange
 #         processes=2,
 #         visualize=False)
 
-StrategyRunner().run_strategy(
+
+strategy_runner = StrategyRunner(
+    base_config=ConfigParser().load_config('configs/base.ini'))
+
+strategy_runner.run_strategy(
     strategy=TrendStrategy,
     strategy_config={},
     asset_pair=AssetPair(Asset('WAVES'), Asset('USDN')),
     timeframe=Timeframe('5m'),
     time_range=TimeRange.from_iso_format(
         from_ts='2021-02-01 00:00:00',
-        to_ts='2021-02-01 06:00:00'))
+        to_ts='2021-02-01 01:00:00'))

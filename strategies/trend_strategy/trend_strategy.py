@@ -15,8 +15,6 @@ class TrendStrategy(StrategyBase):
         self.active_trends = []
 
     def update(self):
-        self.ts.sell(self.asset_pair, 1, self.ts.get_buy_price())
-
         active_trends = []
         for trend in self.active_trends:
             deactivated = False

@@ -32,8 +32,8 @@ class RunResult:
 
 
 class StrategyRunner:
-    def __init__(self):
-        pass
+    def __init__(self, base_config: tp.Dict[str, tp.Dict[str, tp.Any]]):
+        self.base_config = base_config
 
     def run_strategy(
             self,
@@ -41,17 +41,17 @@ class StrategyRunner:
             strategy_config: tp.Dict[str, tp.Any],
             asset_pair: AssetPair,
             timeframe: Timeframe,
-            time_range: TimeRange,
-            candles_lifetime: int = 20) -> RunResult:
+            time_range: TimeRange) -> RunResult:
 
         clock = ClockSimulator(
             start_ts=time_range.from_ts,
             timeframe=timeframe,
-            candles_lifetime=candles_lifetime)
+            config=self.base_config['clock_simulator'])
 
         trading_interface = Simulator(
             asset_pair=asset_pair,
             time_range=time_range,
+            config=self.base_config['simulator'],
             clock=clock)
 
         Logger.set_clock(clock)
@@ -93,7 +93,6 @@ class StrategyRunner:
             asset_pair: AssetPair,
             timeframe: Timeframe,
             time_range: TimeRange,
-            candles_lifetime: int = 20,
             period: tp.Optional[int] = None,
             runs: tp.Optional[int] = None,
             visualize: bool = False,
@@ -120,8 +119,7 @@ class StrategyRunner:
                     'strategy_config': strategy_config,
                     'asset_pair': asset_pair,
                     'timeframe': timeframe,
-                    'time_range': TimeRange(current_ts, next_ts),
-                    'candles_lifetime': candles_lifetime},
+                    'time_range': TimeRange(current_ts, next_ts)},
                 callback=lambda run_result: run_results.append(run_result))
             current_ts = next_ts
 

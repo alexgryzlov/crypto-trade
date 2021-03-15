@@ -1,4 +1,5 @@
 import datetime
+import typing as tp
 from copy import copy
 
 from trading_interface.simulator.clock_simulator import ClockSimulator
@@ -16,6 +17,7 @@ class Simulator(TradingInterface):
                  asset_pair: AssetPair,
                  time_range: TimeRange,
                  clock: ClockSimulator,
+                 config: tp.Dict[str, tp.Any],
                  price_simulation_type: PriceSimulatorType = PriceSimulatorType.ThreeIntervalPath):
         ts_offset = int(datetime.timedelta(days=1).total_seconds())
         self.candles = MarketDataDownloader().get_candles(
@@ -25,7 +27,7 @@ class Simulator(TradingInterface):
         self.active_orders = set()
         self.last_used_order_id = 0
         self.filled_order_ids = set()
-        self.balance = 10
+        self.balance = float(config['initial_balance'])
         self.price_simulator = PriceSimulator(self.clock.candles_lifetime, price_simulation_type)
 
     def is_alive(self):
