@@ -94,7 +94,7 @@ class TradingSystem:
     def cancel_all(self):
         self.ti.cancel_all()
 
-        for order in self.handlers['OrderHandler'].get_active_orders():
+        for order in self.handlers['OrdersHandler'].get_active_orders():
             self.logger.trading(CancelEvent(order))
         self.handlers['OrdersHandler'].cancel_all()
 
