@@ -57,7 +57,9 @@ class StrategyRunner:
         Logger.set_clock(clock)
         Logger.set_log_file_name(time_range.to_iso_format())
 
-        trading_system = TradingSystem(trading_interface)
+        trading_system = TradingSystem(
+            trading_interface=trading_interface,
+            config=self.base_config['trading_system'])
 
         signal_detectors = [
             ExtremumSignalDetector(trading_system, 2),

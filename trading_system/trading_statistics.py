@@ -20,14 +20,11 @@ class TradingStatistics:
         self.filled_orders.append(order)
 
     def __str__(self) -> str:
-        return f'initial balance: {round(self.initial_balance, 2)}\n' \
-               f'final balance:   {round(self.final_balance, 2)}\n' \
-               f'delta:           {round(self._calc_absolute_delta(), 2)}\n' \
-               f'delta(%):        {round(self._calc_relative_delta(), 2)}%\n' \
+        return f'initial balance: {self.initial_balance:.2f}\n' \
+               f'final balance:   {self.final_balance:.2f}\n' \
+               f'delta:           {self._calc_absolute_delta():.2f}\n' \
+               f'delta(%):        {self._calc_relative_delta():.1f}%\n' \
                f'filled orders:   {len(self.filled_orders)}'
-
-        # return 'initial balance: {:.2f}'.format(self.initial_balance) + \
-        #        'final balance:   {:.2f}'.format()
 
     def _calc_absolute_delta(self) -> float:
         return self.final_balance - self.initial_balance

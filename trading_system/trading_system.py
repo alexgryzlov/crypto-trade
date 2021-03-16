@@ -36,11 +36,12 @@ class Handlers(OrderedDict):
 
 
 class TradingSystem:
-    def __init__(self, trading_interface: TradingInterface):
+    def __init__(self, trading_interface: TradingInterface, config: tp.Dict[str, tp.Any]):
         self.logger = Logger('TradingSystem')
         self.ti = trading_interface
         self.stats = TradingStatistics(self.ti.get_balance())
         self.wallet = defaultdict(int)
+        self.currency_asset = Asset(config['currency_asset'])
         self.trading_signals = []
         self.handlers = Handlers() \
             .add(CandlesHandler(trading_interface)) \
@@ -52,7 +53,7 @@ class TradingSystem:
 
     def stop_trading(self) -> None:
         for asset, amount in self.wallet.items():
-            self.create_order(asset_pair=AssetPair(asset, Asset('USDN')),
+            self.create_order(asset_pair=AssetPair(asset, self.currency_asset),
                               amount=-amount)
         self.cancel_all()
 
@@ -83,7 +84,7 @@ class TradingSystem:
         if amount > 0:
             return self.buy(asset_pair, amount, self.get_sell_price())
         elif amount < 0:
-            return self.sell(asset_pair, amount, self.get_buy_price())
+            return self.sell(asset_pair, -amount, self.get_buy_price())
         return None
 
     def buy(self, asset_pair: AssetPair, amount: int, price: float) -> Order:

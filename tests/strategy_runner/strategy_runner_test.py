@@ -1,12 +1,21 @@
+import pytest
+
 from strategy_runner.strategy_runner import StrategyRunner
 from trading import AssetPair, Asset, Timeframe, TimeRange
 
 from tests.logger.empty_logger_mock import empty_logger_mock
 from tests.strategies.strategy_mock import StrategyMock
 
+from base.config_parser import ConfigParser
 
-def test_dummy_strategy_run(empty_logger_mock):
-    StrategyRunner().run_strategy(
+
+@pytest.fixture
+def strategy_runner() -> StrategyRunner:
+    return StrategyRunner(base_config=ConfigParser().load_config('configs/base.ini'))
+
+
+def test_dummy_strategy_run(strategy_runner, empty_logger_mock):
+    strategy_runner.run_strategy(
         strategy=StrategyMock,
         strategy_config={},
         asset_pair=AssetPair(Asset('WAVES'), Asset('USDN')),
@@ -16,8 +25,8 @@ def test_dummy_strategy_run(empty_logger_mock):
             to_ts='2021-02-10 12:00:00'))
 
 
-def test_dummy_multiple_strategy_run(empty_logger_mock):
-    StrategyRunner().run_strategy_on_periods(
+def test_dummy_multiple_strategy_run(strategy_runner, empty_logger_mock):
+    strategy_runner.run_strategy_on_periods(
         strategy=StrategyMock,
         strategy_config={},
         asset_pair=AssetPair(Asset('USDN'), Asset('WAVES')),
