@@ -81,7 +81,6 @@ class StrategyRunner:
 
         trading_system.stop_trading()
 
-        print(time_range.to_iso_format())
         print(str(trading_system.get_trading_statistics()))
 
         ObjectLog().store_log()

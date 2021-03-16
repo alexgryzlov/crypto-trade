@@ -39,7 +39,9 @@ class TradingSystem:
     def __init__(self, trading_interface: TradingInterface, config: tp.Dict[str, tp.Any]):
         self.logger = Logger('TradingSystem')
         self.ti = trading_interface
-        self.stats = TradingStatistics(self.ti.get_balance())
+        self.stats = TradingStatistics(
+            initial_balance=self.ti.get_balance(),
+            start_timestamp=self.ti.get_timestamp())
         self.wallet = defaultdict(int)
         self.currency_asset = Asset(config['currency_asset'])
         self.trading_signals = []
@@ -59,6 +61,7 @@ class TradingSystem:
 
     def get_trading_statistics(self) -> TradingStatistics:
         self.stats.set_final_balance(self.get_balance())
+        self.stats.set_finish_timestamp(self.get_timestamp())
         return copy(self.stats)
 
     def update(self):
