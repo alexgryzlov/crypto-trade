@@ -1,5 +1,6 @@
 import typing as tp
 
+from logger.logger import Logger
 from trading_system.indicators.exp_moving_average_handler import ExpMovingAverageHandler
 from trading_system.trading_system_handler import TradingSystemHandler
 from trading_interface.trading_interface import TradingInterface
@@ -23,6 +24,7 @@ class MovingAverageCDHandler(TradingSystemHandler):
 
         self.macd_values = []
         self.signal_values = []
+        self.logger = Logger(self.get_name())
 
     def get_name(self):
         return f'{type(self).__name__}_s{self.short}_l{self.long}'
@@ -47,6 +49,9 @@ class MovingAverageCDHandler(TradingSystemHandler):
 
         self.macd_values.append(ema_short - ema_long)
         self.signal_values.append(ExpMovingAverageHandler.calculate_from(self.macd_values[-self.average:]))
+        self.logger.info(f'MACD = {self.macd_values[-1]:.6f}, '
+                         f'Signal = {self.signal_values[-1]:.6f}, '
+                         f'diff = {self.macd_values[-1] - self.signal_values[-1]:.6f}')
 
     def get_last_n_values(self, n) -> tp.List[tp.Tuple[float, float]]:
         """ Returns MACD and signal value. """

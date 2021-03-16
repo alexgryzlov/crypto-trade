@@ -45,7 +45,9 @@ class TradingSystem:
             .add(OrdersHandler(trading_interface)) \
             .add(TrendHandler(trading_interface)) \
             .add(MovingAverageHandler(trading_interface, 25)) \
-            .add(MovingAverageHandler(trading_interface, 50))
+            .add(MovingAverageHandler(trading_interface, 50)) \
+            .add(MovingAverageCDHandler(trading_interface)) \
+            .add(RelativeStrengthIndexHandler(trading_interface, 14))
 
     def update(self):
         for handler in self.handlers.values():

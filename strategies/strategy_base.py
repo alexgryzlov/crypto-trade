@@ -1,5 +1,6 @@
 from trading import Trend, TrendType
 import trading_system.trading_system as ts
+from trading_signal_detectors.relative_strength_index.relative_strength_index_signal import RsiSignal
 
 
 class StrategyBase:
@@ -19,6 +20,12 @@ class StrategyBase:
         pass
 
     def handle_moving_average_signal(self, trend: TrendType) -> None:
+        pass
+
+    def handle_moving_average_cd_signal(self, trend: TrendType) -> None:
+        pass
+
+    def handle_relative_strength_index_signal(self, signal: RsiSignal) -> None:
         pass
 
     def handle_filled_order_signal(self, order) -> None:

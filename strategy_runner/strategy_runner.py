@@ -4,6 +4,9 @@ import typing as tp
 
 from trading_interface.simulator.clock_simulator import ClockSimulator
 from trading_interface.simulator.simulator import Simulator
+from trading_signal_detectors.macd.macd_signal_detector import MACDSignalDetector
+from trading_signal_detectors.relative_strength_index.relative_strength_index_signal_detector import \
+    RelativeStrengthIndexSignalDetector
 from trading_system.trading_system import TradingSystem
 
 from trading_signal_detectors.extremum.extremum_signal_detector \
@@ -61,7 +64,10 @@ class StrategyRunner:
 
         signal_detectors = [
             ExtremumSignalDetector(trading_system, 2),
-            MovingAverageSignalDetector(trading_system, 25, 50)]
+            MovingAverageSignalDetector(trading_system, 25, 50),
+            MACDSignalDetector(trading_system),
+            RelativeStrengthIndexSignalDetector(trading_system, 14),
+        ]
 
         strategy = strategy(asset_pair=asset_pair,
                             **strategy_config)
