@@ -65,9 +65,9 @@ class StrategyRunner:
             ExtremumSignalDetector(trading_system, 2),
             MovingAverageSignalDetector(trading_system, 25, 50)]
 
-        strategy = strategy(trading_system=trading_system,
-                            asset_pair=asset_pair,
+        strategy = strategy(asset_pair=asset_pair,
                             **strategy_config)
+        strategy.init_trading(trading_system)
 
         while trading_interface.is_alive():
             trading_system.update()
