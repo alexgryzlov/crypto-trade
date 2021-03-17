@@ -31,10 +31,10 @@ def test_three_interval_big_random(
 
             htl_noise = ps._high_to_low(candle_up, np.random.normal)
             lth_noise = ps._low_to_high(candle_up, np.random.normal)
-            assert (candle_up.low == min(*htl_noise) and candle_up.low == min(
-                *lth_noise))
-            assert (candle_up.high == max(
-                *htl_noise) and candle_up.high == max(*lth_noise))
+            assert (candle_up.low == min(*htl_noise) and
+                    candle_up.low == min(*lth_noise))
+            assert (candle_up.high == max(*htl_noise) and
+                    candle_up.high == max(*lth_noise))
             assert all([i in htl and i in lth for i in vals])
 
 
