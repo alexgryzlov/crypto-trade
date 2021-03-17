@@ -14,8 +14,8 @@ class OrdersHandler(TradingSystemHandler):
         super().__init__(trading_interface)
         self.ti = trading_interface
         self.logger = Logger("OrdersHandler")
-        self.active_orders = set()
-        self.new_filled_orders = set()
+        self.active_orders: tp.Set[Order] = set()
+        self.new_filled_orders: tp.Set[Order] = set()
 
     def update(self) -> None:
         filled_orders = set(
@@ -36,8 +36,8 @@ class OrdersHandler(TradingSystemHandler):
     def add_new_order(self, order: Order) -> None:
         self.active_orders.add(order)
 
-    def cancel_order(self, order: Order):
+    def cancel_order(self, order: Order) -> None:
         self.active_orders.discard(order)
 
-    def cancel_all(self):
+    def cancel_all(self) -> None:
         self.active_orders.clear()

@@ -18,7 +18,7 @@ class TradingInterface:
     def sell(self, asset_pair: AssetPair, amount: int, price: float) -> Order:
         pass
 
-    def cancel_order(self, order: Order) -> bool:
+    def cancel_order(self, order: Order) -> None:
         pass
 
     def cancel_all(self) -> None:

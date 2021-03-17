@@ -9,6 +9,7 @@ from trading_interface.simulator.price_simulator import PriceSimulator, \
     PriceSimulatorType
 
 from copy import copy
+import typing as tp
 
 import typing as tp
 
@@ -16,9 +17,9 @@ PRICE_SHIFT = 0.001
 
 
 class Simulator(TradingInterface):
-    def __init__(self, asset_pair: AssetPair, from_ts, to_ts,
+    def __init__(self, asset_pair: AssetPair, from_ts: int, to_ts: int,
                  clock: ClockSimulator,
-                 price_simulation_type=PriceSimulatorType.ThreeIntervalPath):
+                 price_simulation_type: PriceSimulatorType = PriceSimulatorType.ThreeIntervalPath):
         ts_offset = int(datetime.timedelta(days=1).total_seconds())
         self.candles = MarketDataDownloader().get_candles(
             asset_pair, clock.get_timeframe(), from_ts - ts_offset, to_ts)

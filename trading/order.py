@@ -1,3 +1,4 @@
+from __future__ import annotations
 from enum import IntEnum
 
 from trading import AssetPair
@@ -27,7 +28,7 @@ class Order:
                f"Price: {self.price} " \
                f"Direction: {self.direction}"
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return self.order_id
 
     def __eq__(self, other: object) -> bool:

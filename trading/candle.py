@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 class Candle:
     def __init__(self, ts: int, open_price: float, close_price: float,
                  low_price: float, high_price: float, volume: float):
@@ -28,7 +30,7 @@ class Candle:
                f"High: {self.high} " \
                f"Volume: {self.volume}"
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((self.ts, self.open, self.close, self.low, self.high, self.volume))
 
     def __eq__(self, other: object) -> bool:
