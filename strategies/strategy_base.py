@@ -7,6 +7,9 @@ class StrategyBase:
     def __init__(self, asset_pair: AssetPair, **kwargs: tp.Any):
         pass
 
+    def init_trading(self, trading_system: ts.TradingSystem) -> None:
+        pass
+
     def update(self) -> None:
         pass
 

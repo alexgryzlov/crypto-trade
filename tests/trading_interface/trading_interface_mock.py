@@ -16,10 +16,10 @@ class TradingInterfaceMock(TradingInterface):
     def from_price_values(cls, values: tp.List[float]) -> TradingInterfaceMock:
         candles = [Candle(
             ts=i,
-            open_price=values[i],
-            close_price=values[i + 1],
-            low_price=min(values[i], values[i + 1]),
-            high_price=max(values[i], values[i + 1]),
+            open=values[i],
+            close=values[i + 1],
+            low=min(values[i], values[i + 1]),
+            high=max(values[i], values[i + 1]),
             volume=1) for i in range(len(values) - 1)]
         return cls(candles)
 

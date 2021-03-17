@@ -1,13 +1,14 @@
 from __future__ import annotations
 
+
 class Candle:
-    def __init__(self, ts: int, open_price: float, close_price: float,
-                 low_price: float, high_price: float, volume: float):
+    def __init__(self, ts: int, open: float, close: float,
+                 low: float, high: float, volume: float):
         self.ts = ts
-        self.open = open_price
-        self.close = close_price
-        self.low = low_price
-        self.high = high_price
+        self.open = open
+        self.close = close
+        self.low = low
+        self.high = high
         self.volume = volume
 
     def get_lower_price(self) -> float:
