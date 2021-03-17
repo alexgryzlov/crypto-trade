@@ -41,7 +41,7 @@ class TradingSystem:
         self.ti = trading_interface
         self.wallet: tp.DefaultDict[Asset, int] = defaultdict(int)
         self.trading_signals: tp.List[Signal] = []
-        self.logger.info(f'Trading system TradingSystem initialized')
+        self.logger.info('Trading system TradingSystem initialized')
         self.handlers = Handlers() \
             .add(CandlesHandler(trading_interface)) \
             .add(OrdersHandler(trading_interface)) \

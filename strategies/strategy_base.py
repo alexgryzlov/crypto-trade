@@ -4,8 +4,7 @@ import typing as tp
 
 
 class StrategyBase:
-    def __init__(self, trading_system: ts.TradingSystem,
-                 asset_pair: AssetPair, **kwargs: tp.Any):
+    def __init__(self, asset_pair: AssetPair, **kwargs: tp.Any):
         pass
 
     def update(self) -> None:

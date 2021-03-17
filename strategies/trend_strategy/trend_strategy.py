@@ -1,3 +1,4 @@
+import trading_system.trading_system as ts
 from strategies.strategy_base import StrategyBase
 
 from logger.logger import Logger
@@ -8,14 +9,15 @@ import typing as tp
 
 
 class TrendStrategy(StrategyBase):
-    def __init__(self, trading_system: ts.TradingSystem, asset_pair: AssetPair,
-                 **kwargs: tp.Any):
-        self.ts = trading_system
+    def __init__(self, asset_pair: AssetPair, **kwargs: tp.Any) -> None:
         self.asset_pair = asset_pair
         self.logger = Logger('TrendStrategy')
-        self.logger.info(f'Strategy TrendStrategy initialized')
         self.order_balance = 0
         self.active_trends: tp.List[Trend] = []
+        self.ts = None
+
+    def init_trading(self, trading_system: ts.TradingSystem) -> None:
+        self.ts = trading_system
 
     def update(self) -> None:
         active_trends = []
