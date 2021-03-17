@@ -27,7 +27,7 @@ class TradingStatistics:
     def set_finish_timestamp(self, timestamp: int) -> None:
         self.finish_timestamp = timestamp
 
-    def add_filled_order(self, order: OrderTrue) -> None:
+    def add_filled_order(self, order: Order) -> None:
         self.filled_orders.append(order)
 
     def add_filled_orders(self, orders: tp.List[Order]) -> None:

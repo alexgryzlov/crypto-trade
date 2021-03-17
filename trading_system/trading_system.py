@@ -54,10 +54,10 @@ class TradingSystem:
         self.logger.info('Trading system initialized')
 
     def stop_trading(self) -> None:
-        for asset, amount in self.wallet.items():
+        self.cancel_all()
+        for asset, amount in copy(self.wallet).items():
             self.create_order(asset_pair=AssetPair(asset, self.currency_asset),
                               amount=-amount)
-        self.cancel_all()
 
     def get_trading_statistics(self) -> TradingStatistics:
         self.stats.set_final_balance(self.get_balance())

@@ -49,6 +49,7 @@ class StrategyRunner:
             config=self.base_config['trading_system'])
 
         signal_detectors = [
+            trading_system,
             ExtremumSignalDetector(trading_system, 2),
             MovingAverageSignalDetector(trading_system, 25, 50)]
 
@@ -67,6 +68,8 @@ class StrategyRunner:
             strategy.update()
 
         trading_system.stop_trading()
+        trading_interface.is_alive()
+
         stats = trading_system.get_trading_statistics()
         ObjectLog().store_log()
         print(stats)
