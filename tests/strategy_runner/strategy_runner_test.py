@@ -29,10 +29,11 @@ def test_dummy_multiple_strategy_run(strategy_runner, empty_logger_mock):
     strategy_runner.run_strategy_on_periods(
         strategy=StrategyMock,
         strategy_config={},
-        asset_pair=AssetPair(Asset('USDN'), Asset('WAVES')),
+        asset_pair=AssetPair(Asset('USDT'), Asset('USDN')),
         timeframe=Timeframe('15m'),
         time_range=TimeRange.from_iso_format(
             from_ts='2021-02-10 00:00:00',
             to_ts='2021-02-11 00:00:00'),
         runs=4,
-        processes=2)
+        processes=2,
+        visualize=False)
