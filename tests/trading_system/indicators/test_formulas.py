@@ -1,8 +1,7 @@
 import pytest
 from trading_system.indicators import *
 
-increasing_values = [10., 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9,
-                     11.]
+increasing_values = [val / 10 for val in range(100, 111)]
 decreasing_values = list(reversed(increasing_values))
 factorial_values = [120, 60, 40, 30, 24]  # 5! / 1, 5! / 2, ...
 one_values = [1] * 10
@@ -17,8 +16,8 @@ one_values = [1] * 10
 )
 def test_exp_moving_average(values: tp.List[float], alpha: float,
                             expected: float) -> None:
-    assert ExpMovingAverageHandler.calculate_from(values, 1) == pytest.approx(
-        expected)
+    assert ExpMovingAverageHandler.calculate_from(values, 1) == \
+           pytest.approx(expected)
 
 
 @pytest.mark.parametrize(
@@ -30,8 +29,8 @@ def test_exp_moving_average(values: tp.List[float], alpha: float,
     ]
 )
 def test_moving_average(values: tp.List[float], expected: float) -> None:
-    assert MovingAverageHandler.calculate_from(values) == pytest.approx(
-        expected)
+    assert MovingAverageHandler.calculate_from(values) == \
+           pytest.approx(expected)
 
 
 @pytest.mark.parametrize(
@@ -61,5 +60,5 @@ def test_relative_strength_index(deltas: tp.List[float],
 )
 def test_weighted_moving_average(values: tp.List[float],
                                  expected: float) -> None:
-    assert WeightedMovingAverageHandler.calculate_from(
-        values) == pytest.approx(expected)
+    assert WeightedMovingAverageHandler.calculate_from(values) == \
+           pytest.approx(expected)

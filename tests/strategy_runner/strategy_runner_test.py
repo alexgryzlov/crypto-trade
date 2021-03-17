@@ -5,7 +5,7 @@ from tests.logger.empty_logger_mock import empty_logger_mock
 from tests.strategies.strategy_mock import StrategyMock
 
 
-def test_dummy_strategy_run(empty_logger_mock):
+def test_dummy_strategy_run(empty_logger_mock: empty_logger_mock) -> None:
     StrategyRunner().run_strategy(
         strategy=StrategyMock,
         strategy_config={},
@@ -16,7 +16,7 @@ def test_dummy_strategy_run(empty_logger_mock):
             to_ts='2021-02-10 12:00:00'))
 
 
-def test_dummy_multiple_strategy_run(empty_logger_mock):
+def test_dummy_multiple_strategy_run(empty_logger_mock: empty_logger_mock) -> None:
     StrategyRunner().run_strategy_on_periods(
         strategy=StrategyMock,
         strategy_config={},

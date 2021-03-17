@@ -35,12 +35,12 @@ class MovingAverageSignalDetector(TradingSignalDetector):
             return []
         values = np.array(nearest_values) - np.array(further_values)
 
-        if values[0] < -PRICE_EPS and values[
-            -1] > PRICE_EPS and self.__is_increasing(values):
+        if values[0] < -PRICE_EPS and values[-1] > PRICE_EPS and \
+                self.__is_increasing(values):
             return [Signal("moving_average", TrendType.UPTREND)]
 
-        if values[0] > -PRICE_EPS and values[
-            -1] < PRICE_EPS and self.__is_decreasing(values):
+        if values[0] > -PRICE_EPS and values[-1] < PRICE_EPS and \
+                self.__is_decreasing(values):
             return [Signal("moving_average", TrendType.DOWNTREND)]
 
         return []

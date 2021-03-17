@@ -3,7 +3,7 @@ from trading import Timeframe
 
 
 class ClockSimulator(Clock):
-    def __init__(self, start_ts: int, timeframe: Timeframe, candles_lifetime):
+    def __init__(self, start_ts: int, timeframe: Timeframe, candles_lifetime: int):
         super().__init__()
         self.start_ts = start_ts
         self.timeframe = timeframe

@@ -30,7 +30,8 @@ class RunResult:
 
     @staticmethod
     def get_timestamp_from(run_results: tp.List['RunResult']) -> tp.List[str]:
-        return [Timestamp.to_iso_format(r.time_range.from_ts) for r in run_results]
+        return [Timestamp.to_iso_format(r.time_range.from_ts) for r in
+                run_results]
 
 
 class StrategyRunner:
@@ -66,7 +67,7 @@ class StrategyRunner:
             MovingAverageSignalDetector(trading_system, 25, 50)]
 
         strategy_inst = strategy(asset_pair=asset_pair,
-                            **strategy_config)
+                                 **strategy_config)
         strategy_inst.init_trading(trading_system)
 
         while trading_interface.is_alive():
@@ -90,7 +91,7 @@ class StrategyRunner:
 
     def run_strategy_on_periods(
             self,
-            strategy,
+            strategy: StrategyBase,
             strategy_config: tp.Dict[str, tp.Any],
             asset_pair: AssetPair,
             timeframe: Timeframe,
@@ -99,19 +100,19 @@ class StrategyRunner:
             period: tp.Optional[int] = None,
             runs: tp.Optional[int] = None,
             visualize: bool = False,
-            processes: int = 4):
+            processes: int = 4) -> None:
 
         if period is None and runs is None:
             raise ValueError('Run type not selected')
 
         period = period if period is not None else \
-            time_range.get_range() // runs
+            time_range.get_range() // runs  # type: ignore
         runs = runs if runs is not None else \
             time_range.get_range() // period
 
         pool = mp.Pool(processes=processes, maxtasksperchild=1)
         current_ts = time_range.from_ts
-        run_results = []
+        run_results: tp.List[RunResult] = []
 
         for run_id in range(runs):
             next_ts = current_ts + period
@@ -135,11 +136,12 @@ class StrategyRunner:
             self.visualize_run_results(run_results)
 
     @staticmethod
-    def visualize_run_results(run_results: tp.List[RunResult]):
+    def visualize_run_results(run_results: tp.List[RunResult]) -> None:
         fig = go.Figure()
         fig.add_trace(go.Bar(
             x=RunResult.get_timestamp_from(run_results),
             y=RunResult.get_balance_from(run_results),
             marker_color=['green' if balance > 0 else 'red'
-                          for balance in RunResult.get_balance_from(run_results)]))
+                          for balance in
+                          RunResult.get_balance_from(run_results)]))
         fig.show()

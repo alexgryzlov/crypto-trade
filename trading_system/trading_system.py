@@ -52,9 +52,7 @@ class TradingSystem:
     def update(self) -> None:
         for handler in self.handlers.values():
             handler.update()
-        for order in tp.cast(OrdersHandler,
-                             self.handlers['OrdersHandler']
-                             ).get_new_filled_orders():
+        for order in self._get_orders_handler().get_new_filled_orders():
             self.wallet[order.asset_pair.main_asset] -= int(
                 order.direction) * order.amount
             self.trading_signals.append(Signal('filled_order', copy(order)))
@@ -77,8 +75,7 @@ class TradingSystem:
                                      amount,
                                      price,
                                      order.order_id))
-        tp.cast(OrdersHandler,
-                self.handlers['OrdersHandler']).add_new_order(copy(order))
+        self._get_orders_handler().add_new_order(copy(order))
         return order
 
     def sell(self, asset_pair: AssetPair, amount: int, price: float) -> Order:
@@ -88,25 +85,21 @@ class TradingSystem:
                                       amount,
                                       price,
                                       order.order_id))
-        tp.cast(OrdersHandler,
-                self.handlers['OrdersHandler']).add_new_order(copy(order))
+        self._get_orders_handler().add_new_order(copy(order))
         return order
 
     def cancel_order(self, order: Order) -> None:
         self.ti.cancel_order(order)
 
         self.logger.trading(CancelEvent(order))
-        tp.cast(OrdersHandler,
-                self.handlers['OrdersHandler']).cancel_order(order)
+        self._get_orders_handler().cancel_order(order)
 
     def cancel_all(self) -> None:
         self.ti.cancel_all()
 
-        for order in tp.cast(OrdersHandler,
-                       self.handlers['OrdersHandler']).get_active_orders():
+        for order in self._get_orders_handler().get_active_orders():
             self.logger.trading(CancelEvent(order))
-        tp.cast(OrdersHandler,
-                self.handlers['OrdersHandler']).cancel_all()
+        self._get_orders_handler().cancel_all()
 
     def order_is_filled(self, order: Order) -> bool:
         return self.ti.order_is_filled(order)
@@ -118,8 +111,7 @@ class TradingSystem:
         return self.ti.get_sell_price() + PRICE_EPS
 
     def get_active_orders(self) -> tp.Set[Order]:
-        return tp.cast(OrdersHandler,
-                       self.handlers['OrdersHandler']).get_active_orders()
+        return self._get_orders_handler().get_active_orders()
 
     def get_balance(self) -> float:
         balance = self.ti.get_balance()
@@ -132,3 +124,6 @@ class TradingSystem:
 
     def get_last_n_candles(self, n: int) -> tp.List[Candle]:
         return self.ti.get_last_n_candles(n)
+
+    def _get_orders_handler(self) -> OrdersHandler:
+        return tp.cast(OrdersHandler, self.handlers[OrdersHandler.__name__])

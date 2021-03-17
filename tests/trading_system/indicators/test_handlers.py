@@ -51,11 +51,11 @@ def simulate_handler(ti: TradingInterfaceMock,
 
 @pytest.mark.parametrize("values,ti", all_samples.values())
 @pytest.mark.parametrize("window_size", [5])
-def test_exp_moving_average_handler(values: tp.List[float],
-                                    ti: TradingInterfaceMock,
-                                    window_size: int,
-                                    empty_logger_mock: empty_logger_mock) \
-        -> None:
+def test_exp_moving_average_handler(
+        values: tp.List[float],
+        ti: TradingInterfaceMock,
+        window_size: int,
+        empty_logger_mock: empty_logger_mock) -> None:
     """ Check equality with .calculate_from(). """
     handler = ExpMovingAverageHandler(ti, window_size)
     simulate_handler(ti, handler)
@@ -64,9 +64,9 @@ def test_exp_moving_average_handler(values: tp.List[float],
         map(lambda c: c.get_mid_price(), ti.get_last_n_candles(len(values))))
     check_results(
         handler.get_last_n_values(len(values)),
-        [ExpMovingAverageHandler.calculate_from(mid_prices[0: i + 1],
-                                                2 / (1 + window_size)) for i in
-         range(len(mid_prices))]
+        [ExpMovingAverageHandler.calculate_from(
+            mid_prices[0: i + 1], 2 / (1 + window_size)
+        ) for i in range(len(mid_prices))]
     )
 
 
@@ -82,12 +82,12 @@ def test_exp_moving_average_handler(values: tp.List[float],
         # 2/3 instead of 1 because macd_values[-2:] returns [0, x] when len(macd_values) == 1
     ]
 )
-def test_moving_average_cd_handler(ti: TradingInterfaceMock, short: int,
-                                   long: int, average: int,
-                                   expected_macd: tp.List[float],
-                                   expected_signal: tp.List[float],
-                                   empty_logger_mock: empty_logger_mock) \
-        -> None:
+def test_moving_average_cd_handler(
+        ti: TradingInterfaceMock, short: int,
+        long: int, average: int,
+        expected_macd: tp.List[float],
+        expected_signal: tp.List[float],
+        empty_logger_mock: empty_logger_mock) -> None:
     handler = MovingAverageCDHandler(ti, short, long, average)
     simulate_handler(ti, handler)
 

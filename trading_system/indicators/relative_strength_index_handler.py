@@ -54,8 +54,8 @@ class RelativeStrengthIndexHandler(TradingSystemHandler):
             list(map(lambda x: max(-x, 0), deltas)), alpha)
 
         if average_loss == 0:  # Avoid RuntimeWarning with zero division
-            relative_strength = 1 if isclose(average_gain, 0,
-                                             abs_tol=1e-7) else float('inf')
+            relative_strength = \
+                1 if isclose(average_gain, 0, abs_tol=1e-7) else float('inf')
         else:
             relative_strength = average_gain / average_loss
         relative_strength_index = 100 - 100 / (1 + relative_strength)

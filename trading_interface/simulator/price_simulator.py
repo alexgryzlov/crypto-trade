@@ -34,25 +34,23 @@ class PriceSimulator:
         if candle.ts != self.current_ts:
             self.current_ts = candle.ts
             try:
-                self.prices = self.__getattribute__(
-                    self.simulation_type.value)(candle)
+                self.prices = self.__getattribute__(self.simulation_type.value)(candle)
             except AttributeError as exception:
                 self.logger.exception('Unknown PriceSimulator type.')
                 raise exception
         return self.prices[current_lifetime]
 
-    def three_interval_path(self, candle: Candle) -> tp.List[np.ndarray]:
+    def three_interval_path(self, candle: Candle) -> tp.List[float]:
         return self._high_to_low(candle) if hash(
             candle) % 2 == 0 else self._low_to_high(candle)
 
-    def three_interval_path_noise(self, candle: Candle) -> tp.List[np.ndarray]:
+    def three_interval_path_noise(self, candle: Candle) -> tp.List[float]:
         def noise() -> float:
-            return np.random.normal(0, (
-                        candle.high - candle.low) / self.candles_lifetime)
+            return np.random.normal(0, (candle.high - candle.low) / self.candles_lifetime)
 
         np.random.seed(hash(candle))
-        return self._high_to_low(candle, noise) if hash(
-            candle) % 2 == 0 else self._low_to_high(candle, noise)
+        return self._high_to_low(candle, noise) \
+            if hash(candle) % 2 == 0 else self._low_to_high(candle, noise)
 
     def uniform(self, candle: Candle) -> tp.List[float]:
         return [candle.get_delta() * (i / self.candles_lifetime) + candle.open
@@ -60,7 +58,7 @@ class PriceSimulator:
 
     def _high_to_low(self, candle: Candle,
                      noise: tp.Optional[tp.Callable[[], float]] = None)\
-            -> tp.List[np.ndarray]:
+            -> tp.List[float]:
         path = [[candle.open, candle.high], [candle.high, candle.low],
                 [candle.low, candle.close]]
         return self._build_multi_interval_path(path, self.candles_lifetime,
@@ -68,7 +66,7 @@ class PriceSimulator:
 
     def _low_to_high(self, candle: Candle,
                      noise: tp.Optional[tp.Callable[[], float]] = None)\
-            -> tp.List[np.ndarray]:
+            -> tp.List[float]:
         path = [[candle.open, candle.low], [candle.low, candle.high],
                 [candle.high, candle.close]]
         return self._build_multi_interval_path(path, self.candles_lifetime,
@@ -77,7 +75,7 @@ class PriceSimulator:
     def _build_multi_interval_path(self, intervals: tp.List[tp.List[float]],
                                    total_steps: int,
                                    noise: tp.Optional[tp.Callable[[], float]] = None)\
-            -> tp.List[np.ndarray]:
+            -> tp.List[float]:
         """
         returns 'total_steps' evenly distributed points on the way described by 'intervals'
         starts and ends of intervals are always among the resulting points
@@ -102,8 +100,7 @@ class PriceSimulator:
             total_intermediate_points = total_steps - len(intervals) - 1
             relative_length = abs(interval[1] - interval[0]) / total_path
             corner_points = 2
-            return int(
-                relative_length * total_intermediate_points) + corner_points
+            return int(relative_length * total_intermediate_points) + corner_points
 
         # Make sure at least 2 points (start and end) from first interval are in the result
         prices += list(np.linspace(intervals[0][0], intervals[0][1],
@@ -111,9 +108,8 @@ class PriceSimulator:
 
         # For every intermediate interval don't count its start
         for interval in intervals[1:len(intervals) - 1]:
-            prices += list(
-                np.linspace(interval[0], interval[1], points_count(interval))[
-                1:])
+            prices += list(np.linspace(interval[0], interval[1],
+                                       points_count(interval))[1:])
 
         # If int() cut down some points add them in the last interval
         prices += list(np.linspace(intervals[-1][0], intervals[-1][1],
@@ -127,4 +123,4 @@ class PriceSimulator:
                     lambda x: not any(prices[x] in i for i in intervals),
                     range(len(prices))):
                 prices[ind] = min(max(prices[ind] + noise(), low), high)
-        return prices
+        return prices  # type: ignore

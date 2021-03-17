@@ -65,7 +65,8 @@ def test_multi_interval_big_random(
 
 @pytest.mark.parametrize("candles_lifetime", [25])
 @pytest.mark.parametrize("total_steps", [100])
-def test_same_values(candles_lifetime: int, total_steps: int, empty_logger_mock: empty_logger_mock):
+def test_same_values(candles_lifetime: int, total_steps: int,
+                     empty_logger_mock: empty_logger_mock) -> None:
     ps = PriceSimulator(candles_lifetime, PriceSimulatorType.ThreeIntervalPath)
     intervals = [[1, 1], [1, 1], [1, 1]]
     res = ps._build_multi_interval_path(intervals, total_steps)

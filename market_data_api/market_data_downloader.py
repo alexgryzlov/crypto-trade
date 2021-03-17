@@ -48,11 +48,12 @@ class MarketDataDownloader:
         return self.__fill_gaps(candles)
 
     @retry(RuntimeError, tries=3, delay=2)
-    def __load_candles_batch(self, asset_pair: AssetPair, timeframe: Timeframe, time_range: TimeRange):
+    def __load_candles_batch(self, asset_pair: AssetPair, timeframe: Timeframe,
+                             time_range: TimeRange) -> tp.List[tp.Dict[str, tp.Any]]:
         asset_pair_id = self.exchange.markets[str(asset_pair)]['id']
         response = requests.get(
             f'{MARKET_DATA_HOST}/v0/candles/{asset_pair_id}',
-            params={
+            params={  # type: ignore
                 'interval': timeframe.to_string(),
                 'timeStart': self.__to_milliseconds(time_range.from_ts),
                 'timeEnd': self.__to_milliseconds(time_range.to_ts)
@@ -74,9 +75,9 @@ class MarketDataDownloader:
                 candles[index].ts = ts
         return candles
 
-    def get_orderbook(self, asset_pair: AssetPair, depth=50):
+    def get_orderbook(self, asset_pair: AssetPair, depth: int = 50) -> tp.Dict[str, tp.Any]:
         response = requests.get(
-            f'{MATCHER_HOST}/matcher/orderbook/'
+            f'{MATCHER_HOST}/matcher/orderbook/'  # type: ignore
             f'{asset_pair.main_asset.to_waves_format()}/'
             f'{asset_pair.secondary_asset.to_waves_format()}?depth='
             f'{depth}')

@@ -14,12 +14,13 @@ class TrendStrategy(StrategyBase):
         self.logger = Logger('TrendStrategy')
         self.order_balance = 0
         self.active_trends: tp.List[Trend] = []
-        self.ts = None
+        self.ts: tp.Optional[ts.TradingSystem] = None
 
     def init_trading(self, trading_system: ts.TradingSystem) -> None:
         self.ts = trading_system
 
     def update(self) -> None:
+        assert self.ts is not None
         active_trends = []
         for trend in self.active_trends:
             deactivated = False
@@ -40,6 +41,7 @@ class TrendStrategy(StrategyBase):
         self.active_trends = active_trends
 
     def handle_new_trend_signal(self, trend: Trend) -> None:
+        assert self.ts is not None
         self.logger.info(f'Strategy received trend of type {trend.trend_type}')
 
         if self.order_balance > 3:
