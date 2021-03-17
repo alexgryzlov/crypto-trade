@@ -1,5 +1,4 @@
 import multiprocessing as mp
-import plotly.graph_objects as go
 import typing as tp
 
 from trading_interface.simulator.clock_simulator import ClockSimulator
@@ -70,7 +69,7 @@ class StrategyRunner:
         trading_system.stop_trading()
         stats = trading_system.get_trading_statistics()
         ObjectLog().store_log()
-        print(str(stats))
+        print(stats)
 
         return stats
 
@@ -84,7 +83,7 @@ class StrategyRunner:
             period: tp.Optional[int] = None,
             runs: tp.Optional[int] = None,
             visualize: bool = False,
-            processes: int = 4):
+            processes: int = 4) -> TradingStatistics:
 
         if period is None and runs is None:
             raise ValueError('Run type not selected')
@@ -113,19 +112,10 @@ class StrategyRunner:
 
         pool.close()
         pool.join()
-
-        run_results.sort(key=lambda r: r.start_timestamp)
-        print(TradingStatistics.merge(run_results))
+        stats = TradingStatistics.merge(run_results)
+        print(stats)
 
         if visualize:
-            self.visualize_run_results(run_results)
+            TradingStatistics.visualize(run_results)
 
-    @staticmethod
-    def visualize_run_results(run_results: tp.List[TradingStatistics]):
-        fig = go.Figure()
-        fig.add_trace(go.Bar(
-            x=TradingStatistics.get_start_timestamp(run_results),
-            y=TradingStatistics.get_final_balance(run_results),
-            marker_color=['green' if balance > 0 else 'red'
-                          for balance in TradingStatistics.get_final_balance(run_results)]))
-        fig.show()
+        return stats

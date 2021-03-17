@@ -1,5 +1,6 @@
 import math
 import typing as tp
+import plotly.graph_objects as go
 
 from trading import Order, Timestamp
 
@@ -26,7 +27,7 @@ class TradingStatistics:
     def set_finish_timestamp(self, timestamp: int) -> None:
         self.finish_timestamp = timestamp
 
-    def add_filled_order(self, order: Order) -> None:
+    def add_filled_order(self, order: OrderTrue) -> None:
         self.filled_orders.append(order)
 
     def add_filled_orders(self, orders: tp.List[Order]) -> None:
@@ -61,9 +62,20 @@ class TradingStatistics:
         return stats
 
     @staticmethod
-    def get_final_balance(stats_array: tp.List['TradingStatistics']) -> tp.List[float]:
-        return [s.final_balance for s in stats_array]
+    def get_absolute_delta(stats_array: tp.List['TradingStatistics']) -> tp.List[float]:
+        return [s._calc_absolute_delta() for s in stats_array]
 
     @staticmethod
-    def get_start_timestamp(stats_array: tp.List['TradingStatistics']) -> tp.List[int]:
-        return [s.start_timestamp for s in stats_array]
+    def get_start_time(stats_array: tp.List['TradingStatistics']) -> tp.List[str]:
+        return [Timestamp.to_iso_format(s.start_timestamp) for s in stats_array]
+
+    @staticmethod
+    def visualize(stats_array: tp.List['TradingStatistics']):
+        stats_array.sort(key=lambda r: r.start_timestamp)
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            x=TradingStatistics.get_start_time(stats_array),
+            y=TradingStatistics.get_absolute_delta(stats_array),
+            marker_color=['green' if balance > 0 else 'red'
+                          for balance in TradingStatistics.get_absolute_delta(stats_array)]))
+        fig.show()
