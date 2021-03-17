@@ -59,3 +59,11 @@ class TradingStatistics:
         for s in stats_array:
             stats.add_filled_orders(s.filled_orders)
         return stats
+
+    @staticmethod
+    def get_final_balance(stats_array: tp.List['TradingStatistics']) -> tp.List[float]:
+        return [s.final_balance for s in stats_array]
+
+    @staticmethod
+    def get_start_timestamp(stats_array: tp.List['TradingStatistics']) -> tp.List[int]:
+        return [s.start_timestamp for s in stats_array]

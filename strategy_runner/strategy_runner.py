@@ -4,7 +4,9 @@ import typing as tp
 
 from trading_interface.simulator.clock_simulator import ClockSimulator
 from trading_interface.simulator.simulator import Simulator
+
 from trading_system.trading_system import TradingSystem
+from trading_system.trading_statistics import TradingStatistics
 
 from trading_signal_detectors.extremum.extremum_signal_detector \
     import ExtremumSignalDetector
@@ -14,21 +16,7 @@ from trading_signal_detectors.moving_average.moving_average_signal_detector \
 from logger.object_log import ObjectLog
 from logger.logger import Logger
 
-from trading import AssetPair, Timestamp, Timeframe, TimeRange
-
-
-class RunResult:
-    def __init__(self, time_range: TimeRange, balance: float):
-        self.time_range = time_range
-        self.balance = balance
-
-    @staticmethod
-    def get_balance_from(run_results: tp.List['RunResult']) -> tp.List[float]:
-        return [r.balance for r in run_results]
-
-    @staticmethod
-    def get_timestamp_from(run_results: tp.List['RunResult']) -> tp.List[str]:
-        return [Timestamp.to_iso_format(r.time_range.from_ts) for r in run_results]
+from trading import AssetPair, Timeframe, TimeRange
 
 
 class StrategyRunner:
@@ -41,7 +29,7 @@ class StrategyRunner:
             strategy_config: tp.Dict[str, tp.Any],
             asset_pair: AssetPair,
             timeframe: Timeframe,
-            time_range: TimeRange) -> RunResult:
+            time_range: TimeRange) -> TradingStatistics:
 
         clock = ClockSimulator(
             start_ts=time_range.from_ts,
@@ -80,12 +68,11 @@ class StrategyRunner:
             strategy.update()
 
         trading_system.stop_trading()
-
-        print(str(trading_system.get_trading_statistics()))
-
+        stats = trading_system.get_trading_statistics()
         ObjectLog().store_log()
+        print(str(stats))
 
-        return RunResult(time_range, trading_system.get_balance())
+        return stats
 
     def run_strategy_on_periods(
             self,
@@ -109,7 +96,7 @@ class StrategyRunner:
 
         pool = mp.Pool(processes=processes, maxtasksperchild=1)
         current_ts = time_range.from_ts
-        run_results = []
+        run_results: tp.List[TradingStatistics] = []
 
         for run_id in range(runs):
             next_ts = current_ts + period
@@ -126,17 +113,19 @@ class StrategyRunner:
 
         pool.close()
         pool.join()
-        run_results.sort(key=lambda r: r.time_range.from_ts)
+
+        run_results.sort(key=lambda r: r.start_timestamp)
+        print(TradingStatistics.merge(run_results))
 
         if visualize:
             self.visualize_run_results(run_results)
 
     @staticmethod
-    def visualize_run_results(run_results: tp.List[RunResult]):
+    def visualize_run_results(run_results: tp.List[TradingStatistics]):
         fig = go.Figure()
         fig.add_trace(go.Bar(
-            x=RunResult.get_timestamp_from(run_results),
-            y=RunResult.get_balance_from(run_results),
+            x=TradingStatistics.get_start_timestamp(run_results),
+            y=TradingStatistics.get_final_balance(run_results),
             marker_color=['green' if balance > 0 else 'red'
-                          for balance in RunResult.get_balance_from(run_results)]))
+                          for balance in TradingStatistics.get_final_balance(run_results)]))
         fig.show()
