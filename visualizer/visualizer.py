@@ -277,6 +277,12 @@ class Visualizer:
         self.__add_buy_sell_events(timestamps, prices, amount, meta,
                                    is_buy=False)
 
+    def get_layers(self) -> tp.List[GraphicLayer]:
+        return self._layers
+
+    def get_layout(self) -> go.Layout:
+        return self._layout
+
     def plot(self) -> go.Figure:
         self.__add_ts_slider()
         traces: tp.List[tp.Union[go.Scatter, go.Candlestick]] = []

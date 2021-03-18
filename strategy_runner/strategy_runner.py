@@ -91,7 +91,7 @@ class StrategyRunner:
 
     def run_strategy_on_periods(
             self,
-            strategy: StrategyBase,
+            strategy: tp.Type[StrategyBase],
             strategy_config: tp.Dict[str, tp.Any],
             asset_pair: AssetPair,
             timeframe: Timeframe,
