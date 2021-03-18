@@ -10,9 +10,9 @@ class TradingStatistics:
                  initial_balance: tp.Optional[float] = None,
                  start_timestamp: tp.Optional[int] = None) -> None:
         self.initial_balance = initial_balance
-        self.final_balance = None
+        self.final_balance: tp.Optional[float] = None
         self.start_timestamp = start_timestamp
-        self.finish_timestamp = None
+        self.finish_timestamp: tp.Optional[int] = None
         self.filled_order_count = 0
 
     def set_initial_balance(self, balance: float) -> None:
@@ -31,6 +31,8 @@ class TradingStatistics:
         self.filled_order_count += 1
 
     def __str__(self) -> str:
+        if self.start_timestamp is None or self.finish_timestamp is None:
+            raise ValueError('finish_timestamp hasn\'t been set')
         return f'{Timestamp.to_iso_format(self.start_timestamp)} - {Timestamp.to_iso_format(self.finish_timestamp)}\n' \
                f'initial balance: {self.initial_balance:.2f}\n' \
                f'final balance:   {self.final_balance:.2f}\n' \

@@ -12,6 +12,8 @@ from trading_signal_detectors.extremum.extremum_signal_detector \
 from trading_signal_detectors.moving_average.moving_average_signal_detector \
     import MovingAverageSignalDetector
 
+from strategies.strategy_base import StrategyBase
+
 from logger.object_log import ObjectLog
 from logger.logger import Logger
 
@@ -24,7 +26,7 @@ class StrategyRunner:
 
     def run_strategy(
             self,
-            strategy,
+            strategy: tp.Type[StrategyBase],
             strategy_config: tp.Dict[str, tp.Any],
             asset_pair: AssetPair,
             timeframe: Timeframe,
@@ -53,9 +55,9 @@ class StrategyRunner:
             ExtremumSignalDetector(trading_system, 2),
             MovingAverageSignalDetector(trading_system, 25, 50)]
 
-        strategy = strategy(asset_pair=asset_pair,
-                            **strategy_config)
-        strategy.init_trading(trading_system)
+        strategy_inst = strategy(asset_pair=asset_pair,
+                                 **strategy_config)
+        strategy_inst.init_trading(trading_system)
 
         while trading_interface.is_alive():
             trading_system.update()
@@ -63,9 +65,9 @@ class StrategyRunner:
             for detector in signal_detectors:
                 signals += detector.get_trading_signals()
             for signal in signals:
-                strategy.__getattribute__(
+                strategy_inst.__getattribute__(
                     f'handle_{signal.name}_signal')(signal.content)
-            strategy.update()
+            strategy_inst.update()
 
         trading_system.stop_trading()
         trading_interface.is_alive()
@@ -78,7 +80,7 @@ class StrategyRunner:
 
     def run_strategy_on_periods(
             self,
-            strategy,
+            strategy: tp.Type[StrategyBase],
             strategy_config: tp.Dict[str, tp.Any],
             asset_pair: AssetPair,
             timeframe: Timeframe,
@@ -92,7 +94,7 @@ class StrategyRunner:
             raise ValueError('Run type not selected')
 
         period = period if period is not None else \
-            time_range.get_range() // runs
+            time_range.get_range() // runs  # type: ignore
         runs = runs if runs is not None else \
             time_range.get_range() // period
 

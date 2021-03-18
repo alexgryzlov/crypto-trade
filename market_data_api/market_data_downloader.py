@@ -1,7 +1,9 @@
 import ccxt
 import requests
+from dateutil.parser import isoparse
 from copy import copy
 from retry import retry
+import typing as tp
 
 from trading import Candle, AssetPair, Timeframe, TimeRange, Timestamp
 
@@ -13,12 +15,12 @@ MATCHER_HOST = "https://matcher.waves.exchange"
 
 
 class MarketDataDownloader:
-    def __init__(self):
+    def __init__(self) -> None:
         self.exchange = ccxt.wavesexchange()
         self.exchange.load_markets()
 
-    def get_candles(self, asset_pair: AssetPair, timeframe: Timeframe, time_range: TimeRange):
-        candles = []
+    def get_candles(self, asset_pair: AssetPair, timeframe: Timeframe, time_range: TimeRange) -> tp.List[Candle]:
+        candles: tp.List[Candle] = []
         current_ts = time_range.from_ts
 
         while current_ts <= time_range.to_ts:
@@ -46,11 +48,12 @@ class MarketDataDownloader:
         return self.__fill_gaps(candles)
 
     @retry(RuntimeError, tries=3, delay=2)
-    def __load_candles_batch(self, asset_pair: AssetPair, timeframe: Timeframe, time_range: TimeRange):
+    def __load_candles_batch(self, asset_pair: AssetPair, timeframe: Timeframe,
+                             time_range: TimeRange) -> tp.List[tp.Dict[str, tp.Any]]:
         asset_pair_id = self.exchange.markets[str(asset_pair)]['id']
         response = requests.get(
             f'{MARKET_DATA_HOST}/v0/candles/{asset_pair_id}',
-            params={
+            params={  # type: ignore
                 'interval': timeframe.to_string(),
                 'timeStart': self.__to_milliseconds(time_range.from_ts),
                 'timeEnd': self.__to_milliseconds(time_range.to_ts)
@@ -60,11 +63,11 @@ class MarketDataDownloader:
         return response.json()['data']
 
     @staticmethod
-    def __to_milliseconds(ts):
+    def __to_milliseconds(ts: int) -> int:
         return ts * 1000
 
     @staticmethod
-    def __fill_gaps(candles):
+    def __fill_gaps(candles: tp.List[Candle]) -> tp.List[Candle]:
         for index in range(1, len(candles)):
             if candles[index].open is None:
                 ts = candles[index].ts
@@ -72,9 +75,9 @@ class MarketDataDownloader:
                 candles[index].ts = ts
         return candles
 
-    def get_orderbook(self, asset_pair: AssetPair, depth=50):
+    def get_orderbook(self, asset_pair: AssetPair, depth: int = 50) -> tp.Dict[str, tp.Any]:
         response = requests.get(
-            f'{MATCHER_HOST}/matcher/orderbook/'
+            f'{MATCHER_HOST}/matcher/orderbook/'  # type: ignore
             f'{asset_pair.main_asset.to_waves_format()}/'
             f'{asset_pair.secondary_asset.to_waves_format()}?depth='
             f'{depth}')

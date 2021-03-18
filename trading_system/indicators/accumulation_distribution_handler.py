@@ -21,7 +21,7 @@ class AccumulationDistributionHandler(TradingSystemHandler):
         super().__init__(trading_interface)
         self.ti = trading_interface
         self.start_candle = start_candle
-        self.values = []
+        self.values: tp.List[float] = []
         self.calculate_initial_values()
 
     def calculate_initial_values(self) -> None:

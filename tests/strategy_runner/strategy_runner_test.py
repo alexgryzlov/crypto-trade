@@ -14,7 +14,7 @@ def strategy_runner() -> StrategyRunner:
     return StrategyRunner(base_config=ConfigParser().load_config('configs/base.ini'))
 
 
-def test_dummy_strategy_run(strategy_runner, empty_logger_mock):
+def test_dummy_strategy_run(strategy_runner: StrategyRunner, empty_logger_mock: empty_logger_mock) -> None:
     strategy_runner.run_strategy(
         strategy=StrategyMock,
         strategy_config={},
@@ -25,7 +25,7 @@ def test_dummy_strategy_run(strategy_runner, empty_logger_mock):
             to_ts='2021-02-10 12:00:00'))
 
 
-def test_dummy_multiple_strategy_run(strategy_runner, empty_logger_mock):
+def test_dummy_multiple_strategy_run(strategy_runner: StrategyRunner, empty_logger_mock: empty_logger_mock) -> None:
     strategy_runner.run_strategy_on_periods(
         strategy=StrategyMock,
         strategy_config={},
