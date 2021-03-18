@@ -13,7 +13,7 @@ class TradingStatistics:
         self.final_balance = None
         self.start_timestamp = start_timestamp
         self.finish_timestamp = None
-        self.filled_orders: tp.List[Order] = []
+        self.filled_order_count = 0
 
     def set_initial_balance(self, balance: float) -> None:
         self.initial_balance = balance
@@ -27,12 +27,8 @@ class TradingStatistics:
     def set_finish_timestamp(self, timestamp: int) -> None:
         self.finish_timestamp = timestamp
 
-    def add_filled_order(self, order: Order) -> None:
-        self.filled_orders.append(order)
-
-    def add_filled_orders(self, orders: tp.List[Order]) -> None:
-        for order in orders:
-            self.filled_orders.append(order)
+    def add_filled_order(self, _order: Order) -> None:
+        self.filled_order_count += 1
 
     def __str__(self) -> str:
         return f'{Timestamp.to_iso_format(self.start_timestamp)} - {Timestamp.to_iso_format(self.finish_timestamp)}\n' \
@@ -40,7 +36,7 @@ class TradingStatistics:
                f'final balance:   {self.final_balance:.2f}\n' \
                f'delta:           {self._calc_absolute_delta():.2f}\n' \
                f'delta(%):        {self._calc_relative_delta():.1f}%\n' \
-               f'filled orders:   {len(self.filled_orders)}'
+               f'filled orders:   {self.filled_order_count}'
 
     def _calc_absolute_delta(self) -> float:
         return self.final_balance - self.initial_balance
@@ -50,15 +46,14 @@ class TradingStatistics:
             return 0
         return self._calc_absolute_delta() / self.initial_balance * 100
 
-    @staticmethod
-    def merge(stats_array: tp.List['TradingStatistics']) -> 'TradingStatistics':
-        stats = TradingStatistics()
+    @classmethod
+    def merge(cls, stats_array: tp.List['TradingStatistics']) -> 'TradingStatistics':
+        stats = cls()
         stats.set_initial_balance(sum([s.initial_balance for s in stats_array]))
         stats.set_final_balance(sum([s.final_balance for s in stats_array]))
         stats.set_start_timestamp(min([s.start_timestamp for s in stats_array]))
         stats.set_finish_timestamp(max([s.finish_timestamp for s in stats_array]))
-        for s in stats_array:
-            stats.add_filled_orders(s.filled_orders)
+        stats.filled_order_count = sum([s.filled_order_count for s in stats_array])
         return stats
 
     @staticmethod
