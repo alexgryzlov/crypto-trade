@@ -3,22 +3,26 @@ from trading_interface.trading_interface import TradingInterface
 from logger.logger import Logger
 from logger.log_events import MovingAverageEvent
 
+import typing as tp
+from helpers.typing import Array
+
 
 class MovingAverageHandler(TradingSystemHandler):
     """ Simple Moving Average (SMA or MA) """
-    def __init__(self, trading_interface: TradingInterface, window_size):
+
+    def __init__(self, trading_interface: TradingInterface, window_size: int):
         super().__init__(trading_interface)
         self.ti = trading_interface
 
         self.window_size = window_size
 
-        self.values = []
+        self.values: tp.List[float] = []
         self.logger = Logger(self.get_name())
 
-    def get_name(self):
+    def get_name(self) -> str:
         return f'{type(self).__name__}{self.window_size}'
 
-    def update(self):
+    def update(self) -> None:
         if not super().received_new_candle():
             return
 
@@ -28,11 +32,12 @@ class MovingAverageHandler(TradingSystemHandler):
 
         candle_values = list(map(lambda c: c.get_mid_price(), candles))
         self.values.append(self.calculate_from(candle_values))
-        self.logger.trading(MovingAverageEvent(self.get_last_n_values(1), self.window_size))
+        self.logger.trading(
+            MovingAverageEvent(self.get_last_n_values(1)[0], self.window_size))
 
-    def get_last_n_values(self, n):
+    def get_last_n_values(self, n: int) -> tp.List[float]:
         return self.values[-n:]
 
     @staticmethod
-    def calculate_from(values):
+    def calculate_from(values: Array[float]) -> float:
         return sum(values) / len(values)

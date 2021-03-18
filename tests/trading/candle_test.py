@@ -2,7 +2,7 @@ from trading import Candle
 from numpy.random import random
 
 
-def test_hash_and_eq():
+def test_hash_and_eq() -> None:
     for i in range(1000):
         vals = sorted(random(4))
         candle = Candle(i, vals[1], vals[2], vals[0], vals[3], 1)

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
@@ -5,18 +7,18 @@ from datetime import datetime
 import typing as tp
 import bisect
 
-from trading import TrendLine, TrendType
+from trading import TrendLine, Candle
 
 
-def to_time(ts):
+def to_time(ts: int) -> datetime:
     return datetime.fromtimestamp(ts)
 
 
-def timestamp_to_hhmm(ts):
+def timestamp_to_hhmm(ts: int) -> str:
     return to_time(ts).strftime('%H:%M')
 
 
-def timestamp_to_full(ts):
+def timestamp_to_full(ts: int) -> str:
     return to_time(ts).strftime('%m-%d %H:%M:%S')
 
 
@@ -26,15 +28,15 @@ class GraphicLayer:
     __blue = '#4F41EF'
     __gray = '#787778'
 
-    def __init__(self, visualizer, ts):
+    def __init__(self, visualizer: Visualizer, ts: int):
         self.visualizer = visualizer
         self.ts = ts
         self.left_candle_trace = None
         self.right_candle_trace = None
         self.buy_trace = None
         self.sell_trace = None
-        self.trend_traces = []
-        self.ma_traces = []
+        self.trend_traces: tp.List[go.Scatter] = []
+        self.ma_traces: tp.List[go.Scatter] = []
         self.ts_line = go.Scatter(visible=False,
                                   x=[to_time(ts), to_time(ts)],
                                   y=[visualizer._y_min, visualizer._y_max],
@@ -46,7 +48,8 @@ class GraphicLayer:
                                   ),
                                   name=f'Time: {timestamp_to_full(self.ts)}')
 
-    def add_candles(self, candle_params, prefix_len):
+    def add_candles(self, candle_params: tp.Dict[str, tp.List[tp.Any]],
+                    prefix_len: int) -> None:
         self.left_candle_trace = go.Candlestick(
             visible=prefix_len == 0,
             x=[to_time(ts) for ts in
@@ -90,8 +93,8 @@ class GraphicLayer:
             name='future WAVES/USDN'  # TODO: normal title
         )
 
-    def add_trend_line(self, trend_line: TrendLine, trend_length=30,
-                       name_suffix=""):
+    def add_trend_line(self, trend_line: TrendLine, trend_length: int = 30,
+                       name_suffix: str = "") -> None:
         from_ts = self.ts - trend_length * 300  # TODO: deal with trend_length
         to_ts = self.ts + trend_length * 300
         timestamps = np.array([from_ts, to_ts])
@@ -107,7 +110,9 @@ class GraphicLayer:
                                  ))
         self.trend_traces.append(trend_trace)
 
-    def add_moving_average(self, moving_averages, timestamps, window_size):
+    def add_moving_average(self, moving_averages: tp.List[float],
+                           timestamps: tp.List[datetime],
+                           window_size: int) -> None:
         color = px.colors.qualitative.Pastel[len(self.ma_traces)]
         ma_trace = go.Scatter(visible=False,
                               x=timestamps,
@@ -118,7 +123,8 @@ class GraphicLayer:
                               )
         self.ma_traces.append(ma_trace)
 
-    def add_buy_events(self, timestamps, prices, amount, meta):
+    def add_buy_events(self, timestamps: tp.List[int], prices: tp.List[float],
+                       amount: tp.List[float], meta: tp.List[str]) -> None:
         self.buy_trace = go.Scatter(visible=False,
                                     x=[to_time(ts) for ts in timestamps],
                                     y=prices,
@@ -131,7 +137,8 @@ class GraphicLayer:
                                         symbol='arrow-up'),
                                     text=meta)
 
-    def add_sell_events(self, timestamps, prices, amount, meta):
+    def add_sell_events(self, timestamps: tp.List[int], prices: tp.List[float],
+                        amount: tp.List[float], meta: tp.List[str]) -> None:
         self.sell_trace = go.Scatter(visible=False,
                                      x=[to_time(ts) for ts in timestamps],
                                      y=prices,
@@ -144,15 +151,22 @@ class GraphicLayer:
                                          symbol='arrow-down'),
                                      text=meta)
 
-    def get_traces(self):
+    def get_traces(self) -> tp.List[tp.Union[go.Scatter, go.Candlestick]]:
         return [self.ts_line, self.left_candle_trace, self.right_candle_trace,
                 self.sell_trace, self.buy_trace,
                 *self.trend_traces,
                 *self.ma_traces]
 
-    def get_visibility_params(self, candles_history=None, candles_future=None,
-                              ts_line=None, trends=None, buy=None, sell=None,
-                              ma=None, default_visibility=True):
+    def get_visibility_params(self,
+                              candles_history: tp.Optional[bool] = None,
+                              candles_future: tp.Optional[bool] = None,
+                              ts_line: tp.Optional[bool] = None,
+                              trends: tp.Optional[bool] = None,
+                              buy: tp.Optional[bool] = None,
+                              sell: tp.Optional[bool] = None,
+                              ma: tp.Optional[bool] = None,
+                              default_visibility: bool = True) \
+            -> tp.List[bool]:
         visibility = [default_visibility if ts_line is None else ts_line,
                       default_visibility if candles_history is None else
                       candles_history,
@@ -160,21 +174,23 @@ class GraphicLayer:
                       candles_future,
                       default_visibility if sell is None else sell,
                       default_visibility if buy is None else buy]
-        for i in range(len(self.trend_traces)):
+        for _ in range(len(self.trend_traces)):
             visibility.append(default_visibility if trends is None else trends)
-        for i in range(len(self.ma_traces)):
+        for _ in range(len(self.ma_traces)):
             visibility.append(default_visibility if ma is None else ma)
         return visibility
 
 
-def _slice_candles_by_attrs(candles):
-    candle_params = {}
-    for param in ['ts', 'open', 'close', 'high', 'low']:
-        candle_params[param] = [float(candle.__getattribute__(param))
-                                for candle in candles
-                                if (float(candle.open) != 0 or
-                                    float(candle.close) != 0)]
-    return candle_params
+def _slice_candles_by_attrs(candles: tp.List[Candle]) \
+        -> tp.Dict[str, tp.List[tp.Any]]:
+    return {
+        param: [
+            float(candle.__getattribute__(param))
+            for candle in candles
+            if (float(candle.open) != 0 or float(candle.close) != 0)
+        ]
+        for param in ['ts', 'open', 'close', 'high', 'low']
+    }
 
 
 class Visualizer:
@@ -183,14 +199,14 @@ class Visualizer:
     __blue = '#4F41EF'
     __gray = '#787778'
 
-    def __init__(self):
-        self._candles = None
-        self._candle_params = None
+    def __init__(self) -> None:
+        self._candles: tp.List[Candle] = []
+        self._candle_params: tp.Dict[str, tp.List[tp.Any]] = {}
         self._layers: tp.List[GraphicLayer] = []
-        self._y_min = None
-        self._y_max = None
-        self._ts_min = None
-        self._ts_max = None
+        self._y_min: float = 0
+        self._y_max: float = 0
+        self._ts_min: datetime = to_time(0)
+        self._ts_max: datetime = to_time(0)
         self._layout = go.Layout({
             'title': {
                 'text': 'WAVES/USDN',
@@ -210,7 +226,7 @@ class Visualizer:
             },
         })
 
-    def add_candles(self, candles):
+    def add_candles(self, candles: tp.List[Candle]) -> None:
         self._candles = candles
         self._candle_params = _slice_candles_by_attrs(candles)
         self.__init_params_from_candles()
@@ -220,7 +236,7 @@ class Visualizer:
 
     def add_trend_lines(self,
                         trend_lines: tp.List[tp.Mapping[str, tp.Any]],
-                        trend_length=30):
+                        trend_length: int = 30) -> None:
         for event in trend_lines:
             lower_trend_line = event['lower_trend_line']
             upper_trend_line = event['upper_trend_line']
@@ -237,7 +253,9 @@ class Visualizer:
                                                  trend_length,
                                                  name_suffix="lower line")
 
-    def add_moving_average(self, moving_averages, window_size):
+    def add_moving_average(self,
+                           moving_averages: tp.List[tp.Dict[str, tp.Any]],
+                           window_size: int) -> None:
         averages = []
         timestamps = []
         for event in moving_averages:
@@ -249,26 +267,29 @@ class Visualizer:
             self._layers[ind].add_moving_average(averages, timestamps,
                                                  window_size)
 
-    def add_buy_events(self, timestamps, prices, amount, meta):
+    def add_buy_events(self, timestamps: tp.List[int], prices: tp.List[float],
+                       amount: tp.List[float], meta: tp.List[str]) -> None:
         self.__add_buy_sell_events(timestamps, prices, amount, meta,
                                    is_buy=True)
 
-    def add_sell_events(self, timestamps, prices, amount, meta):
+    def add_sell_events(self, timestamps: tp.List[int], prices: tp.List[float],
+                        amount: tp.List[float], meta: tp.List[str]) -> None:
         self.__add_buy_sell_events(timestamps, prices, amount, meta,
                                    is_buy=False)
 
-    def plot(self):
+    def plot(self) -> go.Figure:
         self.__add_ts_slider()
-        traces = []
+        traces: tp.List[tp.Union[go.Scatter, go.Candlestick]] = []
         for layer in self._layers:
             traces.extend(layer.get_traces())
-        fig = go.Figure(data=traces, layout=self._layout)
-        return fig
+        return go.Figure(data=traces, layout=self._layout)
 
-    def __adjust_timestamps_and_price(self, timestamps, prices, is_buy=False):
+    def __adjust_timestamps_and_price(self, timestamps: tp.List[int],
+                                      prices: tp.List[float],
+                                      is_buy: bool = False) -> None:
         for i, ts in enumerate(timestamps):
             timestamps[i] = self._candles[self.__get_ind_by_ts(ts)].ts
-        amount = dict()
+        amount: tp.Dict[int, int] = {}
         shift = 0.05
         for i, ts in enumerate(timestamps):
             if ts not in amount:
@@ -283,8 +304,10 @@ class Visualizer:
                 prices[i] = self._candles[candle_id].get_upper_price() + \
                             amount[ts] * shift
 
-    def __add_buy_sell_events(self, timestamps, prices, amount, meta,
-                              is_buy=False):
+    def __add_buy_sell_events(self, timestamps: tp.List[int],
+                              prices: tp.List[float], amount: tp.List[float],
+                              meta: tp.List[str],
+                              is_buy: bool = False) -> None:
         self.__adjust_timestamps_and_price(timestamps, prices, is_buy)
         current_layer = 0
         for i, ts in enumerate(timestamps):
@@ -313,10 +336,10 @@ class Visualizer:
                                                 amount,
                                                 meta)
 
-    def __add_layer(self, ts):
+    def __add_layer(self, ts: int) -> None:
         self._layers.append(GraphicLayer(self, ts))
 
-    def __add_ts_slider(self):
+    def __add_ts_slider(self) -> None:
         steps = []
         for i, candle in enumerate(self._candles):
             step = dict(
@@ -327,7 +350,7 @@ class Visualizer:
                 label=timestamp_to_hhmm(candle.ts)
             )
             for j, layer in enumerate(self._layers):
-                step["args"][0]["visible"].extend(
+                step["args"][0]["visible"].extend(  # type: ignore
                     layer.get_visibility_params(default_visibility=(i == j)))
             steps.append(step)
 
@@ -339,11 +362,10 @@ class Visualizer:
         )]
         self._layout['sliders'] = sliders
 
-    def __get_ind_by_ts(self, ts):
-        ind = bisect.bisect_right(self._timestamps, ts) - 1
-        return ind
+    def __get_ind_by_ts(self, ts: int) -> int:
+        return bisect.bisect_right(self._timestamps, ts) - 1
 
-    def __init_params_from_candles(self):
+    def __init_params_from_candles(self) -> None:
         self._timestamps = self._candle_params['ts']
         self._y_min = min(self._candle_params['low']) - 0.3
         self._y_max = max(self._candle_params['high']) + 0.3

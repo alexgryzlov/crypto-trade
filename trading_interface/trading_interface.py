@@ -1,39 +1,40 @@
-from trading import AssetPair, Order
+from trading import AssetPair, Order, Candle
+import typing as tp
 
 
 class TradingInterface:
-    def is_alive(self):
+    def is_alive(self) -> bool:
         pass
 
-    def get_timestamp(self):
+    def get_timestamp(self) -> int:
         pass
 
-    def get_balance(self):
+    def get_balance(self) -> float:
         pass
 
-    def buy(self, asset_pair: AssetPair, amount: int, price: float):
+    def buy(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
         pass
 
-    def sell(self, asset_pair: AssetPair, amount: int, price: float):
+    def sell(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
         pass
 
-    def cancel_order(self, order: Order):
+    def cancel_order(self, order: Order) -> None:
         pass
 
-    def cancel_all(self):
+    def cancel_all(self) -> None:
         pass
 
-    def order_is_filled(self, order: Order):
+    def order_is_filled(self, order: Order) -> bool:
         pass
 
-    def get_buy_price(self):
+    def get_buy_price(self) -> float:
         pass
 
-    def get_sell_price(self):
+    def get_sell_price(self) -> float:
         pass
 
-    def get_orderbook(self):
+    def get_orderbook(self):  # type: ignore
         pass
 
-    def get_last_n_candles(self, n: int):
+    def get_last_n_candles(self, n: int) -> tp.List[Candle]:
         pass
