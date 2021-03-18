@@ -6,6 +6,7 @@ from trading_system.trading_system_handler import TradingSystemHandler
 from trading_interface.trading_interface import TradingInterface
 
 import typing as tp
+from helpers.typing import Array
 
 
 class RelativeStrengthIndexHandler(TradingSystemHandler):
@@ -41,7 +42,7 @@ class RelativeStrengthIndexHandler(TradingSystemHandler):
         return self.values[-n:]
 
     @staticmethod
-    def calculate_from(deltas: tp.List[float],
+    def calculate_from(deltas: Array[float],
                        alpha: tp.Optional[float] = None) \
             -> tp.Tuple[float, float]:
         """ Returns relative strength value and relative strength index. """

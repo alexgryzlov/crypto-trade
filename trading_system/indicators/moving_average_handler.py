@@ -4,6 +4,7 @@ from logger.logger import Logger
 from logger.log_events import MovingAverageEvent
 
 import typing as tp
+from helpers.typing import Array
 
 
 class MovingAverageHandler(TradingSystemHandler):
@@ -38,5 +39,5 @@ class MovingAverageHandler(TradingSystemHandler):
         return self.values[-n:]
 
     @staticmethod
-    def calculate_from(values: tp.List[float]) -> float:
+    def calculate_from(values: Array[float]) -> float:
         return sum(values) / len(values)

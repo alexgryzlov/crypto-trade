@@ -15,6 +15,8 @@ from logger.logger import Logger
 
 from trading import Asset, AssetPair, Signal, Order, Candle
 
+from helpers.typing import TradingSystemHandlerT
+
 PRICE_EPS = 0.005
 
 
@@ -52,7 +54,7 @@ class TradingSystem:
     def update(self) -> None:
         for handler in self.handlers.values():
             handler.update()
-        for order in self._get_orders_handler().get_new_filled_orders():
+        for order in self.get_handler(OrdersHandler).get_new_filled_orders():
             self.wallet[order.asset_pair.main_asset] -= int(
                 order.direction) * order.amount
             self.trading_signals.append(Signal('filled_order', copy(order)))
@@ -75,31 +77,32 @@ class TradingSystem:
                                      amount,
                                      price,
                                      order.order_id))
-        self._get_orders_handler().add_new_order(copy(order))
+        self.get_handler(OrdersHandler).add_new_order(copy(order))
         return order
 
-    def sell(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
+    def sell(self, asset_pair: AssetPair, amount: float,
+             price: float) -> Order:
         order = self.ti.sell(asset_pair, amount, price)
         self.logger.trading(SellEvent(asset_pair.main_asset,
                                       asset_pair.secondary_asset,
                                       amount,
                                       price,
                                       order.order_id))
-        self._get_orders_handler().add_new_order(copy(order))
+        self.get_handler(OrdersHandler).add_new_order(copy(order))
         return order
 
     def cancel_order(self, order: Order) -> None:
         self.ti.cancel_order(order)
 
         self.logger.trading(CancelEvent(order))
-        self._get_orders_handler().cancel_order(order)
+        self.get_handler(OrdersHandler).cancel_order(order)
 
     def cancel_all(self) -> None:
         self.ti.cancel_all()
 
-        for order in self._get_orders_handler().get_active_orders():
+        for order in self.get_handler(OrdersHandler).get_active_orders():
             self.logger.trading(CancelEvent(order))
-        self._get_orders_handler().cancel_all()
+        self.get_handler(OrdersHandler).cancel_all()
 
     def order_is_filled(self, order: Order) -> bool:
         return self.ti.order_is_filled(order)
@@ -111,7 +114,7 @@ class TradingSystem:
         return self.ti.get_sell_price() + PRICE_EPS
 
     def get_active_orders(self) -> tp.Set[Order]:
-        return self._get_orders_handler().get_active_orders()
+        return self.get_handler(OrdersHandler).get_active_orders()
 
     def get_balance(self) -> float:
         balance = self.ti.get_balance()
@@ -125,5 +128,6 @@ class TradingSystem:
     def get_last_n_candles(self, n: int) -> tp.List[Candle]:
         return self.ti.get_last_n_candles(n)
 
-    def _get_orders_handler(self) -> OrdersHandler:
-        return tp.cast(OrdersHandler, self.handlers[OrdersHandler.__name__])
+    def get_handler(self, cls: tp.Type[TradingSystemHandlerT]) \
+            -> TradingSystemHandlerT:
+        return self.handlers[cls.__name__]

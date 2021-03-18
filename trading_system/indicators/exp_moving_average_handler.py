@@ -4,6 +4,7 @@ from trading_interface.trading_interface import TradingInterface
 import numpy as np
 
 import typing as tp
+from helpers.typing import Array
 
 
 class ExpMovingAverageHandler(TradingSystemHandler):
@@ -39,7 +40,7 @@ class ExpMovingAverageHandler(TradingSystemHandler):
         return self.values[-n:]
 
     @staticmethod
-    def calculate_from(values: tp.List[float],
+    def calculate_from(values: Array[float],
                        alpha: tp.Optional[float] = None) -> float:
         if alpha is None:
             alpha = 2 / (1 + len(values))

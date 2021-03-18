@@ -4,6 +4,7 @@ from trading_interface.trading_interface import TradingInterface
 import numpy as np
 
 import typing as tp
+from helpers.typing import Array
 
 
 class WeightedMovingAverageHandler(TradingSystemHandler):
@@ -38,6 +39,6 @@ class WeightedMovingAverageHandler(TradingSystemHandler):
         return self.values[-n:]
 
     @staticmethod
-    def calculate_from(values: tp.List[float]) -> float:
+    def calculate_from(values: Array[float]) -> float:
         coefs = np.arange(1, len(values) + 1)
         return np.sum(coefs * values) / (len(values) * (len(values) + 1) / 2)
