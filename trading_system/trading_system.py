@@ -39,7 +39,7 @@ class TradingSystem:
     def __init__(self, trading_interface: TradingInterface):
         self.logger = Logger('TradingSystem')
         self.ti = trading_interface
-        self.wallet: tp.DefaultDict[Asset, int] = defaultdict(int)
+        self.wallet: tp.DefaultDict[Asset, float] = defaultdict(float)
         self.trading_signals: tp.List[Signal] = []
         self.logger.info('Trading system TradingSystem initialized')
         self.handlers = Handlers() \
@@ -68,7 +68,7 @@ class TradingSystem:
     def get_timestamp(self) -> int:
         return self.ti.get_timestamp()
 
-    def buy(self, asset_pair: AssetPair, amount: int, price: float) -> Order:
+    def buy(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
         order = self.ti.buy(asset_pair, amount, price)
         self.logger.trading(BuyEvent(asset_pair.main_asset,
                                      asset_pair.secondary_asset,
@@ -78,7 +78,7 @@ class TradingSystem:
         self._get_orders_handler().add_new_order(copy(order))
         return order
 
-    def sell(self, asset_pair: AssetPair, amount: int, price: float) -> Order:
+    def sell(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
         order = self.ti.sell(asset_pair, amount, price)
         self.logger.trading(SellEvent(asset_pair.main_asset,
                                       asset_pair.secondary_asset,
@@ -118,7 +118,7 @@ class TradingSystem:
         self.logger.info(f'Checking balance: {balance}')
         return balance
 
-    def get_wallet(self) -> tp.DefaultDict[Asset, int]:
+    def get_wallet(self) -> tp.DefaultDict[Asset, float]:
         self.logger.info(f'Checking wallet: {self.wallet.items()}')
         return self.wallet
 

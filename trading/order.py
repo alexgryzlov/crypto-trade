@@ -10,7 +10,7 @@ class Direction(IntEnum):
 
 
 class Order:
-    def __init__(self, order_id: int, asset_pair: AssetPair, amount: int,
+    def __init__(self, order_id: int, asset_pair: AssetPair, amount: float,
                  price: float, direction: Direction):
         self.order_id = order_id
         self.asset_pair = asset_pair

@@ -43,7 +43,7 @@ class Simulator(TradingInterface):
     def get_balance(self) -> float:
         return self.balance
 
-    def buy(self, asset_pair: AssetPair, amount: int, price: float) -> Order:
+    def buy(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
         order = Order(order_id=self.__get_new_order_id(),
                       asset_pair=asset_pair,
                       amount=amount,
@@ -52,7 +52,7 @@ class Simulator(TradingInterface):
         self.active_orders.add(copy(order))
         return order
 
-    def sell(self, asset_pair: AssetPair, amount: int, price: float) -> Order:
+    def sell(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
         order = Order(order_id=self.__get_new_order_id(),
                       asset_pair=asset_pair,
                       amount=amount,

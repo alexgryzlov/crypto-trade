@@ -12,10 +12,10 @@ class TradingInterface:
     def get_balance(self) -> float:
         pass
 
-    def buy(self, asset_pair: AssetPair, amount: int, price: float) -> Order:
+    def buy(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
         pass
 
-    def sell(self, asset_pair: AssetPair, amount: int, price: float) -> Order:
+    def sell(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
         pass
 
     def cancel_order(self, order: Order) -> None:

@@ -26,7 +26,7 @@ class MovingAverageEvent(LogEvent):
 
 
 class BuyEvent(LogEvent):
-    def __init__(self, buy_asset: Asset, sell_asset: Asset, amount: int,
+    def __init__(self, buy_asset: Asset, sell_asset: Asset, amount: float,
                  price: float, order_id: int):
         super().__init__(f'Buying {amount} of {buy_asset} for {price} '
                          f'{sell_asset}, order {order_id}',
@@ -38,7 +38,7 @@ class BuyEvent(LogEvent):
 
 
 class SellEvent(LogEvent):
-    def __init__(self, sell_asset: Asset, buy_asset: Asset, amount: int,
+    def __init__(self, sell_asset: Asset, buy_asset: Asset, amount: float,
                  price: float, order_id: int) -> None:
         super().__init__(f'Selling {amount} of {sell_asset} for {price} '
                          f'{buy_asset}, order {order_id}',
