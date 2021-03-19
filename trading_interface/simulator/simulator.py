@@ -7,10 +7,9 @@ from market_data_api.market_data_downloader import MarketDataDownloader
 
 from trading import Order, Direction, AssetPair, TimeRange, Candle
 from trading_interface.simulator.price_simulator import PriceSimulator, PriceSimulatorType
+from config import PRICE_SHIFT
 
 import typing as tp
-
-PRICE_SHIFT = 0.001
 
 
 class Simulator(TradingInterface):
