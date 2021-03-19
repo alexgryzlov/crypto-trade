@@ -4,17 +4,18 @@ sys.path.append('.')
 
 import os
 import pickle
-import logger.log_events as log_events
 import typing as tp
 from pathlib import Path
 from collections import defaultdict
+
+import logger.log_events as log_events
+from logger.logger import Logger
 from visualizer import Visualizer
-from logger.object_log import PATH_TO_DUMPS
 from trading import Candle
 
 
 def get_log_path() -> tp.Optional[Path]:
-    path = Path(sys.argv[1] if len(sys.argv) == 2 else PATH_TO_DUMPS)
+    path = Path(sys.argv[1] if len(sys.argv) == 2 else Logger.get_logs_path('dump'))
     logs = list(path.rglob('*.dump')) if path.is_dir() else [path]
     if not logs:
         return None
