@@ -12,7 +12,6 @@ import logger.log_events as log_events
 from logger.logger import Logger
 from visualizer.visualizer import Visualizer
 from trading import Candle
-from config import PATH_TO_DUMPS
 
 
 def get_log_path() -> tp.Optional[Path]:
