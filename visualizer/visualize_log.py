@@ -10,7 +10,7 @@ from collections import defaultdict
 
 import logger.log_events as log_events
 from logger.logger import Logger
-from visualizer import Visualizer
+from visualizer.visualizer import Visualizer
 from trading import Candle
 
 
@@ -63,14 +63,8 @@ def decompose_moving_average(moving_averages: tp.List[tp.Dict[str, tp.Any]]) \
     return ma_by_window
 
 
-if __name__ == '__main__':
-    path = get_log_path()
-    if path is None:
-        print('Log not found')
-        exit(0)
-    print(path)
-    log = load_log(path)
-    decomposed_log = decompose_log(log)
+def create_visualizer_from_log(
+        decomposed_log: tp.Dict[tp.Any, tp.List[tp.Any]]) -> Visualizer:
     vis = Visualizer()
     vis.add_candles(get_candles(decomposed_log[log_events.NewCandleEvent]))
     vis.add_trend_lines(decomposed_log[log_events.TrendLinesEvent])
@@ -81,5 +75,17 @@ if __name__ == '__main__':
         *process_buy_sell_events(decomposed_log[log_events.BuyEvent]))
     vis.add_sell_events(
         *process_buy_sell_events(decomposed_log[log_events.SellEvent]))
+    return vis
+
+
+if __name__ == '__main__':
+    path = get_log_path()
+    if path is None:
+        print('Log not found')
+        exit(0)
+    print(path)
+    log = load_log(path)
+    decomposed_log = decompose_log(log)
+    vis = create_visualizer_from_log(decomposed_log)
     fig = vis.plot()
     fig.show()
