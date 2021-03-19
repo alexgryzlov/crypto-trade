@@ -88,7 +88,7 @@ class StrategyRunner:
         print(trading_system.get_active_orders())
         print(trading_system.get_wallet(), end='\n\n')
 
-        Logger.flush()
+        Logger.store_log()
 
         return RunResult(time_range, trading_system.get_balance())
 

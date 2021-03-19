@@ -68,7 +68,7 @@ class Logger:
         return stream_handler
 
     @classmethod
-    def flush(cls) -> None:
+    def store_log(cls) -> None:
         with open(cls.create_log_file('dump', 'dump'), 'wb') as f:
             pickle.dump(cls._dump_logs, f)
 
