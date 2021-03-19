@@ -11,3 +11,4 @@ retry==0.9.2
 scikit-learn==0.24.1
 dash==1.19.0
 mypy_extensions==0.4.3
+varname==0.6.3
