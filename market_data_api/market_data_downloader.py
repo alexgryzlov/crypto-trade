@@ -6,12 +6,7 @@ from retry import retry
 import typing as tp
 
 from trading import Candle, AssetPair, Timeframe, TimeRange, Timestamp
-
-# API restriction
-# https://api.wavesplatform.com/v0/docs/#/candles/getCandles
-CANDLES_PER_REQUEST = 1400
-MARKET_DATA_HOST = 'https://api.wavesplatform.com'
-MATCHER_HOST = "https://matcher.waves.exchange"
+from config import CANDLES_PER_REQUEST, MARKET_DATA_HOST, MATCHER_HOST
 
 
 class MarketDataDownloader:
@@ -29,7 +24,6 @@ class MarketDataDownloader:
                 timeframe=timeframe,
                 time_range=TimeRange(current_ts,
                                      min(current_ts + timeframe.to_seconds() * CANDLES_PER_REQUEST, time_range.to_ts)))
-
             for candle in candles_data:
                 candle_data = candle['data']
                 new_candle = Candle(
