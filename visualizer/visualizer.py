@@ -373,8 +373,11 @@ class Visualizer:
 
     def __init_params_from_candles(self) -> None:
         self._timestamps = self._candle_params['ts']
-        self._y_min = min(self._candle_params['low']) - 0.3
-        self._y_max = max(self._candle_params['high']) + 0.3
+        self._y_min = min(self._candle_params['low'])
+        self._y_max = max(self._candle_params['high'])
+        height = self._y_max - self._y_min
+        self._y_min -= min(0.5 * height, 0.3)
+        self._y_max += min(0.5 * height, 0.3)
         self._ts_min = to_time(self._candles[0].ts)
         self._ts_max = to_time(self._candles[-1].ts)
         self._layout.yaxis.range = (self._y_min, self._y_max)

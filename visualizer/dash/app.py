@@ -121,6 +121,7 @@ def update_candlestick_chart(timestamp: int, indicators: tp.List[str],
     if vis is None or timestamp is None:
         raise PreventUpdate
     layers = vis.get_layers()
+    timestamp = min(timestamp, len(layers) - 1)
     layer = layers[timestamp]
     traces = layer.get_traces()
     visibility = layer.get_visibility_params(
