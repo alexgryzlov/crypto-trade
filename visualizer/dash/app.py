@@ -13,7 +13,7 @@ sys.path.append('.')
 import visualizer.visualize_log as log
 from visualizer.visualizer import Visualizer
 from pathlib import Path
-from logger.object_log import PATH_TO_DUMPS
+from logger.logger import Logger
 
 import typing as tp
 
@@ -147,7 +147,7 @@ def reload_candlestick_from(new_log_path: str) -> None:
 
 
 def load_log(filename: str) -> tp.Dict[tp.Any, tp.List[tp.Any]]:
-    path = Path(PATH_TO_DUMPS.joinpath(filename))
+    path = Path(Logger.get_logs_path('dump') / filename)
     if not path.is_file():
         path_opt = log.get_log_path()
         if path_opt is None:
