@@ -1,6 +1,7 @@
 import multiprocessing as mp
 import plotly.graph_objects as go
 import typing as tp
+from pathlib import Path
 
 from trading_interface.simulator.clock_simulator import ClockSimulator
 from trading_interface.simulator.simulator import Simulator
@@ -13,7 +14,6 @@ from trading_signal_detectors.moving_average.moving_average_signal_detector \
 
 from strategies.strategy_base import StrategyBase
 
-from logger.object_log import ObjectLog
 from logger.logger import Logger
 
 from trading import AssetPair, Timestamp, Timeframe, TimeRange
@@ -45,20 +45,23 @@ class StrategyRunner:
             asset_pair: AssetPair,
             timeframe: Timeframe,
             time_range: TimeRange,
-            candles_lifetime: int = 20) -> RunResult:
+            candles_lifetime: int = 20,
+            logs_path: tp.Optional[Path] = None) -> RunResult:
+
+        Logger.set_log_file_name(Timestamp.to_iso_format(time_range.from_ts))
+        if logs_path is not None:
+            Logger.set_logs_path(logs_path)
 
         clock = ClockSimulator(
             start_ts=time_range.from_ts,
             timeframe=timeframe,
             candles_lifetime=candles_lifetime)
+        Logger.set_clock(clock)
 
         trading_interface = Simulator(
             asset_pair=asset_pair,
             time_range=time_range,
             clock=clock)
-
-        Logger.set_clock(clock)
-        Logger.set_log_file_name(time_range.to_iso_format())
 
         trading_system = TradingSystem(trading_interface)
 
@@ -85,13 +88,13 @@ class StrategyRunner:
         print(trading_system.get_active_orders())
         print(trading_system.get_wallet(), end='\n\n')
 
-        ObjectLog().store_log()
+        Logger.store_log()
 
         return RunResult(time_range, trading_system.get_balance())
 
     def run_strategy_on_periods(
             self,
-            strategy: StrategyBase,
+            strategy: tp.Type[StrategyBase],
             strategy_config: tp.Dict[str, tp.Any],
             asset_pair: AssetPair,
             timeframe: Timeframe,
@@ -100,7 +103,8 @@ class StrategyRunner:
             period: tp.Optional[int] = None,
             runs: tp.Optional[int] = None,
             visualize: bool = False,
-            processes: int = 4) -> None:
+            processes: int = 4,
+            logs_path: tp.Optional[Path] = None) -> None:
 
         if period is None and runs is None:
             raise ValueError('Run type not selected')
@@ -124,7 +128,8 @@ class StrategyRunner:
                     'asset_pair': asset_pair,
                     'timeframe': timeframe,
                     'time_range': TimeRange(current_ts, next_ts),
-                    'candles_lifetime': candles_lifetime},
+                    'candles_lifetime': candles_lifetime,
+                    'logs_path': logs_path},
                 callback=lambda run_result: run_results.append(run_result))
             current_ts = next_ts
 
