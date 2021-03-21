@@ -1,5 +1,7 @@
 import multiprocessing as mp
+import traceback as tb
 import typing as tp
+from pathlib import Path
 
 from trading_interface.simulator.clock_simulator import ClockSimulator
 from trading_interface.simulator.simulator import Simulator
@@ -14,10 +16,9 @@ from trading_signal_detectors.moving_average.moving_average_signal_detector \
 
 from strategies.strategy_base import StrategyBase
 
-from logger.object_log import ObjectLog
 from logger.logger import Logger
 
-from trading import AssetPair, Timeframe, TimeRange
+from trading import AssetPair, Timestamp, Timeframe, TimeRange
 
 
 class StrategyRunner:
@@ -30,21 +31,24 @@ class StrategyRunner:
             strategy_config: tp.Dict[str, tp.Any],
             asset_pair: AssetPair,
             timeframe: Timeframe,
-            time_range: TimeRange) -> TradingStatistics:
+            time_range: TimeRange,
+            logs_path: tp.Optional[Path] = None) -> TradingStatistics:
+
+        Logger.set_log_file_name(Timestamp.to_iso_format(time_range.from_ts))
+        if logs_path is not None:
+            Logger.set_logs_path(logs_path)
 
         clock = ClockSimulator(
             start_ts=time_range.from_ts,
             timeframe=timeframe,
             config=self.base_config['clock_simulator'])
+        Logger.set_clock(clock)
 
         trading_interface = Simulator(
             asset_pair=asset_pair,
             time_range=time_range,
             config=self.base_config['simulator'],
             clock=clock)
-
-        Logger.set_clock(clock)
-        Logger.set_log_file_name(time_range.to_iso_format())
 
         trading_system = TradingSystem(
             trading_interface=trading_interface,
@@ -73,7 +77,7 @@ class StrategyRunner:
         trading_interface.is_alive()
 
         stats = trading_system.get_trading_statistics()
-        ObjectLog().store_log()
+        Logger.store_log()
         print(stats)
 
         return stats
@@ -88,7 +92,8 @@ class StrategyRunner:
             period: tp.Optional[int] = None,
             runs: tp.Optional[int] = None,
             visualize: bool = False,
-            processes: int = 4) -> TradingStatistics:
+            processes: int = 4,
+            logs_path: tp.Optional[Path] = None) -> TradingStatistics:
 
         if period is None and runs is None:
             raise ValueError('Run type not selected')
@@ -111,8 +116,10 @@ class StrategyRunner:
                     'strategy_config': strategy_config,
                     'asset_pair': asset_pair,
                     'timeframe': timeframe,
-                    'time_range': TimeRange(current_ts, next_ts)},
-                callback=lambda run_result: run_results.append(run_result))
+                    'time_range': TimeRange(current_ts, next_ts),
+                    'logs_path': logs_path},
+                callback=lambda run_result: run_results.append(run_result),
+                error_callback=lambda e: tb.print_exception(type(e), e, None))
             current_ts = next_ts
 
         pool.close()
