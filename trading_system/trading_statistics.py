@@ -41,27 +41,18 @@ class TradingStatistics:
                f'filled orders:   {self.filled_order_count}'
 
     def _calc_absolute_delta(self) -> float:
-        if self.initial_balance is None:
-            raise ValueError('initial balance hasn`t been set')
-
-        if self.final_balance is None:
-            raise ValueError('final balance hasn`t been set')
-
-        return self.final_balance - self.initial_balance
+        return require(self.final_balance) - require(self.initial_balance)
 
     def _calc_relative_delta(self) -> float:
-        if self.initial_balance is None:
-            raise ValueError('initial balance hasn`t been set')
-
-        if math.isclose(self.initial_balance, 0):
+        if math.isclose(require(self.initial_balance), 0):
             return 0
-
-        return self._calc_absolute_delta() / self.initial_balance * 100
+        return self._calc_absolute_delta() / require(self.initial_balance) * 100
 
     @classmethod
     def merge(cls, stats_array: tp.List['TradingStatistics']) -> 'TradingStatistics':
         if not stats_array:
             raise ValueError("empty stats array")
+
         stats = cls()
         stats.set_initial_balance(sum([require(s.initial_balance) for s in stats_array]))
         stats.set_final_balance(sum([require(s.final_balance) for s in stats_array]))
