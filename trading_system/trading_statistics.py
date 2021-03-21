@@ -3,6 +3,7 @@ import typing as tp
 import plotly.graph_objects as go
 
 from trading import Order, Timestamp
+from helpers.typing.utils import require
 
 
 class TradingStatistics:
@@ -31,30 +32,41 @@ class TradingStatistics:
         self.filled_order_count += 1
 
     def __str__(self) -> str:
-        if self.start_timestamp is None or self.finish_timestamp is None:
-            raise ValueError('finish_timestamp hasn\'t been set')
-        return f'{Timestamp.to_iso_format(self.start_timestamp)} - {Timestamp.to_iso_format(self.finish_timestamp)}\n' \
-               f'initial balance: {self.initial_balance:.2f}\n' \
-               f'final balance:   {self.final_balance:.2f}\n' \
+        return f'{Timestamp.to_iso_format(require(self.start_timestamp))} - ' \
+               f'{Timestamp.to_iso_format(require(self.finish_timestamp))}\n' \
+               f'initial balance: {require(self.initial_balance):.2f}\n' \
+               f'final balance:   {require(self.final_balance):.2f}\n' \
                f'delta:           {self._calc_absolute_delta():.2f}\n' \
                f'delta(%):        {self._calc_relative_delta():.1f}%\n' \
                f'filled orders:   {self.filled_order_count}'
 
     def _calc_absolute_delta(self) -> float:
+        if self.initial_balance is None:
+            raise ValueError('initial balance hasn`t been set')
+
+        if self.final_balance is None:
+            raise ValueError('final balance hasn`t been set')
+
         return self.final_balance - self.initial_balance
 
     def _calc_relative_delta(self) -> float:
+        if self.initial_balance is None:
+            raise ValueError('initial balance hasn`t been set')
+
         if math.isclose(self.initial_balance, 0):
             return 0
+
         return self._calc_absolute_delta() / self.initial_balance * 100
 
     @classmethod
     def merge(cls, stats_array: tp.List['TradingStatistics']) -> 'TradingStatistics':
+        if not stats_array:
+            raise ValueError("empty stats array")
         stats = cls()
-        stats.set_initial_balance(sum([s.initial_balance for s in stats_array]))
-        stats.set_final_balance(sum([s.final_balance for s in stats_array]))
-        stats.set_start_timestamp(min([s.start_timestamp for s in stats_array]))
-        stats.set_finish_timestamp(max([s.finish_timestamp for s in stats_array]))
+        stats.set_initial_balance(sum([require(s.initial_balance) for s in stats_array]))
+        stats.set_final_balance(sum([require(s.final_balance) for s in stats_array]))
+        stats.set_start_timestamp(min([require(s.start_timestamp) for s in stats_array]))
+        stats.set_finish_timestamp(max([require(s.finish_timestamp) for s in stats_array]))
         stats.filled_order_count = sum([s.filled_order_count for s in stats_array])
         return stats
 
@@ -64,10 +76,10 @@ class TradingStatistics:
 
     @staticmethod
     def get_start_time(stats_array: tp.List['TradingStatistics']) -> tp.List[str]:
-        return [Timestamp.to_iso_format(s.start_timestamp) for s in stats_array]
+        return [Timestamp.to_iso_format(require(s.start_timestamp)) for s in stats_array]
 
     @staticmethod
-    def visualize(stats_array: tp.List['TradingStatistics']):
+    def visualize(stats_array: tp.List['TradingStatistics']) -> None:
         stats_array.sort(key=lambda r: r.start_timestamp)
         fig = go.Figure()
         fig.add_trace(go.Bar(
