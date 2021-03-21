@@ -1,5 +1,6 @@
 import multiprocessing as mp
 import plotly.graph_objects as go
+import traceback as tb
 import typing as tp
 from pathlib import Path
 
@@ -130,7 +131,8 @@ class StrategyRunner:
                     'time_range': TimeRange(current_ts, next_ts),
                     'candles_lifetime': candles_lifetime,
                     'logs_path': logs_path},
-                callback=lambda run_result: run_results.append(run_result))
+                callback=lambda run_result: run_results.append(run_result),
+                error_callback=lambda e: tb.print_exception(type(e), e, None))
             current_ts = next_ts
 
         pool.close()
