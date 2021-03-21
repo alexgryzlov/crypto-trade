@@ -6,6 +6,9 @@ class TradingInterface:
     def is_alive(self) -> bool:
         pass
 
+    def stop_trading(self) -> None:
+        pass
+
     def get_timestamp(self) -> int:
         pass
 

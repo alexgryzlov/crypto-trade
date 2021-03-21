@@ -1,12 +1,11 @@
 import ccxt
 import requests
-from dateutil.parser import isoparse
 from copy import copy
 from retry import retry
 import typing as tp
 
 from trading import Candle, AssetPair, Timeframe, TimeRange, Timestamp
-from config import CANDLES_PER_REQUEST, MARKET_DATA_HOST, MATCHER_HOST
+from configs.config import CANDLES_PER_REQUEST, MARKET_DATA_HOST, MATCHER_HOST
 
 
 class MarketDataDownloader:
