@@ -4,6 +4,7 @@
   },
 
   "simulator": {
+    "price_simulation_type": "three_interval_path",
     "initial_balance": 100.0,
     "price_shift": 0.001
   },

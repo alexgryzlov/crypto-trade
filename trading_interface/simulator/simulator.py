@@ -17,8 +17,7 @@ class Simulator(TradingInterface):
                  asset_pair: AssetPair,
                  time_range: TimeRange,
                  clock: ClockSimulator,
-                 config: Config,
-                 price_simulation_type: PriceSimulatorType = PriceSimulatorType.ThreeIntervalPath):
+                 config: Config):
         ts_offset = int(datetime.timedelta(days=1).total_seconds())
         self.candles = MarketDataDownloader().get_candles(
             asset_pair, clock.get_timeframe(), TimeRange(time_range.from_ts - ts_offset, time_range.to_ts))
@@ -29,7 +28,9 @@ class Simulator(TradingInterface):
         self.filled_order_ids: tp.Set[int] = set()
         self.balance = float(config['initial_balance'])
         self.price_shift = float(config['price_shift'])
-        self.price_simulator = PriceSimulator(self.clock.candles_lifetime, price_simulation_type)
+        self.price_simulator = PriceSimulator(
+            candles_lifetime=self.clock.candles_lifetime,
+            simulation_type=PriceSimulatorType(config['price_simulation_type']))
 
     def is_alive(self) -> bool:
         self.__fill_orders()

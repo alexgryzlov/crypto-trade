@@ -12,7 +12,7 @@ from base.config_parser import ConfigParser
 
 @pytest.fixture
 def strategy_runner() -> StrategyRunner:
-    return StrategyRunner(base_config=ConfigParser().load_config(Path('configs/base.json')))
+    return StrategyRunner(base_config=ConfigParser.load_config(Path('configs/base.json')))
 
 
 def test_dummy_strategy_run(strategy_runner: StrategyRunner, empty_logger_mock: empty_logger_mock) -> None:
