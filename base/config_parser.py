@@ -1,11 +1,11 @@
-import configparser
+import json
 import typing as tp
+from pathlib import Path
+
+from helpers.typing.common_types import ConfigsScope
 
 
 class ConfigParser:
-    def __init__(self):
-        self.parser = configparser.ConfigParser()
-
-    def load_config(self, config_path: str) -> tp.Dict[str, tp.Dict[str, tp.Any]]:
-        self.parser.read(config_path)
-        return {section: dict(self.parser[section]) for section in self.parser}
+    @classmethod
+    def load_config(cls, config_path: Path) -> ConfigsScope:
+        return json.load(config_path.open())

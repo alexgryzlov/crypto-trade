@@ -1,4 +1,5 @@
 import pytest
+from pathlib import Path
 
 from strategy_runner.strategy_runner import StrategyRunner
 from trading import AssetPair, Asset, Timeframe, TimeRange
@@ -11,7 +12,7 @@ from base.config_parser import ConfigParser
 
 @pytest.fixture
 def strategy_runner() -> StrategyRunner:
-    return StrategyRunner(base_config=ConfigParser().load_config('configs/base.ini'))
+    return StrategyRunner(base_config=ConfigParser().load_config(Path('configs/base.json')))
 
 
 def test_dummy_strategy_run(strategy_runner: StrategyRunner, empty_logger_mock: empty_logger_mock) -> None:

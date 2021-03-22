@@ -3,6 +3,8 @@ import traceback as tb
 import typing as tp
 from pathlib import Path
 
+from helpers.typing.common_types import Config, ConfigsScope
+
 from trading_interface.simulator.clock_simulator import ClockSimulator
 from trading_interface.simulator.simulator import Simulator
 
@@ -22,13 +24,13 @@ from trading import AssetPair, Timestamp, Timeframe, TimeRange
 
 
 class StrategyRunner:
-    def __init__(self, base_config: tp.Dict[str, tp.Dict[str, tp.Any]]):
+    def __init__(self, base_config: ConfigsScope):
         self.base_config = base_config
 
     def run_strategy(
             self,
             strategy: tp.Type[StrategyBase],
-            strategy_config: tp.Dict[str, tp.Any],
+            strategy_config: Config,
             asset_pair: AssetPair,
             timeframe: Timeframe,
             time_range: TimeRange,
@@ -85,7 +87,7 @@ class StrategyRunner:
     def run_strategy_on_periods(
             self,
             strategy: tp.Type[StrategyBase],
-            strategy_config: tp.Dict[str, tp.Any],
+            strategy_config: Config,
             asset_pair: AssetPair,
             timeframe: Timeframe,
             time_range: TimeRange,

@@ -1,11 +1,11 @@
-import typing as tp
+from helpers.typing.common_types import Config
 
 from logger.clock import Clock
 from trading import Timeframe
 
 
 class ClockSimulator(Clock):
-    def __init__(self, start_ts: int, timeframe: Timeframe, config: tp.Dict[str, tp.Any]):
+    def __init__(self, start_ts: int, timeframe: Timeframe, config: Config):
         super().__init__()
         self.start_ts = start_ts
         self.timeframe = timeframe

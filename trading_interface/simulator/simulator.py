@@ -2,6 +2,8 @@ import datetime
 import typing as tp
 from copy import copy
 
+from helpers.typing.common_types import Config
+
 from trading_interface.simulator.clock_simulator import ClockSimulator
 from trading_interface.trading_interface import TradingInterface
 from market_data_api.market_data_downloader import MarketDataDownloader
@@ -15,7 +17,7 @@ class Simulator(TradingInterface):
                  asset_pair: AssetPair,
                  time_range: TimeRange,
                  clock: ClockSimulator,
-                 config: tp.Dict[str, tp.Any],
+                 config: Config,
                  price_simulation_type: PriceSimulatorType = PriceSimulatorType.ThreeIntervalPath):
         ts_offset = int(datetime.timedelta(days=1).total_seconds())
         self.candles = MarketDataDownloader().get_candles(

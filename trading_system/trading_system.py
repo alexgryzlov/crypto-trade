@@ -4,6 +4,8 @@ import typing as tp
 from collections import defaultdict, OrderedDict
 from copy import copy
 
+from helpers.typing.common_types import Config
+
 from trading_interface.trading_interface import TradingInterface
 from trading_system.candles_handler import CandlesHandler
 from trading_system.trading_system_handler import TradingSystemHandler
@@ -41,7 +43,7 @@ class Handlers(OrderedDict):  # type: ignore
 
 
 class TradingSystem:
-    def __init__(self, trading_interface: TradingInterface, config: tp.Dict[str, tp.Any]):
+    def __init__(self, trading_interface: TradingInterface, config: Config):
         self.logger = Logger('TradingSystem')
         self.ti = trading_interface
         self.stats = TradingStatistics(
