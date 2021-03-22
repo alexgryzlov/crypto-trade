@@ -1,4 +1,5 @@
 from __future__ import annotations
+import typing as tp
 
 from collections import defaultdict, OrderedDict
 from copy import copy
@@ -9,6 +10,8 @@ from trading_system.trading_system_handler import TradingSystemHandler
 from trading_system.trend_handler import TrendHandler
 from trading_system.indicators import *
 from trading_system.orders_handler import OrdersHandler
+
+from trading_system.trading_statistics import TradingStatistics
 
 from logger.log_events import BuyEvent, SellEvent, CancelEvent
 from logger.logger import Logger
@@ -38,25 +41,43 @@ class Handlers(OrderedDict):  # type: ignore
 
 
 class TradingSystem:
-    def __init__(self, trading_interface: TradingInterface):
+    def __init__(self, trading_interface: TradingInterface, config: tp.Dict[str, tp.Any]):
         self.logger = Logger('TradingSystem')
         self.ti = trading_interface
+        self.stats = TradingStatistics(
+            initial_balance=self.ti.get_balance(),
+            start_timestamp=self.ti.get_timestamp())
+        self.currency_asset = Asset(config['currency_asset'])
         self.wallet: tp.DefaultDict[Asset, float] = defaultdict(float)
         self.trading_signals: tp.List[Signal] = []
-        self.logger.info('Trading system TradingSystem initialized')
         self.handlers = Handlers() \
             .add(CandlesHandler(trading_interface)) \
             .add(OrdersHandler(trading_interface)) \
             .add(TrendHandler(trading_interface)) \
             .add(MovingAverageHandler(trading_interface, 25)) \
             .add(MovingAverageHandler(trading_interface, 50))
+        self.logger.info('Trading system initialized')
+
+    def stop_trading(self) -> None:
+        self.cancel_all()
+        for asset, amount in copy(self.wallet).items():
+            self.create_order(asset_pair=AssetPair(asset, self.currency_asset),
+                              amount=-amount)
+
+    def get_trading_statistics(self) -> TradingStatistics:
+        stats = copy(self.stats)
+        stats.set_final_balance(self.get_balance())
+        stats.set_finish_timestamp(self.get_timestamp())
+        return stats
 
     def update(self) -> None:
         for handler in self.handlers.values():
             handler.update()
+
         for order in self.get_handler(OrdersHandler).get_new_filled_orders():
-            self.wallet[order.asset_pair.main_asset] -= int(
-                order.direction) * order.amount
+            self.stats.add_filled_order(copy(order))
+            self.wallet[order.asset_pair.main_asset] -= \
+                int(order.direction) * order.amount
             self.trading_signals.append(Signal('filled_order', copy(order)))
 
     def get_trading_signals(self) -> tp.List[Signal]:
@@ -69,6 +90,13 @@ class TradingSystem:
 
     def get_timestamp(self) -> int:
         return self.ti.get_timestamp()
+
+    def create_order(self, asset_pair: AssetPair, amount: float) -> tp.Optional[Order]:
+        if amount > 0:
+            return self.buy(asset_pair, amount, self.get_sell_price())
+        elif amount < 0:
+            return self.sell(asset_pair, -amount, self.get_buy_price())
+        return None
 
     def buy(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
         order = self.ti.buy(asset_pair, amount, price)
@@ -93,16 +121,14 @@ class TradingSystem:
 
     def cancel_order(self, order: Order) -> None:
         self.ti.cancel_order(order)
-
         self.logger.trading(CancelEvent(order))
         self.get_handler(OrdersHandler).cancel_order(order)
 
     def cancel_all(self) -> None:
         self.ti.cancel_all()
-
         for order in self.get_handler(OrdersHandler).get_active_orders():
             self.logger.trading(CancelEvent(order))
-        self.get_handler(OrdersHandler).cancel_all()
+            self.get_handler(OrdersHandler).cancel_all()
 
     def order_is_filled(self, order: Order) -> bool:
         return self.ti.order_is_filled(order)

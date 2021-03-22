@@ -1,4 +1,5 @@
 import datetime
+import typing as tp
 from copy import copy
 
 from trading_interface.simulator.clock_simulator import ClockSimulator
@@ -7,9 +8,6 @@ from market_data_api.market_data_downloader import MarketDataDownloader
 
 from trading import Order, Direction, AssetPair, TimeRange, Candle
 from trading_interface.simulator.price_simulator import PriceSimulator, PriceSimulatorType
-from config import PRICE_SHIFT
-
-import typing as tp
 
 
 class Simulator(TradingInterface):
@@ -17,6 +15,7 @@ class Simulator(TradingInterface):
                  asset_pair: AssetPair,
                  time_range: TimeRange,
                  clock: ClockSimulator,
+                 config: tp.Dict[str, tp.Any],
                  price_simulation_type: PriceSimulatorType = PriceSimulatorType.ThreeIntervalPath):
         ts_offset = int(datetime.timedelta(days=1).total_seconds())
         self.candles = MarketDataDownloader().get_candles(
@@ -26,15 +25,17 @@ class Simulator(TradingInterface):
         self.active_orders: tp.Set[Order] = set()
         self.last_used_order_id = 0
         self.filled_order_ids: tp.Set[int] = set()
-        self.balance = 0.
-        self.price_simulator = PriceSimulator(self.clock.candles_lifetime,
-                                              price_simulation_type)
+        self.balance = float(config['initial_balance'])
+        self.price_shift = float(config['price_shift'])
+        self.price_simulator = PriceSimulator(self.clock.candles_lifetime, price_simulation_type)
 
     def is_alive(self) -> bool:
         self.__fill_orders()
         self.clock.next_iteration()
-        return self.__get_current_candle_index(truncated_index=False) < \
-               len(self.candles)
+        return self.__get_current_candle_index(truncated_index=False) < len(self.candles)
+
+    def stop_trading(self) -> None:
+        self.__fill_orders()
 
     def get_timestamp(self) -> int:
         return self.clock.get_timestamp()
@@ -70,10 +71,10 @@ class Simulator(TradingInterface):
         return order.order_id in self.filled_order_ids
 
     def get_sell_price(self) -> float:
-        return self.__get_current_price() * (1 + PRICE_SHIFT)
+        return self.__get_current_price() * (1 + self.price_shift)
 
     def get_buy_price(self) -> float:
-        return self.__get_current_price() * (1 - PRICE_SHIFT)
+        return self.__get_current_price() * (1 - self.price_shift)
 
     def get_last_n_candles(self, n: int) -> tp.List[Candle]:
         candle_index = self.__get_current_candle_index()
@@ -96,12 +97,11 @@ class Simulator(TradingInterface):
 
     def __get_current_price(self) -> float:
         candle = self.candles[self.__get_current_candle_index()]
-        return self.price_simulator.get_price(candle,
-                                              self.clock.get_current_candle_lifetime())
+        return self.price_simulator.get_price(
+            candle, self.clock.get_current_candle_lifetime())
 
     def __get_current_candle_index(self, truncated_index: bool = True) -> int:
-        index = self.candle_index_offset + \
-                self.clock.get_iterated_candles_count()
+        index = self.candle_index_offset + self.clock.get_iterated_candles_count()
         if not truncated_index:
             return index
         return min(index, len(self.candles) - 1)
