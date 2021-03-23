@@ -13,8 +13,6 @@ if __name__ == "__main__":
     strategy_runner.run_strategy_on_periods(
         strategy=TrendStrategy,
         strategy_config={},
-        asset_pair=AssetPair(Asset('WAVES'), Asset('USDN')),
-        timeframe=Timeframe('5m'),
         time_range=TimeRange.from_iso_format(
             from_ts='2021-02-01 00:00:00',
             to_ts='2021-02-01 12:00:00'),

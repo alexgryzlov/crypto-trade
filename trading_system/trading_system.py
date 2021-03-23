@@ -46,11 +46,13 @@ class TradingSystem:
     def __init__(self, trading_interface: TradingInterface, config: Config):
         self.logger = Logger('TradingSystem')
         self.ti = trading_interface
-        self.stats = TradingStatistics(
-            initial_balance=self.ti.get_balance(),
-            start_timestamp=self.ti.get_timestamp())
         self.currency_asset = Asset(config['currency_asset'])
-        self.wallet: tp.DefaultDict[Asset, float] = defaultdict(float)
+        self.wallet: tp.Dict[Asset, float] = {}
+        for asset_name, amount in config['wallet'].items():
+            self.wallet[Asset(asset_name)] = amount
+        self.stats = TradingStatistics(
+            initial_balance=self.wallet[self.currency_asset],
+            start_timestamp=self.ti.get_timestamp())
         self.trading_signals: tp.List[Signal] = []
         self.handlers = Handlers() \
             .add(CandlesHandler(trading_interface)) \
@@ -62,7 +64,7 @@ class TradingSystem:
 
     def stop_trading(self) -> None:
         self.cancel_all()
-        for asset, amount in copy(self.wallet).items():
+        for asset, amount in self.wallet.items():
             self.create_order(asset_pair=AssetPair(asset, self.currency_asset),
                               amount=-amount)
 
@@ -110,8 +112,7 @@ class TradingSystem:
         self.get_handler(OrdersHandler).add_new_order(copy(order))
         return order
 
-    def sell(self, asset_pair: AssetPair, amount: float,
-             price: float) -> Order:
+    def sell(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
         order = self.ti.sell(asset_pair, amount, price)
         self.logger.trading(SellEvent(asset_pair.main_asset,
                                       asset_pair.secondary_asset,
@@ -145,13 +146,13 @@ class TradingSystem:
         return self.get_handler(OrdersHandler).get_active_orders()
 
     def get_balance(self) -> float:
-        balance = self.ti.get_balance()
+        balance = self.wallet[self.currency_asset]
         self.logger.info(f'Checking balance: {balance}')
         return balance
 
     def get_wallet(self) -> tp.DefaultDict[Asset, float]:
         self.logger.info(f'Checking wallet: {self.wallet.items()}')
-        return self.wallet
+        return copy(self.wallet)
 
     def get_last_n_candles(self, n: int) -> tp.List[Candle]:
         return self.ti.get_last_n_candles(n)

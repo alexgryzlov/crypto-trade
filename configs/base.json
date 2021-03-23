@@ -1,16 +1,24 @@
 {
   "trading_system": {
-    "currency_asset": "USDN"
+    "currency_asset": "USDN",
+    "wallet": {
+      "USDN": 100.0,
+      "WAVES": 0.0
+    }
   },
 
-  "simulator": {
-    "price_simulation_type": "three_interval_path",
-    "initial_balance": 100.0,
-    "price_shift": 0.001
-  },
+  "trading_interface": {
+    "timeframe": "15m",
+    "asset_pair": ["WAVES", "USDN"],
 
-  "clock_simulator": {
-    "candles_lifetime": 20
+    "simulator": {
+      "price_simulation_type": "three_interval_path",
+      "price_shift": 0.001,
+
+      "clock_simulator": {
+        "candles_lifetime": 20
+      }
+    }
   },
 
   "market_data_downloader": {

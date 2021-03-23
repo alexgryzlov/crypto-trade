@@ -9,7 +9,7 @@ class ClockSimulator(Clock):
         super().__init__()
         self.start_ts = start_ts
         self.timeframe = timeframe
-        self.seconds_per_candle = timeframe.to_seconds()
+        self.seconds_per_candle = self.timeframe.to_seconds()
         self.candles_lifetime = int(config['candles_lifetime'])
         self.iteration = 0
 
