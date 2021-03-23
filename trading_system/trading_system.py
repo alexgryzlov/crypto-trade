@@ -51,7 +51,7 @@ class TradingSystem:
         for asset_name, amount in config['wallet'].items():
             self.wallet[Asset(asset_name)] = amount
         self.stats = TradingStatistics(
-            initial_balance=self.wallet[self.currency_asset],
+            initial_balance=self.get_total_balance(),
             start_timestamp=self.ti.get_timestamp())
         self.trading_signals: tp.List[Signal] = []
         self.handlers = Handlers() \
@@ -70,7 +70,7 @@ class TradingSystem:
 
     def get_trading_statistics(self) -> TradingStatistics:
         stats = copy(self.stats)
-        stats.set_final_balance(self.get_balance())
+        stats.set_final_balance(self.get_total_balance())
         stats.set_finish_timestamp(self.get_timestamp())
         return stats
 
@@ -150,7 +150,19 @@ class TradingSystem:
         self.logger.info(f'Checking balance: {balance}')
         return balance
 
-    def get_wallet(self) -> tp.DefaultDict[Asset, float]:
+    def get_total_balance(self) -> float:
+        total_balance = 0.0
+        for asset, amount in self.wallet.items():
+            if asset == self.currency_asset:
+                total_balance += amount
+            else:
+                if amount > 0:
+                    total_balance += self.get_sell_price() * amount
+                else:
+                    total_balance -= self.get_buy_price() * amount
+        return total_balance
+
+    def get_wallet(self) -> tp.Dict[Asset, float]:
         self.logger.info(f'Checking wallet: {self.wallet.items()}')
         return copy(self.wallet)
 

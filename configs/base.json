@@ -3,7 +3,7 @@
     "currency_asset": "USDN",
     "wallet": {
       "USDN": 100.0,
-      "WAVES": 0.0
+      "WAVES": 10.0
     }
   },
 
@@ -25,5 +25,7 @@
     "market_data_host": "https://api.wavesplatform.com",
     "matcher_host": "https://matcher.waves.exchange",
     "candles_per_request": 1400
-  }
+  },
+
+  "strategy_runner": {}
 }
