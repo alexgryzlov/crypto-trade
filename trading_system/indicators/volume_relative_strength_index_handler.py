@@ -18,7 +18,7 @@ class VolumeRelativeStrengthIndexHandler(TradingSystemHandler):
 
         self.window_size = window_size
 
-        self.values = []
+        self.values: tp.List[float] = []
 
     def update(self) -> None:
         if not super().received_new_candle():

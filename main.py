@@ -1,10 +1,15 @@
+from base.config_parser import ConfigParser
+
 from strategy_runner.strategy_runner import StrategyRunner
 from strategies.trend_strategy.trend_strategy import TrendStrategy
 
 from trading import AssetPair, Asset, Timeframe, TimeRange
 
 if __name__ == "__main__":
-    StrategyRunner().run_strategy_on_periods(
+    strategy_runner = StrategyRunner(
+        base_config=ConfigParser().load_config('configs/base.ini'))
+
+    strategy_runner.run_strategy_on_periods(
         strategy=TrendStrategy,
         strategy_config={},
         asset_pair=AssetPair(Asset('WAVES'), Asset('USDN')),

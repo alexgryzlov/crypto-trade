@@ -25,7 +25,7 @@ folder = os.path.join(path, 'orderbook_' + today)
 counter = 1
 
 
-def update_folder():
+def update_folder() -> None:
     global today
     global start_time
     global folder
