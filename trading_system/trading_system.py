@@ -18,7 +18,7 @@ from trading_system.trading_statistics import TradingStatistics
 from logger.log_events import BuyEvent, SellEvent, CancelEvent
 from logger.logger import Logger
 
-from trading import Asset, AssetPair, Signal, Order, Candle
+from trading import Asset, AssetPair, Signal, Order, Direction, Candle
 
 from helpers.typing import TradingSystemHandlerT
 
@@ -65,8 +65,9 @@ class TradingSystem:
     def stop_trading(self) -> None:
         self.cancel_all()
         for asset, amount in self.wallet.items():
-            self.create_order(asset_pair=AssetPair(asset, self.currency_asset),
-                              amount=-amount)
+            if asset != self.currency_asset:
+                self.create_order(asset_pair=AssetPair(asset, self.currency_asset),
+                                  amount=-amount)
 
     def get_trading_statistics(self) -> TradingStatistics:
         stats = copy(self.stats)
@@ -136,6 +137,9 @@ class TradingSystem:
     def order_is_filled(self, order: Order) -> bool:
         return self.ti.order_is_filled(order)
 
+    def get_price_by_direction(self, direction: Direction) -> float:
+        return self.get_buy_price() if direction == Direction.BUY else self.get_sell_price()
+
     def get_buy_price(self) -> float:
         return self.ti.get_buy_price() - PRICE_EPS
 
@@ -156,10 +160,8 @@ class TradingSystem:
             if asset == self.currency_asset:
                 total_balance += amount
             else:
-                if amount > 0:
-                    total_balance += self.get_sell_price() * amount
-                else:
-                    total_balance -= self.get_buy_price() * amount
+                direction = Direction.from_value(-amount)
+                total_balance += amount * int(direction) * self.get_price_by_direction(direction)
         return total_balance
 
     def get_wallet(self) -> tp.Dict[Asset, float]:
