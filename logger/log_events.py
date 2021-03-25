@@ -8,7 +8,7 @@ def _create_dict(*args: tp.Any) -> tp.Dict[str, tp.Any]:
     Given arguments arg_1, ..., arg_n, return 
     dict {'arg_1': arg_1, ..., 'arg_n': arg_n} 
     """
-    return dict(zip(argname(*args), args))
+    return dict(zip(argname(args), args))
 
 
 class LogEvent:
