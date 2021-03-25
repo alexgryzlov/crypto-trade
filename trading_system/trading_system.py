@@ -98,12 +98,13 @@ class TradingSystem:
             return self.sell(asset_pair, -amount, self.get_buy_price())
         return None
 
-    def buy(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
+    def buy(self, asset_pair: AssetPair, amount: float, price: float) -> tp.Optional[Order]:
         if self.wallet[asset_pair.secondary_asset] < price * amount:
             self.logger.warning(
                 f"Not enough {asset_pair.secondary_asset}. "
-                f"Cutting order amount to maximum possible value.")
-            amount = self.wallet[asset_pair.secondary_asset] / price
+                f"Order is not placed.")
+            return None
+
         order = self.ti.buy(asset_pair, amount, price)
         self.logger.trading(BuyEvent(asset_pair.main_asset,
                                      asset_pair.secondary_asset,
@@ -114,12 +115,13 @@ class TradingSystem:
         return order
 
     def sell(self, asset_pair: AssetPair, amount: float,
-             price: float) -> Order:
+             price: float) -> tp.Optional[Order]:
         if self.wallet[asset_pair.main_asset] < amount:
             self.logger.warning(
                 f"Not enough {asset_pair.main_asset}. "
-                f"Cutting order amount to maximum possible value.")
-            amount = self.wallet[asset_pair.main_asset]
+                f"Order is not placed.")
+            return None
+
         order = self.ti.sell(asset_pair, amount, price)
         self.logger.trading(SellEvent(asset_pair.main_asset,
                                       asset_pair.secondary_asset,
