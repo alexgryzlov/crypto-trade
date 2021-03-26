@@ -1,15 +1,18 @@
 from trading import Trend, TrendType, Order, AssetPair
 import trading_system.trading_system as ts
 import typing as tp
+from abc import ABC, abstractmethod
 
 
-class StrategyBase:
+class StrategyBase(ABC):
     def __init__(self, **kwargs: tp.Any):
         pass
 
+    @abstractmethod
     def init_trading(self, trading_system: ts.TradingSystem) -> None:
         pass
 
+    @abstractmethod
     def update(self) -> None:
         pass
 

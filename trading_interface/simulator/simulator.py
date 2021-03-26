@@ -83,6 +83,9 @@ class Simulator(TradingInterface):
         candle_index = self.__get_current_candle_index()
         return self.candles[max(0, candle_index - n): candle_index]
 
+    def get_orderbook(self):  # type: ignore
+        pass
+
     def __order_is_filled(self, order: Order) -> bool:
         return (order.direction == Direction.BUY and
                 order.price > self.get_sell_price()) or \

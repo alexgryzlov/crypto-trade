@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from trading import Candle
+from trading import Candle, AssetPair, Order
 from trading_interface.trading_interface import TradingInterface
 import typing as tp
 
@@ -41,3 +41,30 @@ class TradingInterfaceMock(TradingInterface):
 
     def get_last_n_candles(self, n: int) -> tp.List[Candle]:
         return self.processed_candles[-n:]
+
+    def buy(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
+        pass
+
+    def cancel_all(self) -> None:
+        pass
+
+    def cancel_order(self, order: Order) -> None:
+        pass
+
+    def get_buy_price(self) -> float:
+        pass
+
+    def get_sell_price(self) -> float:
+        pass
+
+    def order_is_filled(self, order: Order) -> bool:
+        pass
+
+    def sell(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
+        pass
+
+    def stop_trading(self) -> None:
+        pass
+
+    def get_orderbook(self):  # type: ignore
+        pass
