@@ -9,12 +9,13 @@ import time
 import os
 import csv
 import datetime
+from pathlib import Path
 from trading.asset import Asset
 from trading.asset import AssetPair
 from market_data_api.market_data_downloader import MarketDataDownloader
 
-ASSET_1 = Asset('USDN')
-ASSET_2 = Asset('WAVES')
+ASSET_1 = Asset('WAVES')
+ASSET_2 = Asset('USDN')
 TIME_DELTA = datetime.timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=1, hours=0, weeks=0)
 
 data_downloader = MarketDataDownloader()
@@ -46,10 +47,10 @@ while True:
     res = data_downloader.get_orderbook(AssetPair(ASSET_1, ASSET_2))
     readable_time = time.ctime(int(str(res['timestamp'])[:-3]))
     with open(os.path.join(folder, readable_time.split()[-2].replace(':', '-') + '.csv'), 'w') as f:
-        fnames = ['amount', 'price']
+        fnames = ['price', 'amount']
         writer = csv.DictWriter(f, fieldnames=fnames)
         writer.writeheader()
         for row in res['bids']:
-            writer.writerow(row)
+            writer.writerow(dict(zip(fnames, row)))
     time.sleep(((start_time - datetime.datetime.today()) + counter * TIME_DELTA).total_seconds())
     counter += 1
