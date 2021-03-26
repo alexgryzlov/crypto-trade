@@ -12,9 +12,6 @@ class TradingInterface:
     def get_timestamp(self) -> int:
         pass
 
-    def get_balance(self) -> float:
-        pass
-
     def buy(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
         pass
 

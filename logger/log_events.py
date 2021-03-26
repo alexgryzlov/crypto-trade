@@ -3,7 +3,7 @@ from varname import argname
 import typing as tp
 
 
-def _create_dict(*args):
+def _create_dict(*args: tp.Any) -> tp.Dict[str, tp.Any]:
     """
     Given arguments arg_1, ..., arg_n, return 
     dict {'arg_1': arg_1, ..., 'arg_n': arg_n} 

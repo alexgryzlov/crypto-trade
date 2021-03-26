@@ -4,7 +4,7 @@ import typing as tp
 
 
 class StrategyBase:
-    def __init__(self, asset_pair: AssetPair, **kwargs: tp.Any):
+    def __init__(self, **kwargs: tp.Any):
         pass
 
     def init_trading(self, trading_system: ts.TradingSystem) -> None:
