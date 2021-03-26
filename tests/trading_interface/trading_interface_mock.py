@@ -51,9 +51,6 @@ class TradingInterfaceMock(TradingInterface):
     def cancel_order(self, order: Order) -> None:
         pass
 
-    def get_balance(self) -> float:
-        pass
-
     def get_buy_price(self) -> float:
         pass
 
