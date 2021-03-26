@@ -3,12 +3,12 @@ from varname import argname
 import typing as tp
 
 
-def _create_dict(*args):
+def _create_dict(*args: tp.Any) -> tp.Dict[str, tp.Any]:
     """
     Given arguments arg_1, ..., arg_n, return 
     dict {'arg_1': arg_1, ..., 'arg_n': arg_n} 
     """
-    return dict(zip(argname(*args), args))
+    return dict(zip(argname(args), args))
 
 
 class LogEvent:
@@ -46,7 +46,7 @@ class SellEvent(LogEvent):
                  price: float, order_id: int) -> None:
         super().__init__(f'Selling {amount} of {sell_asset} for {price} '
                          f'{buy_asset}, order {order_id}',
-                         _create_dict(buy_asset, sell_asset, amout, price,
+                         _create_dict(buy_asset, sell_asset, amount, price,
                          order_id))
 
 

@@ -1,0 +1,31 @@
+{
+  "trading_system": {
+    "currency_asset": "USDN",
+    "wallet": {
+      "USDN": 100.0,
+      "WAVES": 10.0
+    }
+  },
+
+  "trading_interface": {
+    "timeframe": "15m",
+    "asset_pair": ["WAVES", "USDN"],
+
+    "simulator": {
+      "price_simulation_type": "three_interval_path",
+      "price_shift": 0.001,
+
+      "clock_simulator": {
+        "candles_lifetime": 20
+      }
+    }
+  },
+
+  "market_data_downloader": {
+    "market_data_host": "https://api.wavesplatform.com",
+    "matcher_host": "https://matcher.waves.exchange",
+    "candles_per_request": 1400
+  },
+
+  "strategy_runner": {}
+}

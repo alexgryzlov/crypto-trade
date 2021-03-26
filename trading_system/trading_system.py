@@ -4,6 +4,8 @@ import typing as tp
 from collections import defaultdict, OrderedDict
 from copy import copy
 
+from helpers.typing.common_types import Config
+
 from trading_interface.trading_interface import TradingInterface
 from trading_system.candles_handler import CandlesHandler
 from trading_system.trading_system_handler import TradingSystemHandler
@@ -16,7 +18,7 @@ from trading_system.trading_statistics import TradingStatistics
 from logger.log_events import BuyEvent, SellEvent, CancelEvent
 from logger.logger import Logger
 
-from trading import Asset, AssetPair, Signal, Order, Candle
+from trading import Asset, AssetPair, Signal, Order, Direction, Candle
 
 from helpers.typing import TradingSystemHandlerT
 
@@ -41,14 +43,16 @@ class Handlers(OrderedDict):  # type: ignore
 
 
 class TradingSystem:
-    def __init__(self, trading_interface: TradingInterface, config: tp.Dict[str, tp.Any]):
+    def __init__(self, trading_interface: TradingInterface, config: Config):
         self.logger = Logger('TradingSystem')
         self.ti = trading_interface
-        self.stats = TradingStatistics(
-            initial_balance=self.ti.get_balance(),
-            start_timestamp=self.ti.get_timestamp())
         self.currency_asset = Asset(config['currency_asset'])
-        self.wallet: tp.DefaultDict[Asset, float] = defaultdict(float)
+        self.wallet: tp.Dict[Asset, float] = {}
+        for asset_name, amount in config['wallet'].items():
+            self.wallet[Asset(asset_name)] = amount
+        self.stats = TradingStatistics(
+            initial_balance=self.get_total_balance(),
+            start_timestamp=self.ti.get_timestamp())
         self.trading_signals: tp.List[Signal] = []
         self.handlers = Handlers() \
             .add(CandlesHandler(trading_interface)) \
@@ -60,13 +64,14 @@ class TradingSystem:
 
     def stop_trading(self) -> None:
         self.cancel_all()
-        for asset, amount in copy(self.wallet).items():
-            self.create_order(asset_pair=AssetPair(asset, self.currency_asset),
-                              amount=-amount)
+        for asset, amount in self.wallet.items():
+            if asset != self.currency_asset:
+                self.create_order(asset_pair=AssetPair(asset, self.currency_asset),
+                                  amount=-amount)
 
     def get_trading_statistics(self) -> TradingStatistics:
         stats = copy(self.stats)
-        stats.set_final_balance(self.get_balance())
+        stats.set_final_balance(self.get_total_balance())
         stats.set_finish_timestamp(self.get_timestamp())
         return stats
 
@@ -114,8 +119,7 @@ class TradingSystem:
         self.get_handler(OrdersHandler).add_new_order(copy(order))
         return order
 
-    def sell(self, asset_pair: AssetPair, amount: float,
-             price: float) -> tp.Optional[Order]:
+    def sell(self, asset_pair: AssetPair, amount: float, price: float) -> tp.Optional[Order]:
         if self.wallet[asset_pair.main_asset] < amount:
             self.logger.warning(
                 f"Not enough {asset_pair.main_asset}. "
@@ -145,6 +149,9 @@ class TradingSystem:
     def order_is_filled(self, order: Order) -> bool:
         return self.ti.order_is_filled(order)
 
+    def get_price_by_direction(self, direction: Direction) -> float:
+        return self.get_buy_price() if direction == Direction.BUY else self.get_sell_price()
+
     def get_buy_price(self) -> float:
         return self.ti.get_buy_price() - PRICE_EPS
 
@@ -155,13 +162,23 @@ class TradingSystem:
         return self.get_handler(OrdersHandler).get_active_orders()
 
     def get_balance(self) -> float:
-        balance = self.ti.get_balance()
+        balance = self.wallet[self.currency_asset]
         self.logger.info(f'Checking balance: {balance}')
         return balance
 
-    def get_wallet(self) -> tp.DefaultDict[Asset, float]:
+    def get_total_balance(self) -> float:
+        total_balance = 0.0
+        for asset, amount in self.wallet.items():
+            if asset == self.currency_asset:
+                total_balance += amount
+            else:
+                direction = Direction.from_value(-amount)
+                total_balance += amount * int(direction) * self.get_price_by_direction(direction)
+        return total_balance
+
+    def get_wallet(self) -> tp.Dict[Asset, float]:
         self.logger.info(f'Checking wallet: {self.wallet.items()}')
-        return self.wallet
+        return copy(self.wallet)
 
     def get_last_n_candles(self, n: int) -> tp.List[Candle]:
         return self.ti.get_last_n_candles(n)
