@@ -46,11 +46,13 @@ while True:
         update_folder()
     res = data_downloader.get_orderbook(AssetPair(ASSET_1, ASSET_2))
     readable_time = time.ctime(int(str(res['timestamp'])[:-3]))
-    with open(os.path.join(folder, readable_time.split()[-2].replace(':', '-') + '.csv'), 'w') as f:
+    with open(os.path.join(folder, readable_time.split()[-2].replace(':', '-') + '-bid.csv'), 'w') as f_bid, \
+         open(os.path.join(folder, readable_time.split()[-2].replace(':', '-') + '-ask.csv'), 'w') as f_ask:
         fnames = ['price', 'amount']
-        writer = csv.DictWriter(f, fieldnames=fnames)
-        writer.writeheader()
-        for row in res['bids']:
-            writer.writerow(dict(zip(fnames, row)))
+        for f, price_type in ((f_bid, 'bids'), (f_ask, 'asks')):
+            writer = csv.DictWriter(f, fieldnames=fnames)
+            writer.writeheader()
+            for row in res[price_type]:
+                writer.writerow(dict(zip(fnames, row)))
     time.sleep(((start_time - datetime.datetime.today()) + counter * TIME_DELTA).total_seconds())
     counter += 1
