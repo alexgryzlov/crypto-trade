@@ -16,11 +16,6 @@ class TradingInterface(ABC):
     def get_timestamp(self) -> int:
         pass
 
-    @abstractmethod
-    def get_balance(self) -> float:
-        pass
-
-    @abstractmethod
     def buy(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
         pass
 

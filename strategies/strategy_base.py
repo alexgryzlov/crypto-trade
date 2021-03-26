@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 
 
 class StrategyBase(ABC):
-    def __init__(self, asset_pair: AssetPair, **kwargs: tp.Any):
+    def __init__(self, **kwargs: tp.Any):
         pass
 
     @abstractmethod

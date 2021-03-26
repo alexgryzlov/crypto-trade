@@ -8,6 +8,10 @@ class Direction(IntEnum):
     BUY = -1
     SELL = 1
 
+    @staticmethod
+    def from_value(value: float) -> Direction:
+        return Direction.BUY if value > 0 else Direction.SELL
+
 
 class Order:
     def __init__(self, order_id: int, asset_pair: AssetPair, amount: float,

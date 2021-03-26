@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from base.config_parser import ConfigParser
 
 from strategy_runner.strategy_runner import StrategyRunner
@@ -7,13 +9,10 @@ from trading import AssetPair, Asset, Timeframe, TimeRange
 
 if __name__ == "__main__":
     strategy_runner = StrategyRunner(
-        base_config=ConfigParser().load_config('configs/base.ini'))
-
+        base_config=ConfigParser.load_config(Path('configs/base.json')))
     strategy_runner.run_strategy_on_periods(
         strategy=TrendStrategy,
         strategy_config={},
-        asset_pair=AssetPair(Asset('WAVES'), Asset('USDN')),
-        timeframe=Timeframe('5m'),
         time_range=TimeRange.from_iso_format(
             from_ts='2021-02-01 00:00:00',
             to_ts='2021-02-01 12:00:00'),

@@ -22,8 +22,7 @@ class PriceSimulator:
     Noise can be optionally added
     """
 
-    def __init__(self, candles_lifetime: int,
-                 simulation_type: PriceSimulatorType):
+    def __init__(self, candles_lifetime: int, simulation_type: PriceSimulatorType):
         self.candles_lifetime = candles_lifetime
         self.current_ts: tp.Optional[int] = None
         self.prices = [0] * candles_lifetime
