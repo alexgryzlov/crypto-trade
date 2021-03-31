@@ -1,8 +1,11 @@
 import pytest
 from pathlib import Path
 
+from tests.configs import base_config
+from helpers.typing.common_types import ConfigsScope
+
 from strategy_runner.strategy_runner import StrategyRunner
-from trading import AssetPair, Asset, Timeframe, TimeRange
+from trading import TimeRange
 
 from tests.logger.empty_logger_mock import empty_logger_mock
 from tests.strategies.strategy_mock import StrategyMock
@@ -15,8 +18,8 @@ def strategy_runner() -> StrategyRunner:
     return StrategyRunner(base_config=ConfigParser.load_config(Path('configs/base.json')))
 
 
-def test_dummy_strategy_run(strategy_runner: StrategyRunner, empty_logger_mock: empty_logger_mock) -> None:
-    strategy_runner.run_strategy(
+def test_dummy_strategy_run(base_config: ConfigsScope, empty_logger_mock: empty_logger_mock) -> None:
+    StrategyRunner(base_config=base_config).run_strategy(
         strategy=StrategyMock,
         strategy_config={},
         time_range=TimeRange.from_iso_format(
@@ -24,8 +27,8 @@ def test_dummy_strategy_run(strategy_runner: StrategyRunner, empty_logger_mock: 
             to_ts='2021-02-10 12:00:00'))
 
 
-def test_dummy_multiple_strategy_run(strategy_runner: StrategyRunner, empty_logger_mock: empty_logger_mock) -> None:
-    strategy_runner.run_strategy_on_periods(
+def test_dummy_multiple_strategy_run(base_config: ConfigsScope, empty_logger_mock: empty_logger_mock) -> None:
+    StrategyRunner(base_config=base_config).run_strategy_on_periods(
         strategy=StrategyMock,
         strategy_config={},
         time_range=TimeRange.from_iso_format(

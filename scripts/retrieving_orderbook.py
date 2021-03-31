@@ -17,7 +17,6 @@ ASSET_1 = Asset('USDN')
 ASSET_2 = Asset('WAVES')
 TIME_DELTA = datetime.timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=1, hours=0, weeks=0)
 
-data_downloader = MarketDataDownloader()
 path = os.getcwd()
 today = datetime.datetime.today().strftime('%Y-%m-%d')
 start_time = datetime.datetime.today()
@@ -43,7 +42,7 @@ update_folder()
 while True:
     if today != datetime.datetime.today().strftime('%Y-%m-%d'):
         update_folder()
-    res = data_downloader.get_orderbook(AssetPair(ASSET_1, ASSET_2))
+    res = MarketDataDownloader.get_orderbook(AssetPair(ASSET_1, ASSET_2))
     readable_time = time.ctime(int(str(res['timestamp'])[:-3]))
     with open(os.path.join(folder, readable_time.split()[-2].replace(':', '-') + '.csv'), 'w') as f:
         fnames = ['amount', 'price']
