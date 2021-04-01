@@ -26,17 +26,14 @@ path = Path.cwd()
 today = datetime.today().strftime('%Y-%m-%d')
 start_time = datetime.today()
 folder = path / ('orderbook_' + today)
-counter = 1
 
 
 def update_folder() -> None:
     global today
     global start_time
     global folder
-    global counter
     today = datetime.today().strftime('%Y-%m-%d')
     start_time = datetime.today()
-    counter = 1
     folder = path / ('orderbook_' + today)
     folder.mkdir(exist_ok=True)
 
@@ -45,7 +42,6 @@ def load_orderbook() -> None:
     global today
     global start_time
     global folder
-    global counter
 
     print('Loading orderbook... ', end='')
     if today != datetime.today().strftime('%Y-%m-%d'):
@@ -61,7 +57,6 @@ def load_orderbook() -> None:
             writer.writeheader()
             for row in res[price_type]:
                 writer.writerow(dict(zip(fnames, row)))
-    counter += 1
     print('Done.')
 
 
