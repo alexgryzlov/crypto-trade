@@ -43,12 +43,12 @@ def load_orderbook() -> None:
     global start_time
     global folder
 
-    print('Loading orderbook... ', end='')
+    print(f"[{datetime.now().strftime('%F %T')}] Loading orderbook...", end='')
     if today != datetime.today().strftime('%Y-%m-%d'):
         update_folder()
     res = MarketDataDownloader.get_orderbook(AssetPair(ASSET_1, ASSET_2))
     readable_time = \
-        datetime.fromtimestamp(res['timestamp'] / 1000).strftime("%H-%M-%S")
+        datetime.fromtimestamp(res['timestamp'] / 1000).strftime('%H-%M-%S')
     with open(folder / (readable_time + '-bid.csv'), 'w') as f_bid, \
          open(folder / (readable_time + '-ask.csv'), 'w') as f_ask:
         fnames = ['price', 'amount']
@@ -57,7 +57,7 @@ def load_orderbook() -> None:
             writer.writeheader()
             for row in res[price_type]:
                 writer.writerow(dict(zip(fnames, row)))
-    print('Done.')
+    print(' Done.')
 
 
 @timeout(TIME_DELTA)
