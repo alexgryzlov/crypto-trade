@@ -7,12 +7,11 @@
 '''
 
 import csv
-import select
-import sys
 from datetime import datetime
 from pathlib import Path
 
 from base.config_parser import ConfigParser
+from helpers.getch import getch
 from helpers.timeout_decorator import timeout
 from market_data_api.market_data_downloader import MarketDataDownloader
 from trading.asset import Asset, AssetPair
@@ -69,9 +68,7 @@ def load_orderbook() -> None:
 @timeout(TIME_DELTA)
 def read_input() -> None:
     while True:
-        x = sys.stdin.read(1) \
-            if select.select([sys.stdin], [], [], 0)[0] != [] else None
-        if x == 'q':
+        if getch() == 'q':
             print('Stopping execution...')
             break
 
