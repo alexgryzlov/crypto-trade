@@ -3,14 +3,14 @@ from strategies.strategy_base import StrategyBase
 
 from logger.logger import Logger
 
-from trading import Trend, TrendType, AssetPair
+from trading import Trend, TrendType, Asset, AssetPair
 import trading_system.trading_system as ts
 import typing as tp
 
 
 class TrendStrategy(StrategyBase):
-    def __init__(self, asset_pair: AssetPair, **kwargs: tp.Any) -> None:
-        self.asset_pair = asset_pair
+    def __init__(self, **kwargs: tp.Any) -> None:
+        self.asset_pair = AssetPair(Asset('WAVES'), Asset('USDN'))
         self.logger = Logger('TrendStrategy')
         self.order_balance = 0
         self.active_trends: tp.List[Trend] = []

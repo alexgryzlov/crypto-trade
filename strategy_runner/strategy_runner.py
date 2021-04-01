@@ -3,7 +3,8 @@ import traceback as tb
 import typing as tp
 from pathlib import Path
 
-from trading_interface.simulator.clock_simulator import ClockSimulator
+from helpers.typing.common_types import Config, ConfigsScope
+
 from trading_interface.simulator.simulator import Simulator
 
 from trading_system.trading_system import TradingSystem
@@ -18,19 +19,17 @@ from strategies.strategy_base import StrategyBase
 
 from logger.logger import Logger
 
-from trading import AssetPair, Timestamp, Timeframe, TimeRange
+from trading import Timestamp, TimeRange
 
 
 class StrategyRunner:
-    def __init__(self, base_config: tp.Dict[str, tp.Dict[str, tp.Any]]):
+    def __init__(self, base_config: ConfigsScope):
         self.base_config = base_config
 
     def run_strategy(
             self,
             strategy: tp.Type[StrategyBase],
-            strategy_config: tp.Dict[str, tp.Any],
-            asset_pair: AssetPair,
-            timeframe: Timeframe,
+            strategy_config: Config,
             time_range: TimeRange,
             logs_path: tp.Optional[Path] = None) -> TradingStatistics:
 
@@ -38,20 +37,13 @@ class StrategyRunner:
         if logs_path is not None:
             Logger.set_logs_path(logs_path)
 
-        clock = ClockSimulator(
-            start_ts=time_range.from_ts,
-            timeframe=timeframe,
-            config=self.base_config['clock_simulator'])
-        Logger.set_clock(clock)
-
-        trading_interface = Simulator(
-            asset_pair=asset_pair,
+        simulator = Simulator(
             time_range=time_range,
-            config=self.base_config['simulator'],
-            clock=clock)
+            config=self.base_config['trading_interface'])
+        Logger.set_clock(simulator.get_clock())
 
         trading_system = TradingSystem(
-            trading_interface=trading_interface,
+            trading_interface=simulator,
             config=self.base_config['trading_system'])
 
         signal_detectors = [
@@ -59,11 +51,10 @@ class StrategyRunner:
             ExtremumSignalDetector(trading_system, 2),
             MovingAverageSignalDetector(trading_system, 25, 50)]
 
-        strategy_inst = strategy(asset_pair=asset_pair,
-                                 **strategy_config)
+        strategy_inst = strategy(**strategy_config)
         strategy_inst.init_trading(trading_system)
 
-        while trading_interface.is_alive():
+        while simulator.is_alive():
             trading_system.update()
             signals = []
             for detector in signal_detectors:
@@ -74,7 +65,7 @@ class StrategyRunner:
             strategy_inst.update()
 
         trading_system.stop_trading()
-        trading_interface.stop_trading()
+        simulator.stop_trading()
 
         stats = trading_system.get_trading_statistics()
         Logger.store_log()
@@ -85,9 +76,7 @@ class StrategyRunner:
     def run_strategy_on_periods(
             self,
             strategy: tp.Type[StrategyBase],
-            strategy_config: tp.Dict[str, tp.Any],
-            asset_pair: AssetPair,
-            timeframe: Timeframe,
+            strategy_config: Config,
             time_range: TimeRange,
             period: tp.Optional[int] = None,
             runs: tp.Optional[int] = None,
@@ -114,8 +103,6 @@ class StrategyRunner:
                 kwds={
                     'strategy': strategy,
                     'strategy_config': strategy_config,
-                    'asset_pair': asset_pair,
-                    'timeframe': timeframe,
                     'time_range': TimeRange(current_ts, next_ts),
                     'logs_path': logs_path},
                 callback=lambda run_result: run_results.append(run_result),
