@@ -144,7 +144,7 @@ class TradingSystem:
         self.ti.cancel_all()
         for order in self.get_handler(OrdersHandler).get_active_orders():
             self.logger.trading(CancelEvent(order))
-            self.get_handler(OrdersHandler).cancel_all()
+        self.get_handler(OrdersHandler).cancel_all()
 
     def order_is_filled(self, order: Order) -> bool:
         return self.ti.order_is_filled(order)
