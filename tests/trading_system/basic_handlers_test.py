@@ -71,4 +71,3 @@ def test_candles_handler(ti: TradingInterfaceMock, empty_logger_mock):
     assert candles_handler.received_new_candle() == True
     candles_handler.update()
     assert candles_handler.get_last_candle_timestamp() == ti.get_timestamp() - 1
-

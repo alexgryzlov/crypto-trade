@@ -10,6 +10,7 @@ from trading import Order, AssetPair, Asset, Direction
 one_values = [1] * 10
 ones_ti = TradingInterfaceMock.from_price_values(one_values)
 
+
 @pytest.mark.parametrize('ti', [ones_ti])
 def test_trading_system_basic(ti: TradingInterfaceMock, empty_logger_mock):
     ti.update()
@@ -51,5 +52,3 @@ def test_trading_system_basic(ti: TradingInterfaceMock, empty_logger_mock):
         assert len(ts.get_trading_signals()) == 0
         assert len(signals) >= 2
         assert any(x.name == 'filled_order' for x in signals)
-
-
