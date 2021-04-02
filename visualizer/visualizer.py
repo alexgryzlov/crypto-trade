@@ -10,8 +10,9 @@ import bisect
 from trading import TrendLine, Candle
 
 
-# fix for windows Windows
+# fix for Windows https://bugs.python.org/issue36439
 MIN_TIMESTAMP = 86400
+
 
 def to_time(ts: int) -> datetime:
     return datetime.fromtimestamp(ts)
