@@ -31,30 +31,77 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app.layout = html.Div([
     html.Table([
         html.Tr([
-            html.Th(html.Label('Candles'), style={'width': '30%'}),
-            html.Th(html.Label('Indicators'), style={'width': '30%'}),
+            html.Th(html.Label('General'), style={'width': '10%'}),
+            html.Th(html.Label('Indicators'), style={'width': '60%'}),
             html.Th(html.Label('Log'), style={'width': '30%'})
         ]),
         html.Tr([
             html.Td([
                 dcc.Checklist(
-                    id='candles-checklist',
+                    id='general-checklist',
                     options=[
                         {'label': 'Show future', 'value': 'FUT'},
+                        {'label': 'Buy/Sell Events', 'value': 'B/S'}
                     ],
-                    value=[]
+                    value=['B/S']
                 )
             ]),
             html.Td([
-                dcc.Checklist(
-                    id='indicators-checklist',
-                    options=[
-                        {'label': 'Moving Average', 'value': 'MA'},
-                        {'label': 'Trend Lines', 'value': 'T'},
-                        {'label': 'Buy/Sell Events', 'value': 'B/S'}
-                    ],
-                    value=['MA', 'T', 'B/S']
-                )
+                html.Div(
+                    dcc.Checklist(
+                        id='indicators-checklist-0',
+                        options=[
+                            {'label': 'Trend Lines', 'value': 'T'}
+                        ],
+                        value=['T'],
+                        labelStyle={'display': 'block'}
+                    ),
+                    style={'width': '20%', 'height': '100%', 'float': 'left'},
+                ),
+                html.Div(
+                    dcc.Checklist(
+                        id='indicators-checklist-1',
+                        options=[
+                            {'label': 'Trend Lines', 'value': 'T'}
+                        ],
+                        value=['T'],
+                        labelStyle={'display': 'block'}
+                    ),
+                    style={'width': '20%', 'height': '100%', 'float': 'left'},
+                ),
+                html.Div(
+                    dcc.Checklist(
+                        id='indicators-checklist-2',
+                        options=[
+                            {'label': 'Trend Lines', 'value': 'T'}
+                        ],
+                        value=['T'],
+                        labelStyle={'display': 'block'}
+                    ),
+                    style={'width': '20%', 'height': '100%', 'float': 'left'},
+                ),
+                html.Div(
+                    dcc.Checklist(
+                        id='indicators-checklist-3',
+                        options=[
+                            {'label': 'Trend Lines', 'value': 'T'}
+                        ],
+                        value=['T'],
+                        labelStyle={'display': 'block'}
+                    ),
+                    style={'width': '20%', 'height': '100%', 'float': 'left'},
+                ),
+                html.Div(
+                    dcc.Checklist(
+                        id='indicators-checklist-4',
+                        options=[
+                            {'label': 'Trend Lines', 'value': 'T'}
+                        ],
+                        value=['T'],
+                        labelStyle={'display': 'block'}
+                    ),
+                    style={'width': '20%', 'height': '100%', 'float': 'left'},
+                ),
             ]),
             html.Td([
                 html.Div(
@@ -74,20 +121,32 @@ app.layout = html.Div([
     ], style={'height': '100%'})
 ], style={'height': '80vh'})
 
+CheckLst = tp.List[tp.Dict[str, str]]
+
 
 @app.callback(
     [Output('timestamp-slider', 'min'),
      Output('timestamp-slider', 'max'),
      Output('timestamp-slider', 'value'),
-     Output('log-filename-box', 'value')],
+     Output('log-filename-box', 'value'),
+     Output('indicators-checklist-0', 'options'),
+     Output('indicators-checklist-1', 'options'),
+     Output('indicators-checklist-2', 'options'),
+     Output('indicators-checklist-3', 'options'),
+     Output('indicators-checklist-4', 'options'),
+     ],
     [Input('load-log-button', 'n_clicks'),
      Input('load-last-log-button', 'n_clicks')],
     [State('log-filename-box', 'value')])
 def update_log(n_log_clicks: tp.Optional[int],
                n_last_log_clicks: tp.Optional[int],
-               value: tp.Optional[str]) -> tp.Tuple[int, int, int, str]:
+               value: tp.Optional[str]) -> tp.Tuple[int, int, int, str,
+                                                    CheckLst, CheckLst,
+                                                    CheckLst, CheckLst,
+                                                    CheckLst]:
     global load_last_log_clicks
-    if n_last_log_clicks is not None and n_last_log_clicks > load_last_log_clicks:
+    if n_last_log_clicks is not None and \
+            n_last_log_clicks > load_last_log_clicks:
         load_last_log_clicks = n_last_log_clicks
         current_last_log = log.get_log_path()
         if current_last_log is None:
@@ -96,19 +155,28 @@ def update_log(n_log_clicks: tp.Optional[int],
     if value is None:
         raise PreventUpdate
 
-    reload_candlestick_from(value)
+    curves = reload_candlestick_from(value)
+    chks = generate_indicators_options(curves)
     if vis is None:
         raise PreventUpdate
     layers = vis.get_layers()
-    return 0, len(layers), len(layers) // 2, value
+    return 0, len(layers), len(layers) // 2, value, chks[0], chks[1], chks[2], \
+           chks[3], chks[4]
 
 
 @app.callback(Output('candlestick-chart', 'figure'),
               [Input('timestamp-slider', 'value'),
-               Input('indicators-checklist', 'value'),
-               Input('candles-checklist', 'value')])
-def update_candlestick_chart(timestamp: int, indicators: tp.List[str],
-                             candles_future: tp.List[str]) -> go.Figure:
+               Input('indicators-checklist-0', 'value'),
+               Input('indicators-checklist-1', 'value'),
+               Input('indicators-checklist-2', 'value'),
+               Input('indicators-checklist-3', 'value'),
+               Input('indicators-checklist-4', 'value'),
+               Input('general-checklist', 'value')])
+def update_candlestick_chart(timestamp: int, ind1: tp.List[str],
+                             ind2: tp.List[str], ind3: tp.List[str],
+                             ind4: tp.List[str], ind5: tp.List[str],
+                             general_info: tp.List[str]) -> go.Figure:
+    indicators = [*ind1, *ind2, *ind3, *ind4, *ind5]
     global vis
     if vis is None or timestamp is None:
         raise PreventUpdate
@@ -117,11 +185,11 @@ def update_candlestick_chart(timestamp: int, indicators: tp.List[str],
     layer = layers[timestamp]
     traces = layer.get_traces()
     visibility = layer.get_visibility_params(
-        candles_future='FUT' in candles_future,
-        ma='MA' in indicators,
+        candles_future='FUT' in general_info,
         trends='T' in indicators,
-        buy='B/S' in indicators,
-        sell='B/S' in indicators
+        buy='B/S' in general_info,
+        sell='B/S' in general_info,
+        indicators=indicators
     )
     layout = vis.get_layout()
     for trace, visible in zip(traces, visibility):
@@ -131,14 +199,33 @@ def update_candlestick_chart(timestamp: int, indicators: tp.List[str],
     return fig
 
 
-def reload_candlestick_from(new_log_path: str) -> None:
+def generate_indicators_options(labels: tp.List[str]) \
+        -> tp.Tuple[
+            CheckLst, CheckLst, CheckLst,
+            CheckLst, CheckLst]:
+    base = [
+        {'label': 'Trend Lines', 'value': 'T'}
+    ]
+    base.extend({'label': label, 'value': label} for label in labels)
+    columns: tp.List[CheckLst] = []
+    step = 3
+    for i, _ in zip(range(0, len(base), step), range(5)):
+        columns.append(base[i:i + step])
+    for i in range(len(columns), 5):
+        columns.append([])
+    return columns[0], columns[1], columns[2], columns[3], columns[4]
+
+
+def reload_candlestick_from(new_log_path: str) -> tp.List[str]:
     global vis, log_path
     log_path = new_log_path
     decomposed_log = load_log(new_log_path)
+    current_curves = log.get_all_curve_names(decomposed_log)
     vis = log.create_visualizer_from_log(decomposed_log)
+    return current_curves
 
 
-def load_log(filename: str) -> tp.Dict[tp.Any, tp.List[tp.Any]]:
+def load_log(filename: str) -> log.DecomposedLogType:
     path = Path(Logger.get_logs_path('dump') / filename)
     if not path.is_file():
         path_opt = log.get_log_path()

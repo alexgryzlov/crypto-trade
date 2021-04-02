@@ -25,11 +25,26 @@ class TrendLinesEvent(LogEvent):
                          _create_dict(lower_trend_line, upper_trend_line))
 
 
-class MovingAverageEvent(LogEvent):
+class CurveEvent(LogEvent):
+    name = 'Custom Curve'
+
+    def __init__(self,
+                 msg: str,
+                 value: float,
+                 params: str):
+        super().__init__(msg,
+                         _create_dict(value, params))
+
+
+class MovingAverageEvent(CurveEvent):
+    name = 'Moving Average'
+
     def __init__(self, average_value: float, window_size: int):
         super().__init__(
             f'New average of last {window_size} elements {average_value}',
-            _create_dict(average_value, window_size))
+            average_value,
+            f'{window_size}',
+        )
 
 
 class BuyEvent(LogEvent):
