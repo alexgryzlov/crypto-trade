@@ -10,6 +10,9 @@ import bisect
 from trading import TrendLine, Candle
 
 
+# fix for windows Windows
+MIN_TIMESTAMP = 86400
+
 def to_time(ts: int) -> datetime:
     return datetime.fromtimestamp(ts)
 
@@ -205,8 +208,8 @@ class Visualizer:
         self._layers: tp.List[GraphicLayer] = []
         self._y_min: float = 0
         self._y_max: float = 0
-        self._ts_min: datetime = to_time(0)
-        self._ts_max: datetime = to_time(0)
+        self._ts_min: datetime = to_time(MIN_TIMESTAMP + 1)
+        self._ts_max: datetime = to_time(MIN_TIMESTAMP + 1)
         self._layout = go.Layout({
             'title': {
                 'text': 'WAVES/USDN',
