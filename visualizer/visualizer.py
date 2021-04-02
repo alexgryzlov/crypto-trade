@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 import plotly.graph_objects as go
+import plotly.express as px
 from datetime import datetime
 import typing as tp
 import bisect
@@ -113,11 +114,13 @@ class GraphicLayer:
                   curve: tp.List[float],
                   timestamps: tp.List[datetime],
                   line_name: str) -> None:
+        color = px.colors.qualitative.Pastel[len(self.curve_traces)]
         curve_trace = go.Scatter(visible=False,
                                  x=timestamps,
                                  y=curve,
                                  mode='lines',
-                                 name=line_name
+                                 name=line_name,
+                                 line=dict(color=color)
                                  )
         self.curve_traces.append(curve_trace)
 

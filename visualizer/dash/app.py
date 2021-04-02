@@ -61,10 +61,8 @@ app.layout = html.Div([
                 html.Div(
                     dcc.Checklist(
                         id='indicators-checklist-1',
-                        options=[
-                            {'label': 'Trend Lines', 'value': 'T'}
-                        ],
-                        value=['T'],
+                        options=[],
+                        value=[],
                         labelStyle={'display': 'block'}
                     ),
                     style={'width': '20%', 'height': '100%', 'float': 'left'},
@@ -72,10 +70,8 @@ app.layout = html.Div([
                 html.Div(
                     dcc.Checklist(
                         id='indicators-checklist-2',
-                        options=[
-                            {'label': 'Trend Lines', 'value': 'T'}
-                        ],
-                        value=['T'],
+                        options=[],
+                        value=[],
                         labelStyle={'display': 'block'}
                     ),
                     style={'width': '20%', 'height': '100%', 'float': 'left'},
@@ -83,10 +79,8 @@ app.layout = html.Div([
                 html.Div(
                     dcc.Checklist(
                         id='indicators-checklist-3',
-                        options=[
-                            {'label': 'Trend Lines', 'value': 'T'}
-                        ],
-                        value=['T'],
+                        options=[],
+                        value=[],
                         labelStyle={'display': 'block'}
                     ),
                     style={'width': '20%', 'height': '100%', 'float': 'left'},
@@ -94,10 +88,8 @@ app.layout = html.Div([
                 html.Div(
                     dcc.Checklist(
                         id='indicators-checklist-4',
-                        options=[
-                            {'label': 'Trend Lines', 'value': 'T'}
-                        ],
-                        value=['T'],
+                        options=[],
+                        value=[],
                         labelStyle={'display': 'block'}
                     ),
                     style={'width': '20%', 'height': '100%', 'float': 'left'},
