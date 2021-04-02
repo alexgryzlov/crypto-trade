@@ -22,6 +22,7 @@ log_path_opt = log.get_log_path()
 log_path: tp.Optional[str] = None
 if log_path_opt is not None:
     log_path = log_path_opt.name
+load_last_log_clicks = 0
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -77,38 +78,29 @@ app.layout = html.Div([
 @app.callback(
     [Output('timestamp-slider', 'min'),
      Output('timestamp-slider', 'max'),
-     Output('timestamp-slider', 'value')],
-    [Input('load-log-button', 'n_clicks')],
+     Output('timestamp-slider', 'value'),
+     Output('log-filename-box', 'value')],
+    [Input('load-log-button', 'n_clicks'),
+     Input('load-last-log-button', 'n_clicks')],
     [State('log-filename-box', 'value')])
-def update_log(n_clicks: tp.Optional[int],
-               value: tp.Optional[str]) -> tp.Tuple[int, int, int]:
-    if value is None or value == log_path:
+def update_log(n_log_clicks: tp.Optional[int],
+               n_last_log_clicks: tp.Optional[int],
+               value: tp.Optional[str]) -> tp.Tuple[int, int, int, str]:
+    global load_last_log_clicks
+    if n_last_log_clicks is not None and n_last_log_clicks > load_last_log_clicks:
+        load_last_log_clicks = n_last_log_clicks
+        current_last_log = log.get_log_path()
+        if current_last_log is None:
+            raise PreventUpdate
+        value = current_last_log.name
+    if value is None:
         raise PreventUpdate
 
     reload_candlestick_from(value)
     if vis is None:
         raise PreventUpdate
     layers = vis.get_layers()
-    return 0, len(layers), len(layers) // 2
-
-
-@app.callback(
-    [Output('timestamp-slider', 'min'),
-     Output('timestamp-slider', 'max'),
-     Output('timestamp-slider', 'value'),
-     Output('log-filename-box', 'value')],
-    [Input('load-last-log-button', 'n_clicks')])
-def update_last_log(n_clicks: tp.Optional[int]) \
-        -> tp.Tuple[int, int, int, str]:
-    current_last_log = log.get_log_path()
-    if current_last_log is None:
-        raise PreventUpdate
-    if current_last_log.name != log_path:
-        reload_candlestick_from(current_last_log.name)
-    if vis is None:
-        raise PreventUpdate
-    layers = vis.get_layers()
-    return 0, len(layers), len(layers) // 2, tp.cast(str, log_path)
+    return 0, len(layers), len(layers) // 2, value
 
 
 @app.callback(Output('candlestick-chart', 'figure'),
