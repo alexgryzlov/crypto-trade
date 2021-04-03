@@ -25,18 +25,19 @@ class RelativeStrengthIndexHandler(TradingSystemHandler):
     def get_name(self) -> str:
         return f'{type(self).__name__}{self.window_size}'
 
-    def update(self) -> None:
+    def update(self) -> bool:
         if not super().received_new_candle():
-            return
+            return False
 
         candles = self.ti.get_last_n_candles(self.window_size)
         if len(candles) < self.window_size:
-            return
+            return False
 
         deltas = list(map(lambda c: c.get_delta(), candles))
         rs, rsi = self.calculate_from(deltas, self.alpha)
         self.relative_strength.append(rs)
         self.values.append(rsi)
+        return True
 
     def get_last_n_values(self, n: int) -> tp.List[float]:
         return self.values[-n:]

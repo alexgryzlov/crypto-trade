@@ -29,16 +29,17 @@ class OnBalanceVolumeHandler(TradingSystemHandler):
         candles = self.ti.get_last_n_candles(self.start_candle)
         self.values = self.calculate_from(candles)
 
-    def update(self) -> None:
+    def update(self) -> bool:
         if not super().received_new_candle():
-            return
+            return False
 
         candles = self.ti.get_last_n_candles(2)
 
         if len(candles) < 2:
-            return
+            return False
 
         self.values.append(self.calculate_from(candles)[-1] + (self.values[-1] if self.values else 0))
+        return True
 
     def get_last_n_values(self, n: int) -> tp.List[float]:
         return self.values[-n:]

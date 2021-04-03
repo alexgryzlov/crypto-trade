@@ -17,13 +17,14 @@ class OrdersHandler(TradingSystemHandler):
         self.active_orders: tp.Set[Order] = set()
         self.new_filled_orders: tp.Set[Order] = set()
 
-    def update(self) -> None:
+    def update(self) -> bool:
         filled_orders = set(
             filter(self.ti.order_is_filled, self.active_orders))
         for order in filled_orders:
             self.logger.trading(FilledOrderEvent(order.order_id))
         self.new_filled_orders |= filled_orders
         self.active_orders = self.active_orders - filled_orders
+        return len(filled_orders) > 0
 
     def get_active_orders(self) -> tp.Set[Order]:
         return self.active_orders
