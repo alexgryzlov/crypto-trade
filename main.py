@@ -11,7 +11,7 @@ from trading import TimeRange
 if __name__ == "__main__":
     base_config = ConfigParser.load_config(Path('configs/base.json'))
 
-    MarketDataDownloader.init(base_config)
+    MarketDataDownloader.init(base_config['market_data_downloader'])
 
     strategy_runner = StrategyRunner(
         base_config=base_config)
