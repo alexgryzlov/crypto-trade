@@ -14,12 +14,12 @@ from base.config_parser import ConfigParser
 
 
 @pytest.fixture
-def strategy_runner() -> StrategyRunner:
-    return StrategyRunner(base_config=ConfigParser.load_config(Path('configs/base.json')))
+def strategy_runner(base_config: ConfigsScope) -> StrategyRunner:
+    return StrategyRunner(base_config=base_config)
 
 
-def test_dummy_strategy_run(base_config: ConfigsScope, empty_logger_mock: empty_logger_mock) -> None:
-    StrategyRunner(base_config=base_config).run_strategy(
+def test_dummy_strategy_run(strategy_runner: StrategyRunner, empty_logger_mock: empty_logger_mock) -> None:
+    strategy_runner.run_strategy(
         strategy=StrategyMock,
         strategy_config={},
         time_range=TimeRange.from_iso_format(
@@ -27,8 +27,8 @@ def test_dummy_strategy_run(base_config: ConfigsScope, empty_logger_mock: empty_
             to_ts='2021-02-10 12:00:00'))
 
 
-def test_dummy_multiple_strategy_run(base_config: ConfigsScope, empty_logger_mock: empty_logger_mock) -> None:
-    StrategyRunner(base_config=base_config).run_strategy_on_periods(
+def test_dummy_multiple_strategy_run(strategy_runner: StrategyRunner, empty_logger_mock: empty_logger_mock) -> None:
+    strategy_runner.run_strategy_on_periods(
         strategy=StrategyMock,
         strategy_config={},
         time_range=TimeRange.from_iso_format(
