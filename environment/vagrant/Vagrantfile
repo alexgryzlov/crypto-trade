@@ -1,0 +1,28 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/xenial64"
+	
+  config.vm.provision "file", source: "../../requirements.txt", destination: "requirements.txt"
+
+  config.vm.provision "shell", inline: <<-SHELL
+	# git
+	add-apt-repository ppa:git-core/ppa
+	apt-get update
+	apt-get install git -y
+	
+	# python 3.8.8
+	add-apt-repository ppa:deadsnakes/ppa
+	apt-get update
+	apt-get install python3.8 -y
+
+	# pip
+	apt-get install python3.8-distutils -y
+	curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+	python3.8 get-pip.py
+
+	# pip packages
+	python3.8 -m pip install -r requirements.txt
+  SHELL
+end

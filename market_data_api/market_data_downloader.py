@@ -80,9 +80,4 @@ class MarketDataDownloader:
 
     @staticmethod
     def get_orderbook(asset_pair: AssetPair, depth: int = 50) -> tp.Dict[str, tp.Any]:
-        response = requests.get(
-            f'{MarketDataDownloader._Config["matcher_host"]}/matcher/orderbook/'  # type: ignore
-            f'{asset_pair.main_asset.to_waves_format()}/'
-            f'{asset_pair.secondary_asset.to_waves_format()}?depth='
-            f'{depth}')
-        return response.json()
+        return MarketDataDownloader._Exchange.fetch_order_book(symbol=str(asset_pair), params={'depth': str(depth)})
