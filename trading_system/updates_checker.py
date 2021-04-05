@@ -49,14 +49,15 @@ class UpdatesChecker:
         """
 
         def inner(func: tp.Callable[[tp.Any], tp.Any]) -> tp.Callable[[tp.Any], tp.Any]:
+            _name = name
+            if _name is None:
+                _name = str(func)
+
             @functools.wraps(func)
             def wrapper(*args, **kwargs):  # type: ignore
-                if '_name' not in locals():
-                    _name = name
-                    if _name is None:
-                        _name = str(func)
-                    if isinstance(_name, Callable):
-                        _name = _name(args[0])
+                nonlocal _name
+                if isinstance(_name, Callable):
+                    _name = _name(args[0])
                 result = func(*args, **kwargs)
                 if updated(result):
                     UpdatesChecker.last_updates[_name] += 1
@@ -76,12 +77,14 @@ class UpdatesChecker:
         """
 
         def inner(func: tp.Callable[[tp.Any], tp.Any]) -> tp.Callable[[tp.Any], tp.Any]:
+            if '_of' not in locals():
+                _of = of
+
             @functools.wraps(func)
             def wrapper(*args, **kwargs):  # type: ignore
-                if '_of' not in locals():
-                    _of = of
-                    if isinstance(_of, FromClass):
-                        _of = _of.get(args[0])
+                nonlocal _of
+                if isinstance(_of, FromClass):
+                    _of = _of.get(args[0])
 
                 updated_dependencies = [UpdatesChecker.last_updates[dependency] >
                                         UpdatesChecker.last_executed[str(func)][dependency]
