@@ -28,14 +28,15 @@ class AccumulationDistributionHandler(TradingSystemHandler):
         candles = self.ti.get_last_n_candles(self.start_candle)
         self.values = self.calculate_from(candles)
 
-    def update(self) -> None:
+    def update(self) -> bool:
         if not super().received_new_candle():
-            return
+            return False
 
         candle = self.ti.get_last_n_candles(1)
         cmfv = self.calculate_from(candle)[0]
 
         self.values.append(cmfv + (self.values[-1] if self.values else 0))
+        return True
 
     def get_last_n_values(self, n: int) -> tp.List[float]:
         return self.values[-n:]

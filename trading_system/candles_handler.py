@@ -10,10 +10,12 @@ class CandlesHandler(TradingSystemHandler):
         self.ti = trading_interface
         self.logger = Logger("CandlesHandler")
 
-    def update(self) -> None:
+    def update(self) -> bool:
         if super().received_new_candle():
             last_candle = self.ti.get_last_n_candles(1)[0]
             self.logger.trading(NewCandleEvent(last_candle))
+            return True
+        return False
 
     def get_last_candle_timestamp(self) -> int:
         return self.last_candle_timestamp

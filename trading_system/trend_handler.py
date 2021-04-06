@@ -24,12 +24,13 @@ class TrendHandler(TradingSystemHandler):
         self.ti = trading_interface
         self.logger = Logger("TrendHandler")
 
-    def update(self) -> None:
+    def update(self) -> bool:
         if not super().received_new_candle():
-            return
+            return False
         lower_trend_line, upper_trend_line = self.get_trend_lines()
         self.logger.trading(
             TrendLinesEvent(lower_trend_line, upper_trend_line))
+        return True
 
     def get_trend_lines(self) -> tp.Tuple[TrendLine, TrendLine]:
         candles = self.ti.get_last_n_candles(MAX_LAST_CANDLE_COUNT)
