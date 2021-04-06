@@ -4,4 +4,8 @@ SRC_FILE_LIST=$(git diff --cached --name-only --diff-filter=AMR | grep '.*\.py')
 if [ -n "$SRC_FILE_LIST" ]
 then
     flake8 $SRC_FILE_LIST
+    if [ $? -ne 0 ]
+    then
+        exit 1
+    fi
 fi
