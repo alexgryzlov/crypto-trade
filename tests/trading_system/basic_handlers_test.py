@@ -1,5 +1,5 @@
 import pytest
-import mock
+from mock import MagicMock
 
 from tests.logger.empty_logger_mock import empty_logger_mock
 
@@ -10,48 +10,55 @@ import typing as tp
 
 one_values = [1] * 10
 ones_ti = TradingInterfaceMock.from_price_values(one_values)
+ones_ti.order_is_filled = MagicMock(return_value=True)
 
 
-@pytest.mark.parametrize('ti', [ones_ti])
-def test_orders_handler(ti: TradingInterfaceMock, empty_logger_mock):
-    orders = [Order(i, AssetPair(Asset('WAVES'), Asset('USDN')), 1, 1, Direction.BUY) for i in range(10)]
+@pytest.fixture
+def sample_orders() -> tp.List[Order]:
+    return [Order(i, AssetPair(Asset('WAVES'), Asset('USDN')), 1, 1, Direction.BUY) for i in range(10)]
 
-    def always_true(order: Order) -> bool:
-        return True
 
-    with mock.patch.object(ti, 'order_is_filled', new=always_true):
-        orders_handler = OrdersHandler(ti)
-        for order in orders:
-            orders_handler.add_new_order(order)
+@pytest.fixture
+def orders_handler(request, sample_orders) -> OrdersHandler:
+    handler = OrdersHandler(request.param)
+    for order in sample_orders:
+        handler.add_new_order(order)
+    return handler
 
-        active_orders = orders_handler.get_active_orders()
-        new_order = Order(1000, AssetPair(Asset('WAVES'), Asset('USDN')), 1, 1, Direction.BUY)
-        active_orders.add(new_order)
-        assert len(active_orders) != len(orders_handler.get_active_orders())
 
-        assert len(orders_handler.get_active_orders()) == len(orders)
-        orders_handler.update()
-        assert len(orders_handler.get_active_orders()) == 0
-        assert len(orders_handler.get_new_filled_orders()) == len(orders)
-        assert len(orders_handler.get_new_filled_orders()) == 0
+@pytest.mark.parametrize("orders_handler", [ones_ti], indirect=True)
+def test_active_orders_copy(sample_orders, orders_handler, empty_logger_mock):
+    active_orders = orders_handler.get_active_orders()
+    new_order = Order(1000, AssetPair(Asset('WAVES'), Asset('USDN')), 1, 1, Direction.BUY)
+    active_orders.add(new_order)
+    assert len(active_orders) != len(orders_handler.get_active_orders())
 
-        for order in orders:
-            orders_handler.add_new_order(order)
 
-        assert len(orders_handler.get_active_orders()) == len(orders)
+@pytest.mark.parametrize("orders_handler", [ones_ti], indirect=True)
+def test_filled_orders(sample_orders, orders_handler, empty_logger_mock):
+    assert len(orders_handler.get_active_orders()) == len(sample_orders)
+    orders_handler.update()
+    assert len(orders_handler.get_active_orders()) == 0
+    assert len(orders_handler.get_new_filled_orders()) == len(sample_orders)
+    assert len(orders_handler.get_new_filled_orders()) == 0
 
-        left = len(orders)
-        for order in orders:
-            orders_handler.cancel_order(order)
-            left -= 1
-            assert len(orders_handler.get_active_orders()) == left
 
-        for order in orders:
-            orders_handler.add_new_order(order)
+@pytest.mark.parametrize("orders_handler", [ones_ti], indirect=True)
+def test_cancel_order(sample_orders, orders_handler, empty_logger_mock):
+    assert len(orders_handler.get_active_orders()) == len(sample_orders)
 
-        assert len(orders_handler.get_active_orders()) == len(orders)
-        orders_handler.cancel_all()
-        assert len(orders_handler.get_active_orders()) == 0
+    left = len(sample_orders)
+    for order in sample_orders:
+        orders_handler.cancel_order(order)
+        left -= 1
+        assert len(orders_handler.get_active_orders()) == left
+
+    for order in sample_orders:
+        orders_handler.add_new_order(order)
+
+    assert len(orders_handler.get_active_orders()) == len(sample_orders)
+    orders_handler.cancel_all()
+    assert len(orders_handler.get_active_orders()) == 0
 
 
 @pytest.mark.parametrize('ti', [ones_ti])
