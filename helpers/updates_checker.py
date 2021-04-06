@@ -21,7 +21,12 @@ class FromClass:
 
 
 def handlers_name(handler: TradingSystemHandler) -> str:
-    """ check_update helper for handlers """
+    """ check_update helper for handlers
+        Example:
+            @check_update(handlers_name)
+            def update(): ...
+            Will use name of handler as a unique key.
+    """
     return handler.get_name()
 
 

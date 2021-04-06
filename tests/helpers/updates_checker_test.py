@@ -2,7 +2,7 @@ import pytest
 
 import typing as tp
 
-from trading_system.updates_checker import UpdatesChecker, handlers_name, FromClass
+from helpers.updates_checker import UpdatesChecker, handlers_name, FromClass
 
 
 @pytest.fixture(scope="function")
