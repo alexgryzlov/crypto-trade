@@ -53,7 +53,7 @@ class MarketDataDownloader:
     @retry(RuntimeError, tries=3, delay=2)
     def _load_candles_batch(asset_pair: AssetPair, timeframe: Timeframe,
                             time_range: TimeRange) -> tp.List[tp.Dict[str, tp.Any]]:
-        asset_pair_id = MarketDataDownloader._Exchange.markets[str(asset_pair)]['id']
+        asset_pair_id = MarketDataDownloader._Exchange.markets[str(reversed(asset_pair))]['id']
         response = requests.get(
             f'{MarketDataDownloader._Config["market_data_host"]}/v0/candles/{asset_pair_id}',
             params={  # type: ignore
@@ -80,4 +80,5 @@ class MarketDataDownloader:
 
     @staticmethod
     def get_orderbook(asset_pair: AssetPair, depth: int = 50) -> tp.Dict[str, tp.Any]:
-        return MarketDataDownloader._Exchange.fetch_order_book(symbol=str(asset_pair), params={'depth': str(depth)})
+        return MarketDataDownloader._Exchange.fetch_order_book(symbol=str(reversed(asset_pair)),
+                                                               params={'depth': str(depth)})

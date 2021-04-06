@@ -21,3 +21,6 @@ class AssetPair:
 
     def __repr__(self) -> str:
         return f"{self.main_asset}/{self.secondary_asset}"
+
+    def __reversed__(self) -> 'AssetPair':
+        return AssetPair(self.secondary_asset, self.main_asset)

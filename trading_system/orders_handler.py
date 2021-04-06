@@ -1,3 +1,6 @@
+import typing as tp
+from copy import copy
+
 from trading_system.trading_system_handler import TradingSystemHandler
 from trading_interface.trading_interface import TradingInterface
 
@@ -5,8 +8,6 @@ from trading import Order
 
 from logger.log_events import FilledOrderEvent
 from logger.logger import Logger
-
-import typing as tp
 
 
 class OrdersHandler(TradingSystemHandler):
@@ -26,7 +27,7 @@ class OrdersHandler(TradingSystemHandler):
         self.active_orders = self.active_orders - filled_orders
 
     def get_active_orders(self) -> tp.Set[Order]:
-        return self.active_orders
+        return copy(self.active_orders)
 
     def get_new_filled_orders(self) -> tp.Set[Order]:
         orders = self.new_filled_orders
