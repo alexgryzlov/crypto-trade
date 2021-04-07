@@ -1,3 +1,6 @@
+import typing as tp
+from copy import copy
+
 from trading_system.trading_system_handler import TradingSystemHandler
 from trading_interface.trading_interface import TradingInterface
 
@@ -6,8 +9,6 @@ from trading import Order
 from logger.log_events import FilledOrderEvent
 from logger.logger import Logger
 from copy import copy
-
-import typing as tp
 
 
 class OrdersHandler(TradingSystemHandler):
@@ -18,13 +19,14 @@ class OrdersHandler(TradingSystemHandler):
         self.active_orders: tp.Set[Order] = set()
         self.new_filled_orders: tp.Set[Order] = set()
 
-    def update(self) -> None:
+    def update(self) -> bool:
         filled_orders = set(
             filter(self.ti.order_is_filled, self.active_orders))
         for order in filled_orders:
             self.logger.trading(FilledOrderEvent(order.order_id))
         self.new_filled_orders |= filled_orders
         self.active_orders = self.active_orders - filled_orders
+        return len(filled_orders) > 0
 
     def get_active_orders(self) -> tp.Set[Order]:
         return copy(self.active_orders)
