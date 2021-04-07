@@ -9,7 +9,8 @@ class TradingSystemHandler:
         self.ti = trading_interface
         self.last_candle_timestamp = -1
 
-    def update(self) -> None:
+    def update(self) -> bool:
+        """ Returns True if updated with new values. """
         pass
 
     def get_required_handlers(self) -> tp.List[TradingSystemHandler]:

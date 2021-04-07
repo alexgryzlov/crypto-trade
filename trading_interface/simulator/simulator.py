@@ -27,7 +27,7 @@ class Simulator(TradingInterface):
         self.price_simulator = PriceSimulator(
             candles_lifetime=self.clock.candles_lifetime,
             simulation_type=PriceSimulatorType(config['simulator']['price_simulation_type']))
-        self.candles = MarketDataDownloader().get_candles(
+        self.candles = MarketDataDownloader.get_candles(
             asset_pair=AssetPair(*config['asset_pair']),
             timeframe=self.clock.get_timeframe(),
             time_range=TimeRange(time_range.from_ts - ts_offset, time_range.to_ts))
