@@ -22,23 +22,23 @@ def test_trading_system_basic(ti: TradingInterfaceMock, empty_logger_mock):
 
     assert ts.exchange_is_alive() is ti.is_alive()
     initial_balance = ts.get_balance()
-    ts.buy(AssetPair(Asset("WAVES"), Asset("USDN")), 1, 10)
+    ts.buy(AssetPair(Asset("USDN"), Asset("WAVES")), 1, 10)
     assert len(ts.get_active_orders()) == 1
     ts.update()
     assert len(ts.get_active_orders()) == 0
-    # assert ts.get_balance() + 10 == initial_balance
+    assert ts.get_balance() + 10 == initial_balance
     assert ts.wallet[Asset("WAVES")] == 11
 
     initial_balance = ts.get_balance()
-    ts.sell(AssetPair(Asset("WAVES"), Asset("USDN")), 1, 10)
+    ts.sell(AssetPair(Asset("USDN"), Asset("WAVES")), 1, 10)
     assert len(ts.get_active_orders()) == 1
     ts.update()
     assert len(ts.get_active_orders()) == 0
-    # assert ts.get_balance() == initial_balance + 10
+    assert ts.get_balance() == initial_balance + 10
     assert ts.wallet[Asset("WAVES")] == 10
 
     initial_balance = ts.get_balance()
-    ts.sell(AssetPair(Asset("WAVES"), Asset("USDN")), 1, 10)
+    ts.sell(AssetPair(Asset("USDN"), Asset("WAVES")), 1, 10)
     assert len(ts.get_active_orders()) == 1
     ts.cancel_all()
     assert len(ts.get_active_orders()) == 0

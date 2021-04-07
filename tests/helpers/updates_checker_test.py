@@ -12,7 +12,7 @@ def clear_updates_checker() -> None:
 
 
 @UpdatesChecker.check_update('0mod3', lambda x: x is not None)
-def append_0_mod_3(x: int, array: list[int]) -> tp.Optional[int]:
+def append_0_mod_3(x: int, array: tp.List[int]) -> tp.Optional[int]:
     if x % 3 == 0:
         array.append(x)
         return x
@@ -20,7 +20,7 @@ def append_0_mod_3(x: int, array: list[int]) -> tp.Optional[int]:
 
 
 @UpdatesChecker.check_update('1mod3', lambda x: x is not None)
-def append_1_mod_3(x: int, array: list[int]) -> tp.Optional[int]:
+def append_1_mod_3(x: int, array: tp.List[int]) -> tp.Optional[int]:
     if x % 3 == 1:
         array.append(x)
         return x
@@ -28,7 +28,7 @@ def append_1_mod_3(x: int, array: list[int]) -> tp.Optional[int]:
 
 
 @UpdatesChecker.on_updates(['0mod3'], None)
-def get_if_0_mod_3(array: list[int]) -> tp.Optional[list[int]]:
+def get_if_0_mod_3(array: tp.List[int]) -> tp.Optional[tp.List[int]]:
     return array
 
 
@@ -38,9 +38,9 @@ def get_if_0_mod_3(array: list[int]) -> tp.Optional[list[int]]:
     [i for i in range(2, 15, 3)],
     [i for i in range(15)],
 ])
-def test_one_checker(values: list[int], clear_updates_checker: None) -> None:
-    array: list[int] = []
-    true_array: list[int] = []
+def test_one_checker(values: tp.List[int], clear_updates_checker: None) -> None:
+    array: tp.List[int] = []
+    true_array: tp.List[int] = []
     for elem in values:
         append_0_mod_3(elem, array)
         if elem % 3 == 0:
@@ -51,7 +51,7 @@ def test_one_checker(values: list[int], clear_updates_checker: None) -> None:
 
 
 @UpdatesChecker.on_updates(['0mod3', '1mod3'], None, 'any')
-def get_if_0_or_1_mod_3(array: list[int]) -> tp.Optional[list[int]]:
+def get_if_0_or_1_mod_3(array: tp.List[int]) -> tp.Optional[tp.List[int]]:
     return array
 
 
@@ -61,9 +61,9 @@ def get_if_0_or_1_mod_3(array: list[int]) -> tp.Optional[list[int]]:
     [i for i in range(2, 15, 3)],
     [i for i in range(15)],
 ])
-def test_two_checkers_any(values: list[int], clear_updates_checker: None) -> None:
-    array: list[int] = []
-    true_array: list[int] = []
+def test_two_checkers_any(values: tp.List[int], clear_updates_checker: None) -> None:
+    array: tp.List[int] = []
+    true_array: tp.List[int] = []
     for elem in values:
         append_0_mod_3(elem, array)
         append_1_mod_3(elem, array)
@@ -75,7 +75,7 @@ def test_two_checkers_any(values: list[int], clear_updates_checker: None) -> Non
 
 
 @UpdatesChecker.on_updates(['0mod3', '1mod3'], None, 'all')
-def get_if_0_or_1_mod_3_all(array: list[int]) -> tp.Optional[list[int]]:
+def get_if_0_or_1_mod_3_all(array: tp.List[int]) -> tp.Optional[tp.List[int]]:
     return array
 
 
@@ -85,9 +85,9 @@ def get_if_0_or_1_mod_3_all(array: list[int]) -> tp.Optional[list[int]]:
     [i for i in range(2, 15, 3)],
     [i for i in range(15)],
 ])
-def test_two_checkers_all(values: list[int], clear_updates_checker: None) -> None:
-    array: list[int] = []
-    true_array: list[int] = []
+def test_two_checkers_all(values: tp.List[int], clear_updates_checker: None) -> None:
+    array: tp.List[int] = []
+    true_array: tp.List[int] = []
     updated: int = 0  # mask of updated values (00 -- nothing updated, 11 -- both 0 and 1 updated)
     for elem in values:
         append_0_mod_3(elem, array)
