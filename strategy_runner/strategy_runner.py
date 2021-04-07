@@ -6,6 +6,9 @@ from pathlib import Path
 from helpers.typing.common_types import Config, ConfigsScope
 
 from trading_interface.simulator.simulator import Simulator
+from trading_signal_detectors.macd.macd_signal_detector import MACDSignalDetector
+from trading_signal_detectors.relative_strength_index.relative_strength_index_signal_detector import \
+    RelativeStrengthIndexSignalDetector
 
 from trading_system.trading_system import TradingSystem
 from trading_system.trading_statistics import TradingStatistics
@@ -49,7 +52,10 @@ class StrategyRunner:
         signal_detectors = [
             trading_system,
             ExtremumSignalDetector(trading_system, 2),
-            MovingAverageSignalDetector(trading_system, 25, 50)]
+            MovingAverageSignalDetector(trading_system, 25, 50),
+            RelativeStrengthIndexSignalDetector(trading_system, 9),
+            MACDSignalDetector(trading_system),
+        ]
 
         strategy_inst = strategy(**strategy_config)
         strategy_inst.init_trading(trading_system)

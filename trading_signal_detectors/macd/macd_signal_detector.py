@@ -1,5 +1,6 @@
 import numpy as np
 
+from helpers.updates_checker import UpdatesChecker, FromClass
 from trading_signal_detectors.trading_signal_detector import TradingSignalDetector
 from trading import Signal, TrendType
 from trading_system.indicators import MovingAverageCDHandler
@@ -19,6 +20,7 @@ class MACDSignalDetector(TradingSignalDetector):
         self.handler: MovingAverageCDHandler = \
             trading_system.handlers[f'MovingAverageCDHandler_s{12}_l{26}']
 
+    @UpdatesChecker.on_updates(FromClass(lambda detector: [detector.handler.get_name()]), [])
     def get_trading_signals(self):
         values = np.array(self.handler.get_last_n_values(2))
 

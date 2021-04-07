@@ -1,3 +1,4 @@
+from helpers.updates_checker import UpdatesChecker, FromClass
 from trading_signal_detectors.relative_strength_index.relative_strength_index_signal import RsiSignal
 from trading_signal_detectors.trading_signal_detector import TradingSignalDetector
 from trading import Signal
@@ -22,6 +23,7 @@ class RelativeStrengthIndexSignalDetector(TradingSignalDetector):
         self.handler: RelativeStrengthIndexHandler = \
             trading_system.handlers[f'RelativeStrengthIndexHandler{window_size}']
 
+    @UpdatesChecker.on_updates(FromClass(lambda detector: [detector.handler.get_name()]), [])
     def get_trading_signals(self):
         values = self.handler.get_last_n_values(1)
 
