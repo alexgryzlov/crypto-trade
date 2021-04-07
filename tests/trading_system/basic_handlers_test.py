@@ -13,7 +13,7 @@ ones_ti = TradingInterfaceMock.from_price_values(one_values)
 ones_ti.order_is_filled = MagicMock(return_value=True)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def sample_orders() -> tp.List[Order]:
     return [Order(i, AssetPair(Asset('WAVES'), Asset('USDN')), 1, 1, Direction.BUY) for i in range(10)]
 
@@ -64,17 +64,15 @@ def test_cancel_order(sample_orders, orders_handler, empty_logger_mock):
 @pytest.mark.parametrize('ti', [ones_ti])
 def test_candles_handler(ti: TradingInterfaceMock, empty_logger_mock):
     candles_handler = CandlesHandler(ti)
-    time = 0
     while ti.update():
         assert candles_handler.received_new_candle()
         candles_handler.update()
-        assert candles_handler.get_last_candle_timestamp() == time
-        time += 1
+        assert candles_handler.get_last_candle_timestamp() == ti.get_timestamp() - 1
     ti.refresh()
-    assert candles_handler.received_new_candle() == False
+    assert candles_handler.received_new_candle() is False
     for i in range(5):
         ti.update()
 
-    assert candles_handler.received_new_candle() == True
+    assert candles_handler.received_new_candle() is True
     candles_handler.update()
     assert candles_handler.get_last_candle_timestamp() == ti.get_timestamp() - 1
