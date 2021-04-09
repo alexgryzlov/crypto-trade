@@ -14,6 +14,10 @@ from trading_signal_detectors.extremum.extremum_signal_detector \
     import ExtremumSignalDetector
 from trading_signal_detectors.moving_average.moving_average_signal_detector \
     import MovingAverageSignalDetector
+from trading_signal_detectors.exp_moving_average.exp_moving_average_signal_detector \
+    import ExpMovingAverageSignalDetector
+from trading_signal_detectors.stochastic_rsi.stochastic_rsi_signal_detector \
+    import StochasticRSISignalDetector
 
 from strategies.strategy_base import StrategyBase
 
@@ -49,7 +53,9 @@ class StrategyRunner:
         signal_detectors = [
             trading_system,
             ExtremumSignalDetector(trading_system, 2),
-            MovingAverageSignalDetector(trading_system, 25, 50)]
+            MovingAverageSignalDetector(trading_system, 25, 50),
+            ExpMovingAverageSignalDetector(trading_system),
+            StochasticRSISignalDetector(trading_system)]
 
         strategy_inst = strategy(**strategy_config)
         strategy_inst.init_trading(trading_system)

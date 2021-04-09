@@ -59,7 +59,11 @@ class TradingSystem:
             .add(OrdersHandler(trading_interface)) \
             .add(TrendHandler(trading_interface)) \
             .add(MovingAverageHandler(trading_interface, 25)) \
-            .add(MovingAverageHandler(trading_interface, 50))
+            .add(MovingAverageHandler(trading_interface, 50)) \
+            .add(ExpMovingAverageHandler(trading_interface, 8)) \
+            .add(ExpMovingAverageHandler(trading_interface, 14)) \
+            .add(ExpMovingAverageHandler(trading_interface, 50)) \
+            .add(RelativeStrengthIndexHandler(trading_interface, 14))
         self.logger.info('Trading system initialized')
 
     def stop_trading(self) -> None:
