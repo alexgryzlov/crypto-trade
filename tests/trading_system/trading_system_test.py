@@ -83,7 +83,6 @@ def test_get_total_balance(ti: TradingInterfaceMock, ts, empty_logger_mock):
     ti.update()
 
 
-
 @pytest.mark.parametrize('ts', [ones_ti], indirect=True)
 @pytest.mark.parametrize('ti', [ones_ti])
 def test_trading_system_stop_trading(ti: TradingInterfaceMock, ts, empty_logger_mock):
@@ -109,7 +108,7 @@ def test_trading_system_get_total_balance(ti: TradingInterfaceMock, ts, empty_lo
     init_balance_waves = 10
     ts.wallet[Asset("USDN")] = init_balance_usdn
     ts.wallet[Asset("WAVES")] = init_balance_waves
-    assert pytest.approx(ts.get_total_balance(), 1e-6) ==\
+    assert pytest.approx(ts.get_total_balance(), 1e-6) == \
            (init_balance_usdn + init_balance_waves * ts.get_price_by_direction(Direction.SELL))
     ts.sell(AssetPair(Asset("USDN"), Asset("WAVES")), 10, 10)
     ts.update()
@@ -118,5 +117,5 @@ def test_trading_system_get_total_balance(ti: TradingInterfaceMock, ts, empty_lo
     ts.update()
     ti.update()
     ti.update()
-    assert pytest.approx(ts.get_total_balance(), 1e-6) ==\
+    assert pytest.approx(ts.get_total_balance(), 1e-6) == \
            (20 * ts.get_price_by_direction(Direction.SELL))
