@@ -25,6 +25,13 @@ class TrendLinesEvent(LogEvent):
                          _create_dict(lower_trend_line, upper_trend_line))
 
 
+class ExpMovingAverageEvent(LogEvent):
+    def __init__(self, value: float, window_size: int):
+        super().__init__(
+            f'New EMA of last {window_size} elements {value}',
+            _create_dict(value, window_size))
+
+
 class MovingAverageEvent(LogEvent):
     def __init__(self, average_value: float, window_size: int):
         super().__init__(
