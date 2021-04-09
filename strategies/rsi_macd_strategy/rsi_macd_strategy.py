@@ -25,8 +25,8 @@ class RSIMACDStrategy(StrategyBase):
         self.last_rsi_overbought_ts = -1
         self.last_rsi_value = -1.
         self.received_new_signal = False
-        self.scale = 7
-        self.offset = 10 - self.scale
+        self.scale = kwargs['amount_scale']
+        self.offset = kwargs['amount_offset']
 
     def init_trading(self, trading_system: ts.TradingSystem) -> None:
         self.ts = trading_system

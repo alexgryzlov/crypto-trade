@@ -22,6 +22,8 @@ if __name__ == "__main__":
         strategy=RSIMACDStrategy,
         strategy_config={
             'threshold': Timeframe('3h').to_seconds(),
+            'amount_scale': 7,
+            'amount_offset': 3,
             'asset_pair': AssetPair(Asset('USDN'), Asset('WAVES')),
         },
         time_range=TimeRange.from_iso_format(
