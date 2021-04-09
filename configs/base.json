@@ -8,7 +8,7 @@
   },
 
   "trading_interface": {
-    "timeframe": "15m",
+    "timeframe": "1h",
     "asset_pair": ["USDN", "WAVES"],
 
     "simulator": {

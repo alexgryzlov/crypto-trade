@@ -111,8 +111,8 @@ class TradingSystem:
             return None
         self.wallet[asset_pair.main_asset] -= price * amount
         order = self.ti.buy(asset_pair, amount, price)
-        self.logger.trading(BuyEvent(asset_pair.main_asset,
-                                     asset_pair.secondary_asset,
+        self.logger.trading(BuyEvent(asset_pair.secondary_asset,
+                                     asset_pair.main_asset,
                                      amount,
                                      price,
                                      order.order_id))
@@ -127,8 +127,8 @@ class TradingSystem:
             return None
         self.wallet[asset_pair.secondary_asset] -= amount
         order = self.ti.sell(asset_pair, amount, price)
-        self.logger.trading(SellEvent(asset_pair.main_asset,
-                                      asset_pair.secondary_asset,
+        self.logger.trading(SellEvent(asset_pair.secondary_asset,
+                                      asset_pair.main_asset,
                                       amount,
                                       price,
                                       order.order_id))

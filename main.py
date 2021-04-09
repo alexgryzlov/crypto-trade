@@ -21,10 +21,10 @@ if __name__ == "__main__":
     strategy_runner.run_strategy(
         strategy=RSIMACDStrategy,
         strategy_config={
-            'threshold': Timeframe('30m').to_seconds(),
+            'threshold': Timeframe('3h').to_seconds(),
             'asset_pair': AssetPair(Asset('USDN'), Asset('WAVES')),
         },
         time_range=TimeRange.from_iso_format(
             from_ts='2021-02-01 00:00:00',
-            to_ts='2021-02-02 12:00:00'),
+            to_ts='2021-03-01 12:00:00'),
     )

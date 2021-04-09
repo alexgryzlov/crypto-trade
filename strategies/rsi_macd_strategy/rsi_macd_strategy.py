@@ -4,7 +4,7 @@ from strategies.strategy_base import StrategyBase
 from logger.logger import Logger
 
 from trading import TrendType
-from trading_signal_detectors.relative_strength_index.relative_strength_index_signal import RsiSignal
+from trading_signal_detectors.relative_strength_index.relative_strength_index_signal import RsiSignal, RsiSignalType
 
 
 class RSIMACDStrategy(StrategyBase):
@@ -13,6 +13,7 @@ class RSIMACDStrategy(StrategyBase):
         buy when RSI signals oversold and MACD signals uptrend
         sell when RSI signals overbought and MACD signals downtrend
     """
+
     def __init__(self, asset_pair, **kwargs) -> None:
         self.asset_pair = asset_pair
         self.logger = Logger('RSIMACDStrategy')
@@ -22,28 +23,32 @@ class RSIMACDStrategy(StrategyBase):
         self.last_macd_downtrend_ts = -1
         self.last_rsi_oversold_ts = -1
         self.last_rsi_overbought_ts = -1
-        self.recieved_new_signal = False
+        self.last_rsi_value = -1.
+        self.received_new_signal = False
+        self.scale = 7
+        self.offset = 10 - self.scale
 
     def init_trading(self, trading_system: ts.TradingSystem) -> None:
         self.ts = trading_system
 
     def update(self) -> None:
-        if not self.recieved_new_signal:
+        if not self.received_new_signal:
             return
 
         if self.last_macd_downtrend_ts >= self.last_macd_uptrend_ts and \
                 self.last_rsi_overbought_ts >= self.last_rsi_oversold_ts and \
                 min(self.last_macd_downtrend_ts, self.last_rsi_overbought_ts) > self.__get_timestamp_border():
-            self.ts.sell(self.asset_pair, 5, self.ts.get_buy_price())
+            self.ts.sell(self.asset_pair, self.scale * self.last_rsi_value + self.offset, self.ts.get_buy_price())
+
         elif self.last_macd_uptrend_ts >= self.last_macd_downtrend_ts and \
                 self.last_rsi_oversold_ts >= self.last_rsi_overbought_ts and \
                 min(self.last_macd_uptrend_ts, self.last_rsi_oversold_ts) > self.__get_timestamp_border():
-            self.ts.buy(self.asset_pair, 5, self.ts.get_sell_price())
-        self.recieved_new_signal = False
+            self.ts.buy(self.asset_pair, self.scale * self.last_rsi_value + self.offset, self.ts.get_sell_price())
+        self.received_new_signal = False
 
     def handle_moving_average_cd_signal(self, trend) -> None:
         self.logger.info(f'Strategy received MACD signal of type {trend}')
-        self.recieved_new_signal = True
+        self.received_new_signal = True
 
         if trend == TrendType.UPTREND:
             self.last_macd_uptrend_ts = self.ts.get_timestamp()
@@ -51,10 +56,10 @@ class RSIMACDStrategy(StrategyBase):
             self.last_macd_downtrend_ts = self.ts.get_timestamp()
 
     def handle_relative_strength_index_signal(self, signal: RsiSignal) -> None:
-        self.logger.info(f'Strategy received RSI signal of type {signal}')
-        self.recieved_new_signal = True
-
-        if signal == RsiSignal.OVERSOLD:
+        self.logger.info(f'Strategy received RSI signal of type {signal.type}.')
+        self.received_new_signal = True
+        self.last_rsi_value = signal.value
+        if signal.type == RsiSignalType.OVERSOLD:
             self.last_rsi_oversold_ts = self.ts.get_timestamp()
         else:
             self.last_rsi_overbought_ts = self.ts.get_timestamp()

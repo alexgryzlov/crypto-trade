@@ -1,5 +1,5 @@
 from helpers.updates_checker import UpdatesChecker, FromClass
-from trading_signal_detectors.relative_strength_index.relative_strength_index_signal import RsiSignal
+from trading_signal_detectors.relative_strength_index.relative_strength_index_signal import RsiSignal, RsiSignalType
 from trading_signal_detectors.trading_signal_detector import TradingSignalDetector
 from trading import Signal
 from trading_system.indicators import RelativeStrengthIndexHandler
@@ -31,9 +31,13 @@ class RelativeStrengthIndexSignalDetector(TradingSignalDetector):
             return []
 
         if values[0] < self.oversold_bound:
-            return [Signal("relative_strength_index", RsiSignal.OVERSOLD)]
+            return [Signal("relative_strength_index",
+                           RsiSignal(RsiSignalType.OVERSOLD,
+                                     (self.oversold_bound - values[0]) / self.oversold_bound))]
 
         if values[0] > self.overbought_bound:
-            return [Signal("relative_strength_index", RsiSignal.OVERBOUGHT)]
+            return [Signal("relative_strength_index",
+                           RsiSignal(RsiSignalType.OVERBOUGHT,
+                                     (values[0] - self.overbought_bound) / (100 - self.overbought_bound)))]
 
         return []
