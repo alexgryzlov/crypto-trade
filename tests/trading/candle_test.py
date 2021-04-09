@@ -1,5 +1,6 @@
-from trading import Candle
 from numpy.random import random
+
+from trading import Candle
 
 
 def test_hash_and_eq() -> None:

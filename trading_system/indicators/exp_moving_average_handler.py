@@ -24,9 +24,9 @@ class ExpMovingAverageHandler(TradingSystemHandler):
     def get_name(self) -> str:
         return f'{type(self).__name__}{self.window_size}_{self.smoothing}'
 
-    def update(self) -> None:
+    def update(self) -> bool:
         if not super().received_new_candle():
-            return
+            return False
 
         new_candle = self.ti.get_last_n_candles(1)[0]
         if len(self.values) > 0:
@@ -35,6 +35,7 @@ class ExpMovingAverageHandler(TradingSystemHandler):
                 self.values[-1] * (1 - self.alpha))
         else:
             self.values.append(new_candle.get_mid_price())
+        return True
 
     def get_last_n_values(self, n: int) -> tp.List[float]:
         return self.values[-n:]

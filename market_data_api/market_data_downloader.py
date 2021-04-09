@@ -4,25 +4,34 @@ from copy import copy
 from retry import retry
 import typing as tp
 
+from helpers.typing.common_types import Config
+
 from trading import Candle, AssetPair, Timeframe, TimeRange, Timestamp
-from configs.config import CANDLES_PER_REQUEST, MARKET_DATA_HOST, MATCHER_HOST
 
 
 class MarketDataDownloader:
-    def __init__(self) -> None:
-        self.exchange = ccxt.wavesexchange()
-        self.exchange.load_markets()
+    _Config: Config = None
+    _Exchange = None
 
-    def get_candles(self, asset_pair: AssetPair, timeframe: Timeframe, time_range: TimeRange) -> tp.List[Candle]:
+    @staticmethod
+    def init(config: Config) -> None:
+        MarketDataDownloader._Config = config
+        MarketDataDownloader._Exchange = ccxt.wavesexchange()
+        MarketDataDownloader._Exchange.load_markets()
+
+    @staticmethod
+    def get_candles(asset_pair: AssetPair, timeframe: Timeframe, time_range: TimeRange) -> tp.List[Candle]:
         candles: tp.List[Candle] = []
         current_ts = time_range.from_ts
 
         while current_ts <= time_range.to_ts:
-            candles_data = self.__load_candles_batch(
+            candles_data = MarketDataDownloader._load_candles_batch(
                 asset_pair=asset_pair,
                 timeframe=timeframe,
-                time_range=TimeRange(current_ts,
-                                     min(current_ts + timeframe.to_seconds() * CANDLES_PER_REQUEST, time_range.to_ts)))
+                time_range=TimeRange(
+                    current_ts,
+                    min(current_ts + timeframe.to_seconds() * MarketDataDownloader._Config['candles_per_request'],
+                        time_range.to_ts)))
             for candle in candles_data:
                 candle_data = candle['data']
                 new_candle = Candle(
@@ -38,29 +47,30 @@ class MarketDataDownloader:
                 break
             current_ts = candles[-1].ts + 1
 
-        return self.__fill_gaps(candles)
+        return MarketDataDownloader._fill_gaps(candles)
 
+    @staticmethod
     @retry(RuntimeError, tries=3, delay=2)
-    def __load_candles_batch(self, asset_pair: AssetPair, timeframe: Timeframe,
-                             time_range: TimeRange) -> tp.List[tp.Dict[str, tp.Any]]:
-        asset_pair_id = self.exchange.markets[str(asset_pair)]['id']
+    def _load_candles_batch(asset_pair: AssetPair, timeframe: Timeframe,
+                            time_range: TimeRange) -> tp.List[tp.Dict[str, tp.Any]]:
+        asset_pair_id = MarketDataDownloader._Exchange.markets[str(reversed(asset_pair))]['id']
         response = requests.get(
-            f'{MARKET_DATA_HOST}/v0/candles/{asset_pair_id}',
+            f'{MarketDataDownloader._Config["market_data_host"]}/v0/candles/{asset_pair_id}',
             params={  # type: ignore
                 'interval': timeframe.to_string(),
-                'timeStart': self.__to_milliseconds(time_range.from_ts),
-                'timeEnd': self.__to_milliseconds(time_range.to_ts)
+                'timeStart': MarketDataDownloader._to_milliseconds(time_range.from_ts),
+                'timeEnd': MarketDataDownloader._to_milliseconds(time_range.to_ts)
             })
         if not response:
             raise RuntimeError(response.content)
         return response.json()['data']
 
     @staticmethod
-    def __to_milliseconds(ts: int) -> int:
+    def _to_milliseconds(ts: int) -> int:
         return ts * 1000
 
     @staticmethod
-    def __fill_gaps(candles: tp.List[Candle]) -> tp.List[Candle]:
+    def _fill_gaps(candles: tp.List[Candle]) -> tp.List[Candle]:
         for index in range(1, len(candles)):
             if candles[index].open is None:
                 ts = candles[index].ts
@@ -68,5 +78,7 @@ class MarketDataDownloader:
                 candles[index].ts = ts
         return candles
 
-    def get_orderbook(self, asset_pair: AssetPair, depth: int = 50) -> tp.Dict[str, tp.Any]:
-        return self.exchange.fetch_order_book(symbol=str(asset_pair), params={'depth': str(depth)})
+    @staticmethod
+    def get_orderbook(asset_pair: AssetPair, depth: int = 50) -> tp.Dict[str, tp.Any]:
+        return MarketDataDownloader._Exchange.fetch_order_book(symbol=str(reversed(asset_pair)),
+                                                               params={'depth': str(depth)})

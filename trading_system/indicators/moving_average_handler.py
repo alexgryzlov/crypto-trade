@@ -22,18 +22,19 @@ class MovingAverageHandler(TradingSystemHandler):
     def get_name(self) -> str:
         return f'{type(self).__name__}{self.window_size}'
 
-    def update(self) -> None:
+    def update(self) -> bool:
         if not super().received_new_candle():
-            return
+            return False
 
         candles = self.ti.get_last_n_candles(self.window_size)
         if len(candles) < self.window_size:
-            return
+            return False
 
         candle_values = list(map(lambda c: c.get_mid_price(), candles))
         self.values.append(self.calculate_from(candle_values))
         self.logger.trading(
             MovingAverageEvent(self.get_last_n_values(1)[0], self.window_size))
+        return True
 
     def get_last_n_values(self, n: int) -> tp.List[float]:
         return self.values[-n:]
