@@ -1,4 +1,4 @@
-from trading import Asset, TrendLine, Candle, Order
+from trading import AssetPair, TrendLine, Candle, Order
 from varname import argname
 import typing as tp
 
@@ -33,28 +33,28 @@ class MovingAverageEvent(LogEvent):
 
 
 class BuyEvent(LogEvent):
-    def __init__(self, buy_asset: Asset, sell_asset: Asset, amount: float,
+    def __init__(self, asset_pair: AssetPair, amount: float,
                  price: float, order_id: int):
-        super().__init__(f'Buying {amount} of {buy_asset} for {price} '
-                         f'{sell_asset}, order {order_id}',
-                         _create_dict(buy_asset, sell_asset, amount, price,
+        super().__init__(f'Buying {amount} of {asset_pair.amount_asset} for {price} '
+                         f'{asset_pair.price_asset}, order {order_id}',
+                         _create_dict(asset_pair.amount_asset, asset_pair.price_asset, amount, price,
                          order_id))
 
 
 class SellEvent(LogEvent):
-    def __init__(self, sell_asset: Asset, buy_asset: Asset, amount: float,
+    def __init__(self, asset_pair: AssetPair, amount: float,
                  price: float, order_id: int) -> None:
-        super().__init__(f'Selling {amount} of {sell_asset} for {price} '
-                         f'{buy_asset}, order {order_id}',
-                         _create_dict(buy_asset, sell_asset, amount, price,
+        super().__init__(f'Selling {amount} of {asset_pair.price_asset} for {price} '
+                         f'{asset_pair.amount_asset}, order {order_id}',
+                         _create_dict(asset_pair.amount_asset, asset_pair.price_asset, amount, price,
                          order_id))
 
 
 class CancelEvent(LogEvent):
     def __init__(self, order: Order):
         super().__init__(f'Cancel order {order.order_id}',
-                         {'buy_asset': order.asset_pair.main_asset,
-                          'sell_asset': order.asset_pair.secondary_asset,
+                         {'amount_asset': order.asset_pair.amount_asset,
+                          'price_asset': order.asset_pair.price_asset,
                           'amount': order.amount,
                           'price': order.price,
                           'order_id': order.order_id})

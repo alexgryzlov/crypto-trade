@@ -14,7 +14,7 @@ from trading import Timeframe, AssetPair, Asset, TimeRange
 def test_candle_count(timeframe: str, candle_count: int, base_config: ConfigsScope) -> None:
     MarketDataDownloader.init(base_config['market_data_downloader'])
     candles = MarketDataDownloader.get_candles(
-        asset_pair=AssetPair(Asset('USDN'), Asset('WAVES')),
+        asset_pair=AssetPair(Asset('WAVES'), Asset('USDN')),
         timeframe=Timeframe(timeframe),
         time_range=TimeRange.from_iso_format(
             from_ts='2021-03-01 00:00:00',
