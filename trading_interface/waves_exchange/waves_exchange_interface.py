@@ -1,54 +1,51 @@
+import ccxt
 import typing as tp
 from abc import ABC, abstractmethod
 
 from trading import AssetPair, Order, Candle
+from trading_interface.trading_interface import TradingInterface
+
+from helpers.typing.common_types import Config
 
 
-class TradingInterface(ABC):
-    @abstractmethod
+class WAVESExchangeInterface(TradingInterface):
+    def __init__(self, config: Config):
+        self._exchange = ccxt.wavesexchange()
+        self.asset_pair = AssetPair(*config['asset_pair'])
+        # MarketDataDownloader._Exchange.load_markets()
+
     def is_alive(self) -> bool:
-        pass
+        return self._exchange.fetchStatus()['status'] == 'ok'
 
-    @abstractmethod
     def stop_trading(self) -> None:
         pass
 
-    @abstractmethod
     def get_timestamp(self) -> int:
         pass
 
-    @abstractmethod
     def buy(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
         pass
 
-    @abstractmethod
     def sell(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
         pass
 
-    @abstractmethod
     def cancel_order(self, order: Order) -> None:
         pass
 
-    @abstractmethod
     def cancel_all(self) -> None:
         pass
 
-    @abstractmethod
     def order_is_filled(self, order: Order) -> bool:
         pass
 
-    @abstractmethod
     def get_buy_price(self) -> float:
-        pass
+        return self.get_orderbook()['bids'][0][0]
 
-    @abstractmethod
     def get_sell_price(self) -> float:
-        pass
+        return self.get_orderbook()['asks'][0][0]
 
-    @abstractmethod
     def get_orderbook(self):  # type: ignore
-        pass
+        return self._exchange.fetch_order_book(str(reversed(self.asset_pair)))
 
-    @abstractmethod
     def get_last_n_candles(self, n: int) -> tp.List[Candle]:
         pass

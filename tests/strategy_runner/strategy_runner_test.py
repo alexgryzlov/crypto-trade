@@ -19,7 +19,7 @@ def strategy_runner(base_config: ConfigsScope) -> StrategyRunner:
 
 
 def test_dummy_strategy_run(strategy_runner: StrategyRunner, empty_logger_mock: empty_logger_mock) -> None:
-    strategy_runner.run_strategy(
+    strategy_runner.run_simulation(
         strategy=StrategyMock,
         strategy_config={},
         time_range=TimeRange.from_iso_format(
@@ -28,7 +28,7 @@ def test_dummy_strategy_run(strategy_runner: StrategyRunner, empty_logger_mock: 
 
 
 def test_dummy_multiple_strategy_run(strategy_runner: StrategyRunner, empty_logger_mock: empty_logger_mock) -> None:
-    strategy_runner.run_strategy_on_periods(
+    strategy_runner.run_simulation_on_periods(
         strategy=StrategyMock,
         strategy_config={},
         time_range=TimeRange.from_iso_format(

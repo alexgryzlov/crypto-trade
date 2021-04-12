@@ -26,7 +26,7 @@ class StrategyRunner:
     def __init__(self, base_config: ConfigsScope):
         self.base_config = base_config
 
-    def run_strategy(
+    def run_simulation(
             self,
             strategy: tp.Type[StrategyBase],
             strategy_config: Config,
@@ -74,7 +74,7 @@ class StrategyRunner:
 
         return stats
 
-    def run_strategy_on_periods(
+    def run_simulation_on_periods(
             self,
             strategy: tp.Type[StrategyBase],
             strategy_config: Config,
@@ -100,7 +100,7 @@ class StrategyRunner:
         for run_id in range(runs):
             next_ts = current_ts + period
             pool.apply_async(
-                self.run_strategy,
+                self.run_simulation,
                 kwds={
                     'strategy': strategy,
                     'strategy_config': strategy_config,

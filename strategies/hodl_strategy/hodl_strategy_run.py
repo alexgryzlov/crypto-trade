@@ -17,7 +17,7 @@ if __name__ == "__main__":
     strategy_runner = StrategyRunner(
         base_config=base_config)
 
-    strategy_runner.run_strategy_on_periods(
+    strategy_runner.run_simulation_on_periods(
         strategy=HodlStrategy,
         strategy_config={'asset_pair': AssetPair(Asset('USDN'), Asset('WAVES'))},
         time_range=TimeRange.from_iso_format(
