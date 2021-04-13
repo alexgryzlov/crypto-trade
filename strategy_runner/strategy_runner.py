@@ -23,8 +23,13 @@ from trading import Timestamp, TimeRange
 
 
 class StrategyRunner:
-    def __init__(self, base_config: ConfigsScope):
+    def __init__(self,
+                 base_config: ConfigsScope,
+                 simulator_config: Config,
+                 exchange_config: Config):
         self.base_config = base_config
+        self.simulator_config = simulator_config
+        self.exchange_config = exchange_config
 
     def run_simulation(
             self,
@@ -39,7 +44,8 @@ class StrategyRunner:
 
         simulator = Simulator(
             time_range=time_range,
-            config=self.base_config['trading_interface'])
+            trading_config=self.base_config['trading_interface'],
+            exchange_config=self.simulator_config )
         Logger.set_clock(simulator.get_clock())
 
         trading_system = TradingSystem(

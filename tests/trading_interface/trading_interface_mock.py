@@ -42,7 +42,7 @@ class TradingInterfaceMock(TradingInterface):
     def get_last_n_candles(self, n: int) -> tp.List[Candle]:
         return self.processed_candles[-n:]
 
-    def buy(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
+    def buy(self, amount: float, price: float) -> Order:
         pass
 
     def cancel_all(self) -> None:
@@ -60,7 +60,7 @@ class TradingInterfaceMock(TradingInterface):
     def order_is_filled(self, order: Order) -> bool:
         pass
 
-    def sell(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
+    def sell(self, amount: float, price: float) -> Order:
         pass
 
     def stop_trading(self) -> None:

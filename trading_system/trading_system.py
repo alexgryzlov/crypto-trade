@@ -107,7 +107,7 @@ class TradingSystem:
                 f"Order is not placed.")
             return None
         self.wallet[asset_pair.main_asset] -= price * amount
-        order = self.ti.buy(asset_pair, amount, price)
+        order = self.ti.buy(amount, price)
         self.logger.trading(BuyEvent(asset_pair.main_asset,
                                      asset_pair.secondary_asset,
                                      amount,
@@ -123,7 +123,7 @@ class TradingSystem:
                 f"Order is not placed.")
             return None
         self.wallet[asset_pair.secondary_asset] -= amount
-        order = self.ti.sell(asset_pair, amount, price)
+        order = self.ti.sell(amount, price)
         self.logger.trading(SellEvent(asset_pair.main_asset,
                                       asset_pair.secondary_asset,
                                       amount,

@@ -16,10 +16,13 @@ if __name__ == "__main__":
     MarketDataDownloader.init(base_config['market_data_downloader'])
 
     strategy_runner = StrategyRunner(
-        base_config=base_config)
+        base_config=base_config,
+        simulator_config=ConfigParser.load_config(Path('configs/simulator.json')),
+        exchange_config=ConfigParser.load_config(Path('configs/waves.json')))
 
     e = WAVESExchangeInterface(base_config['trading_interface'])
-    print(e.get_buy_price(), e.get_sell_price())
+    print(e.get_sell_price())
+   # print(e.get_buy_price(), e.get_sell_price())
 
     # strategy_runner.run_simulation_on_periods(
     #    strategy=TrendStrategy,

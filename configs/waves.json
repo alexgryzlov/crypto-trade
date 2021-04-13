@@ -1,0 +1,8 @@
+{
+  "mainnet": {
+    "matcher": "http://matcher.waves.exchange"
+  },
+  "testnet": {
+    "matcher": "https://matcher-testnet.waves.exchange"
+  }
+}

@@ -44,10 +44,10 @@ class GridStrategy(StrategyBase):
         if order.direction.value == Direction.SELL.value:
             level = self.grid[order.order_id]
             self.grid.pop(order.order_id)
-            order = self.ts.buy(self.asset_pair, self.tranche, self.get_level_price(level - 1))
+            order = self.ts.buy(self.tranche, self.get_level_price(level - 1))
             self.grid[order.order_id] = level
         elif order.direction.value == Direction.BUY.value:
             level = self.grid[order.order_id]
             self.grid.pop(order.order_id)
-            order = self.ts.sell(self.asset_pair, self.tranche, self.get_level_price(level + 1))
+            order = self.ts.sell(self.tranche, self.get_level_price(level + 1))
             self.grid[order.order_id] = level
