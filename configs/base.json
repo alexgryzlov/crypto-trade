@@ -9,7 +9,7 @@
 
   "trading_interface": {
     "timeframe": "15m",
-    "asset_pair": ["USDN", "WAVES"],
+    "asset_pair": ["WAVES", "USDN"],
 
     "simulator": {
       "price_simulation_type": "three_interval_path",
