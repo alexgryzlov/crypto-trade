@@ -29,7 +29,7 @@ def ts(request) -> TradingSystem:
 def test_trading_system_buy(ti: TradingInterfaceMock, ts, empty_logger_mock):
     assert ts.exchange_is_alive() is ti.is_alive()
     initial_balance = ts.get_balance()
-    ts.buy(AssetPair(Asset("USDN"), Asset("WAVES")), 1, 10)
+    ts.buy(AssetPair(Asset("WAVES"), Asset("USDN")), 1, 10)
     assert len(ts.get_active_orders()) == 1
     ts.update()
     assert len(ts.get_active_orders()) == 0
@@ -41,7 +41,7 @@ def test_trading_system_buy(ti: TradingInterfaceMock, ts, empty_logger_mock):
 @pytest.mark.parametrize('ti', [ones_ti])
 def test_trading_system_sell(ti: TradingInterfaceMock, ts, empty_logger_mock):
     initial_balance = ts.get_balance()
-    ts.sell(AssetPair(Asset("USDN"), Asset("WAVES")), 1, 10)
+    ts.sell(AssetPair(Asset("WAVES"), Asset("USDN")), 1, 10)
     assert len(ts.get_active_orders()) == 1
     ts.update()
     assert len(ts.get_active_orders()) == 0
@@ -53,7 +53,7 @@ def test_trading_system_sell(ti: TradingInterfaceMock, ts, empty_logger_mock):
 @pytest.mark.parametrize('ti', [ones_ti])
 def test_trading_system_cancel(ti: TradingInterfaceMock, ts, empty_logger_mock):
     initial_balance = ts.get_balance()
-    ts.sell(AssetPair(Asset("USDN"), Asset("WAVES")), 1, 10)
+    ts.sell(AssetPair(Asset("WAVES"), Asset("USDN")), 1, 10)
     assert len(ts.get_active_orders()) == 1
     ts.cancel_all()
     assert len(ts.get_active_orders()) == 0
@@ -67,8 +67,8 @@ def test_trading_system_filled_signal(ti: TradingInterfaceMock, ts, empty_logger
     assert ts.get_price_by_direction(Direction.BUY) == ts.get_buy_price()
     assert ts.get_price_by_direction(Direction.SELL) == ts.get_sell_price()
 
-    ts.buy(AssetPair(Asset("USDN"), Asset("WAVES")), 1, 10)
-    ts.buy(AssetPair(Asset("USDN"), Asset("WAVES")), 1, 10)
+    ts.buy(AssetPair(Asset("WAVES"), Asset("USDN")), 1, 10)
+    ts.buy(AssetPair(Asset("WAVES"), Asset("USDN")), 1, 10)
     ts.update()
 
     signals = ts.get_trading_signals()
@@ -90,8 +90,8 @@ def test_trading_system_stop_trading(ti: TradingInterfaceMock, ts, empty_logger_
     init_balance = 30
     ts.wallet[Asset("USDN")] = init_balance
     ts.wallet[Asset("WAVES")] = 0
-    ts.buy(AssetPair(Asset("USDN"), Asset("WAVES")), 1, 10)
-    ts.buy(AssetPair(Asset("USDN"), Asset("WAVES")), 1, 10)
+    ts.buy(AssetPair(Asset("WAVES"), Asset("USDN")), 1, 10)
+    ts.buy(AssetPair(Asset("WAVES"), Asset("USDN")), 1, 10)
     assert ts.wallet[Asset("USDN")] == init_balance - 20
     assert len(ts.get_active_orders()) == 2
     ts.stop_trading()
@@ -110,10 +110,10 @@ def test_trading_system_get_total_balance(ti: TradingInterfaceMock, ts, empty_lo
     ts.wallet[Asset("WAVES")] = init_balance_waves
     assert pytest.approx(ts.get_total_balance(), 1e-6) == \
            (init_balance_usdn + init_balance_waves * ts.get_price_by_direction(Direction.SELL))
-    ts.sell(AssetPair(Asset("USDN"), Asset("WAVES")), 10, 10)
+    ts.sell(AssetPair(Asset("WAVES"), Asset("USDN")), 10, 10)
     ts.update()
     assert pytest.approx(ts.get_total_balance(), 1e-6) == init_balance_usdn + 10 * 10
-    ts.buy(AssetPair(Asset("USDN"), Asset("WAVES")), 20, 10)
+    ts.buy(AssetPair(Asset("WAVES"), Asset("USDN")), 20, 10)
     ts.update()
     ti.update()
     ti.update()
