@@ -9,12 +9,18 @@ from helpers.typing.utils import require
 class TradingStatistics:
     def __init__(self,
                  initial_balance: tp.Optional[float] = None,
-                 start_timestamp: tp.Optional[int] = None) -> None:
+                 start_timestamp: tp.Optional[int] = None,
+                 initial_coin_balance: tp.Optional[float] = None) -> None:
         self.initial_balance = initial_balance
+        self.initial_coin_balance = initial_coin_balance
         self.final_balance: tp.Optional[float] = None
+        self.hodl_result: tp.Optional[float] = None
         self.start_timestamp = start_timestamp
         self.finish_timestamp: tp.Optional[int] = None
         self.filled_order_count = 0
+
+    def set_hodl_result(self, balance: float) -> None:
+        self.hodl_result = balance
 
     def set_initial_balance(self, balance: float) -> None:
         self.initial_balance = balance
@@ -38,7 +44,13 @@ class TradingStatistics:
                f'final balance:   {require(self.final_balance):.2f}\n' \
                f'delta:           {self._calc_absolute_delta():.2f}\n' \
                f'delta(%):        {self._calc_relative_delta():.1f}%\n' \
-               f'filled orders:   {self.filled_order_count}'
+               f'filled orders:   {self.filled_order_count}\n' \
+               f'--------------------------------------------------------\n' \
+               f'hodl_result:   {self.hodl_result}\n' \
+               f'hodl_result(%):   {self._calc_absolute_hodl_delta()}%\n'
+
+    def _calc_absolute_hodl_delta(self) -> float:
+        return (require(self.hodl_result) - require(self.initial_balance)) / (require(self.initial_balance)) * 100
 
     def _calc_absolute_delta(self) -> float:
         return require(self.final_balance) - require(self.initial_balance)
@@ -55,6 +67,7 @@ class TradingStatistics:
 
         stats = cls()
         stats.set_initial_balance(sum([require(s.initial_balance) for s in stats_array]))
+        stats.set_hodl_result(sum([require(s.hodl_result) for s in stats_array]))
         stats.set_final_balance(sum([require(s.final_balance) for s in stats_array]))
         stats.set_start_timestamp(min([require(s.start_timestamp) for s in stats_array]))
         stats.set_finish_timestamp(max([require(s.finish_timestamp) for s in stats_array]))

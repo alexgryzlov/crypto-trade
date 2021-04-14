@@ -52,7 +52,8 @@ class TradingSystem:
             self.wallet[Asset(asset_name)] = amount
         self.stats = TradingStatistics(
             initial_balance=self.get_total_balance(),
-            start_timestamp=self.ti.get_timestamp())
+            start_timestamp=self.ti.get_timestamp(),
+            initial_coin_balance=self.get_total_coin_balance())
         self.trading_signals: tp.List[Signal] = []
         self.handlers = Handlers() \
             .add(CandlesHandler(trading_interface)) \
@@ -71,6 +72,7 @@ class TradingSystem:
 
     def get_trading_statistics(self) -> TradingStatistics:
         stats = copy(self.stats)
+        stats.set_hodl_result(self.stats.initial_coin_balance * self.get_sell_price())
         stats.set_final_balance(self.get_total_balance())
         stats.set_finish_timestamp(self.get_timestamp())
         return stats
@@ -161,6 +163,15 @@ class TradingSystem:
         balance = self.wallet[self.currency_asset]
         self.logger.info(f'Checking balance: {balance}')
         return balance
+
+    def get_total_coin_balance(self) -> float:
+        total_coins = 0.0
+        for asset, amount in self.wallet.items():
+            if asset != self.currency_asset:
+                total_coins += amount
+            else:
+                total_coins += amount / self.ti.get_buy_price()
+        return total_coins
 
     def get_total_balance(self) -> float:
         total_balance = 0.0
