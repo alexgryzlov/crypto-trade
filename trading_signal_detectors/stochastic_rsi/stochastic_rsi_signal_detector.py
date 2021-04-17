@@ -60,5 +60,5 @@ class StochasticRSISignalDetector(TradingSignalDetector):
 
     def __calculate_sma(self, values: tp.List[float],
                         window: int) -> tp.List[float]:
-        cummean = pd.Series(values).rolling(window).mean()
-        return cummean[-window:].tolist()
+        rolling_mean = pd.Series(values).rolling(window).mean()
+        return rolling_mean[-window:].tolist()
