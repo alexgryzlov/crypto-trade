@@ -13,12 +13,14 @@ logging.addLevelName(TRADING, "TRADING")
 
 
 class Logger:
-    def __init__(self, name: str, stdout: bool = False):
+    def __init__(self, name: str, file: bool = True, stdout: bool = False, sys_time: bool = False):
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.INFO)
-        self.logger.addHandler(self._get_trading_file_handler())
-        self.logger.addHandler(self._get_info_file_handler())
-        self.logger.addFilter(Logger.TimestampFilter())
+        if file:
+            self.logger.addHandler(self._get_trading_file_handler())
+            self.logger.addHandler(self._get_info_file_handler())
+        if not sys_time:
+            self.logger.addFilter(Logger.TimestampFilter())
         if stdout:
             self.logger.addHandler(self.__get_stream_handler())
 

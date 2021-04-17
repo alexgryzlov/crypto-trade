@@ -2,6 +2,7 @@ import multiprocessing as mp
 import traceback as tb
 import typing as tp
 from pathlib import Path
+from os import getpid
 
 from helpers.typing.common_types import Config, ConfigsScope
 
@@ -31,7 +32,13 @@ class StrategyRunner:
             strategy: tp.Type[StrategyBase],
             strategy_config: Config,
             time_range: TimeRange,
-            logs_path: tp.Optional[Path] = None) -> TradingStatistics:
+            logs_path: tp.Optional[Path] = None,
+            stdout_frequency: int = 10) -> TradingStatistics:
+
+        logger = Logger(f"Runner{getpid()}", file=False, stdout=True, sys_time=True)
+
+        def get_progress() -> float:
+            return (simulator.get_timestamp() - time_range.from_ts) / time_range.get_range() * 100
 
         Logger.set_log_file_name(Timestamp.to_iso_format(time_range.from_ts))
         if logs_path is not None:
@@ -53,8 +60,13 @@ class StrategyRunner:
 
         strategy_inst = strategy(**strategy_config)
         strategy_inst.init_trading(trading_system)
-
+        current_progress = 0
+        logger.info("Strategy started")
         while simulator.is_alive():
+            if get_progress() // stdout_frequency * stdout_frequency != current_progress:
+                current_progress = get_progress() // stdout_frequency * stdout_frequency
+                logger.info(f"{current_progress}% of simulation passed."
+                                 f" Simulation time: {Timestamp.to_iso_format(simulator.get_timestamp())}")
             trading_system.update()
             signals = []
             for detector in signal_detectors:
