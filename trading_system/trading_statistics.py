@@ -46,8 +46,9 @@ class TradingStatistics:
                f'delta(%):        {self._calc_relative_delta():.1f}%\n' \
                f'filled orders:   {self.filled_order_count}\n' \
                f'--------------------------------------------------------\n' \
-               f'hodl_result:   {self.hodl_result}\n' \
-               f'hodl_result(%):   {self._calc_absolute_hodl_delta()}%\n'
+               f'hodl_result:   {require(self.hodl_result): .2f}\n' \
+               f'delta hodl_result:   {require(self.hodl_result) - require(self.initial_balance): .2f}\n' \
+               f'delta hodl_result(%):   {self._calc_absolute_hodl_delta(): .1f}%\n'
 
     def _calc_absolute_hodl_delta(self) -> float:
         return (require(self.hodl_result) - require(self.initial_balance)) / (require(self.initial_balance)) * 100
