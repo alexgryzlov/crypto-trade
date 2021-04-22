@@ -71,8 +71,6 @@ class StrategyRunner:
             strategy_instance.update()
 
         trading_system.stop_trading()
-        simulator.stop_trading()
-        trading_system.update()
 
         stats = trading_system.get_trading_statistics()
         Logger.store_log()

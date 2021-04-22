@@ -66,10 +66,8 @@ class TradingSystem:
 
     def stop_trading(self) -> None:
         self.cancel_all()
-        for asset, amount in self.wallet.items():
-            if asset != self.currency_asset:
-                self.create_order(asset_pair=AssetPair(asset, self.currency_asset),
-                                  amount=-amount)
+        self.ti.stop_trading()
+        self.update()
 
     def get_trading_statistics(self) -> TradingStatistics:
         stats = copy(self.stats)
