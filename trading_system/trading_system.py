@@ -22,8 +22,6 @@ from trading import Asset, AssetPair, Signal, Order, Direction, Candle
 
 from helpers.typing import TradingSystemHandlerT
 
-PRICE_EPS = 0.005
-
 
 class Handlers(OrderedDict):  # type: ignore
     def add(self, handler: TradingSystemHandler) -> Handlers:
@@ -151,10 +149,10 @@ class TradingSystem:
         return self.get_buy_price() if direction == Direction.BUY else self.get_sell_price()
 
     def get_buy_price(self) -> float:
-        return self.ti.get_buy_price() - PRICE_EPS
+        return self.ti.get_buy_price()
 
     def get_sell_price(self) -> float:
-        return self.ti.get_sell_price() + PRICE_EPS
+        return self.ti.get_sell_price()
 
     def get_active_orders(self) -> tp.Set[Order]:
         return self.get_handler(OrdersHandler).get_active_orders()
