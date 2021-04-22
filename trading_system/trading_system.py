@@ -46,9 +46,8 @@ class TradingSystem:
         self.logger = Logger('TradingSystem')
         self.ti = trading_interface
         self.currency_asset = Asset(config['currency_asset'])
-        self.wallet: tp.Dict[Asset, float] = {}
-        for asset_name, amount in config['wallet'].items():
-            self.wallet[Asset(asset_name)] = amount
+        self.wallet: tp.Dict[Asset, float] = {Asset(asset_name): amount
+            for asset_name, amount in config['wallet'].items()}
         self.stats = TradingStatistics(
             initial_balance=self.get_total_balance(),
             start_timestamp=self.ti.get_timestamp(),
