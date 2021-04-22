@@ -49,6 +49,8 @@ class TradingSystem:
         self.wallet: tp.Dict[Asset, float] = {Asset(asset_name): amount
             for asset_name, amount in config['wallet'].items()}
         self.stats = TradingStatistics(
+            price_asset=self.currency_asset,
+            initial_wallet=self.wallet,
             initial_balance=self.get_total_balance(),
             start_timestamp=self.ti.get_timestamp(),
             initial_coin_balance=self.get_total_coin_balance())
@@ -65,12 +67,12 @@ class TradingSystem:
 
     def stop_trading(self) -> None:
         self.cancel_all()
-        self.ti.stop_trading()
         self.update()
 
     def get_trading_statistics(self) -> TradingStatistics:
         stats = copy(self.stats)
         stats.set_hodl_result(self.stats.initial_coin_balance * self.ti.get_sell_price())
+        stats.set_final_wallet(self.get_wallet())
         stats.set_final_balance(self.get_total_balance())
         stats.set_finish_timestamp(self.get_timestamp())
         return stats
