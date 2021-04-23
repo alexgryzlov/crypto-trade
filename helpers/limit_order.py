@@ -23,7 +23,7 @@ class LimitOrder():
     def update(self) -> None:
         for order, take_profit, stop_loss in copy(self.orders):
             if not self.ts.order_is_filled(order):
-                return
+                continue
             direction = Direction(-order.direction)
             sgn = int(direction)
             cur_price = self.ts.get_price_by_direction(order.direction)
