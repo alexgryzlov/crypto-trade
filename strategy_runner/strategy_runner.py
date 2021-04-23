@@ -35,7 +35,8 @@ class StrategyRunner:
             logs_path: tp.Optional[Path] = None,
             stdout_frequency: int = 10) -> TradingStatistics:
 
-        logger = Logger(f"Runner{getpid()}", file=False, stdout=True, sys_time=True)
+        logger = Logger(f"Runner{getpid()}",
+                        config=self.base_config['strategy_runner']['logger'])
 
         def get_progress() -> float:
             return (simulator.get_timestamp() - time_range.from_ts) / time_range.get_range() * 100
@@ -60,13 +61,14 @@ class StrategyRunner:
 
         strategy_inst = strategy(**strategy_config)
         strategy_inst.init_trading(trading_system)
-        current_progress = 0
+        last_checkpoint = 0
         logger.info("Strategy started")
         while simulator.is_alive():
-            if get_progress() // stdout_frequency * stdout_frequency != current_progress:
-                current_progress = get_progress() // stdout_frequency * stdout_frequency
-                logger.info(f"{current_progress}% of simulation passed."
-                                 f" Simulation time: {Timestamp.to_iso_format(simulator.get_timestamp())}")
+            current_checkpoint = get_progress() // stdout_frequency * stdout_frequency
+            if current_checkpoint != last_checkpoint:
+                last_checkpoint = current_checkpoint
+                logger.info(f"{last_checkpoint}% of simulation passed."
+                            f" Simulation time: {Timestamp.to_iso_format(simulator.get_timestamp())}")
             trading_system.update()
             signals = []
             for detector in signal_detectors:

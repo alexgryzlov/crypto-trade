@@ -7,25 +7,31 @@ from logger.clock import Clock
 from logger.log_events import LogEvent
 
 import typing as tp
+from helpers.typing.common_types import Config
 
 TRADING = logging.WARNING + 5
 logging.addLevelName(TRADING, "TRADING")
 
 
 class Logger:
-    def __init__(self, name: str, file: bool = True, stdout: bool = False, sys_time: bool = False):
+    def __init__(self, name: str, config: Config = None):
+        self.config = Logger._default_config if config is None else config
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.INFO)
-        if file:
+        if self.config["file_output"]:
             self.logger.addHandler(self._get_trading_file_handler())
             self.logger.addHandler(self._get_info_file_handler())
-        if not sys_time:
-            self.logger.addFilter(Logger.TimestampFilter())
-        if stdout:
+        if self.config["std_output"]:
             self.logger.addHandler(self.__get_stream_handler())
+        if not self.config["system_time"]:
+            self.logger.addFilter(Logger.TimestampFilter())
 
     def __getattr__(self, item: str) -> tp.Any:
         return getattr(self.logger, item)
+
+    @classmethod
+    def set_default_config(cls, cfg: Config):
+        cls._default_config = cfg
 
     @classmethod
     def set_clock(cls, clock: Clock) -> None:
@@ -102,9 +108,10 @@ class Logger:
             return True
 
     _clock = Clock()
-    _log_format = (f'[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s ',
+    _log_format = ('[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s ',
                    '%m-%d %H:%M:%S')
     _file_handlers: tp.Dict[Path, logging.FileHandler] = {}
     _dump_logs: tp.List[LogEvent] = []
     _file_name: tp.Optional[str] = None
     _logs_path = Path('logs')
+    _default_config: Config = None

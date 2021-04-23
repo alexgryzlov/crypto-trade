@@ -27,5 +27,17 @@
     "candles_per_request": 1400
   },
 
-  "strategy_runner": {}
+  "strategy_runner": {
+    "logger": {
+      "file_output": false,
+      "std_output": true,
+      "system_time": true
+    }
+  },
+
+  "default_logger": {
+    "file_output": true,
+    "std_output": false,
+    "system_time": false
+  }
 }
