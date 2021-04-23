@@ -9,7 +9,6 @@ import bisect
 
 from trading import TrendLine, Candle
 
-
 # fix for Windows https://bugs.python.org/issue36439
 MIN_TIMESTAMP = 86400
 
@@ -117,14 +116,16 @@ class GraphicLayer:
     def add_curve(self,
                   curve: tp.List[float],
                   timestamps: tp.List[datetime],
-                  line_name: str) -> None:
+                  line_name: str,
+                  meta: tp.List[str]) -> None:
         color = px.colors.qualitative.Pastel[len(self.curve_traces)]
         curve_trace = go.Scatter(visible=False,
                                  x=timestamps,
                                  y=curve,
                                  mode='lines',
                                  name=line_name,
-                                 line=dict(color=color)
+                                 line=dict(color=color),
+                                 text=meta,
                                  )
         self.curve_traces.append(curve_trace)
 
@@ -266,14 +267,20 @@ class Visualizer:
         curve = []
         timestamps = []
         last_added = -1
+        meta = []
         for event in curve_events:
             value = event['value']
+            meta.append(f"{curve_name}<br>{event['value_fmt']}")
+            min_val, max_val = event['min_value'], event['max_value']
+            if min_val is not None:
+                value = self.__scale(value, min_val, max_val)
             curve.append(value)
             ts = event['ts']
             timestamps.append(to_time(ts))
             ind = self.__get_ind_by_ts(ts)
             if ind > last_added:
-                self._layers[ind].add_curve(curve, timestamps, curve_name)
+                self._layers[ind].add_curve(curve, timestamps, curve_name,
+                                            meta)
                 last_added = ind
 
     def add_buy_events(self, timestamps: tp.List[int], prices: tp.List[float],
@@ -298,6 +305,13 @@ class Visualizer:
         for layer in self._layers:
             traces.extend(layer.get_traces())
         return go.Figure(data=traces, layout=self._layout)
+
+    def __scale(self, value: float, min_val: float, max_val: float) -> float:
+        value = (value - min_val) / (max_val - min_val)
+        border = 0.05 * (self._y_max - self._y_min)
+        value = value * (self._y_max - self._y_min - 2 * border) + \
+                self._y_min + border
+        return value
 
     def __adjust_timestamps_and_price(self, timestamps: tp.List[int],
                                       prices: tp.List[float],

@@ -31,9 +31,14 @@ class CurveEvent(LogEvent):
     def __init__(self,
                  msg: str,
                  value: float,
-                 params: str):
+                 params: str,
+                 min_value: tp.Optional[float] = None,
+                 max_value: tp.Optional[float] = None,
+                 value_fmt: str = 'Value: {value:.4f}'):
+        value_fmt = value_fmt.format(value=value)
         super().__init__(msg,
-                         _create_dict(value, params))
+                         _create_dict(value, params, min_value, max_value,
+                                      value_fmt))
 
 
 class ExpMovingAverageEvent(CurveEvent):
@@ -54,6 +59,17 @@ class MovingAverageEvent(CurveEvent):
             f'New average of last {window_size} elements {average_value}',
             average_value,
             f'{window_size}',
+        )
+
+
+class RSIEvent(CurveEvent):
+    name = 'RSI'
+
+    def __init__(self, rsi: float):
+        super().__init__(
+            f'New RSI {rsi:.2f}%', rsi, '',
+            min_value=0, max_value=100,
+            value_fmt='RSI: {value:.2f}%'
         )
 
 
