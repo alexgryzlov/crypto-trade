@@ -67,9 +67,9 @@ class RSIEvent(CurveEvent):
 
     def __init__(self, rsi: float):
         super().__init__(
-            f'New RSI {rsi:.2f}%', rsi, '',
+            f'New RSI {rsi:.2f}', rsi, '',
             min_value=0, max_value=100,
-            value_fmt='RSI: {value:.2f}%'
+            value_fmt='RSI: {value:.2f}'
         )
 
 
