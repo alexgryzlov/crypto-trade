@@ -32,7 +32,8 @@
       "file_output": false,
       "std_output": true,
       "system_time": true
-    }
+    },
+    "stdout_frequency": 10
   },
 
   "default_logger": {
