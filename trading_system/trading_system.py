@@ -59,7 +59,11 @@ class TradingSystem:
             .add(OrdersHandler(trading_interface)) \
             .add(TrendHandler(trading_interface)) \
             .add(MovingAverageHandler(trading_interface, 25)) \
-            .add(MovingAverageHandler(trading_interface, 50))
+            .add(MovingAverageHandler(trading_interface, 50)) \
+            .add(ExpMovingAverageHandler(trading_interface, 8)) \
+            .add(ExpMovingAverageHandler(trading_interface, 14)) \
+            .add(ExpMovingAverageHandler(trading_interface, 50)) \
+            .add(RelativeStrengthIndexHandler(trading_interface, 14))
         self.logger.info('Trading system initialized')
 
     def stop_trading(self) -> None:
@@ -78,11 +82,8 @@ class TradingSystem:
     def update(self) -> None:
         for handler in self.handlers.values():
             handler.update()
-
         for order in self.get_handler(OrdersHandler).get_new_filled_orders():
-            self.stats.add_filled_order(copy(order))
-            self.wallet[order.asset_pair.main_asset] -= \
-                int(order.direction) * order.amount
+            self._handle_filled_order(order)
             self.trading_signals.append(Signal('filled_order', copy(order)))
 
     def get_trading_signals(self) -> tp.List[Signal]:
@@ -104,15 +105,14 @@ class TradingSystem:
         return None
 
     def buy(self, asset_pair: AssetPair, amount: float, price: float) -> tp.Optional[Order]:
-        if self.wallet[asset_pair.secondary_asset] < price * amount:
+        if self.wallet[asset_pair.price_asset] < price * amount:
             self.logger.warning(
-                f"Not enough {asset_pair.secondary_asset}. "
+                f"Not enough {asset_pair.amount_asset}. "
                 f"Order is not placed.")
             return None
-
+        self.wallet[asset_pair.price_asset] -= price * amount
         order = self.ti.buy(asset_pair, amount, price)
-        self.logger.trading(BuyEvent(asset_pair.main_asset,
-                                     asset_pair.secondary_asset,
+        self.logger.trading(BuyEvent(asset_pair,
                                      amount,
                                      price,
                                      order.order_id))
@@ -120,15 +120,14 @@ class TradingSystem:
         return order
 
     def sell(self, asset_pair: AssetPair, amount: float, price: float) -> tp.Optional[Order]:
-        if self.wallet[asset_pair.main_asset] < amount:
+        if self.wallet[asset_pair.amount_asset] < amount:
             self.logger.warning(
-                f"Not enough {asset_pair.main_asset}. "
+                f"Not enough {asset_pair.price_asset}. "
                 f"Order is not placed.")
             return None
-
+        self.wallet[asset_pair.amount_asset] -= amount
         order = self.ti.sell(asset_pair, amount, price)
-        self.logger.trading(SellEvent(asset_pair.main_asset,
-                                      asset_pair.secondary_asset,
+        self.logger.trading(SellEvent(asset_pair,
                                       amount,
                                       price,
                                       order.order_id))
@@ -137,14 +136,13 @@ class TradingSystem:
 
     def cancel_order(self, order: Order) -> None:
         self.ti.cancel_order(order)
-        self.logger.trading(CancelEvent(order))
-        self.get_handler(OrdersHandler).cancel_order(order)
+        self._handle_canceled_order(order)
 
     def cancel_all(self) -> None:
         self.ti.cancel_all()
-        for order in self.get_handler(OrdersHandler).get_active_orders():
-            self.logger.trading(CancelEvent(order))
-            self.get_handler(OrdersHandler).cancel_all()
+        active_orders = self.get_handler(OrdersHandler).get_active_orders()
+        for order in active_orders:
+            self._handle_canceled_order(order)
 
     def order_is_filled(self, order: Order) -> bool:
         return self.ti.order_is_filled(order)
@@ -173,7 +171,7 @@ class TradingSystem:
                 total_balance += amount
             else:
                 direction = Direction.from_value(-amount)
-                total_balance += amount * int(direction) * self.get_price_by_direction(direction)
+                total_balance += amount * self.get_price_by_direction(direction)
         return total_balance
 
     def get_wallet(self) -> tp.Dict[Asset, float]:
@@ -186,3 +184,18 @@ class TradingSystem:
     def get_handler(self, cls: tp.Type[TradingSystemHandlerT]) \
             -> TradingSystemHandlerT:
         return self.handlers[cls.__name__]
+
+    def _handle_canceled_order(self, order: Order) -> None:
+        self.get_handler(OrdersHandler).cancel_order(order)
+        if order.direction == Direction.BUY:
+            self.wallet[order.asset_pair.price_asset] += order.price * order.amount
+        else:  # Direction.SELL
+            self.wallet[order.asset_pair.amount_asset] += order.amount
+        self.logger.trading(CancelEvent(order))
+
+    def _handle_filled_order(self, order: Order) -> None:
+        if order.direction == Direction.BUY:
+            self.wallet[order.asset_pair.amount_asset] += order.amount
+        else:  # Direction.SELL
+            self.wallet[order.asset_pair.price_asset] += order.price * order.amount
+        self.stats.add_filled_order(copy(order))

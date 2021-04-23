@@ -31,7 +31,7 @@ class Logger:
 
     @classmethod
     def set_log_file_name(cls, name: str) -> None:
-        cls._file_name = name
+        cls._file_name = name.replace(":", "-")
 
     @classmethod
     def set_logs_path(cls, path: Path) -> None:

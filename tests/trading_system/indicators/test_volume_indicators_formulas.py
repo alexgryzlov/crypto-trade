@@ -1,11 +1,10 @@
+import pytest
+import typing as tp
+
 from trading_system.indicators.accumulation_distribution_handler import AccumulationDistributionHandler
 from trading_system.indicators.on_balance_volume_handler import OnBalanceVolumeHandler
 from trading_system.indicators.volume_relative_strength_index_handler import VolumeRelativeStrengthIndexHandler
 from trading.candle import Candle
-
-import typing as tp
-
-import pytest
 
 AD_TEST_CASES = [
     ([Candle(0, 0, 62.15, 61.37, 62.34, 7849), Candle(1, 0, 60.81, 60.69, 62.05, 11692),

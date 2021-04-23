@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+
+PROJECT_ABBREV='CTS'
+COMMIT_MSG=$(head -n 1 $1)
+expr "$COMMIT_MSG" : "\[$PROJECT_ABBREV-[[:digit:]]\{1,\}\] .*" > /dev/null
+if [ $? != 0 ]
+then
+    echo 'Commit message must conform to the following regex (POSIX ERE syntax):'
+    echo "\[$PROJECT_ABBREV-[[:digit:]]+\] .*"
+    exit 1
+fi

@@ -27,7 +27,7 @@ class Order:
 
     def __str__(self) -> str:
         return f"OrderId: {self.order_id} " \
-               f"AssetPair: {self.asset_pair.main_asset}-{self.asset_pair.secondary_asset} " \
+               f"AssetPair: {self.asset_pair.amount_asset}-{self.asset_pair.price_asset} " \
                f"Amount: {self.amount} " \
                f"Price: {self.price} " \
                f"Direction: {self.direction}"
