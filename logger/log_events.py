@@ -37,6 +37,8 @@ class CurveEvent(LogEvent):
 
 
 class ExpMovingAverageEvent(CurveEvent):
+    name = 'Exp Moving Average'
+
     def __init__(self, value: float, window_size: int):
         super().__init__(
             f'New EMA of last {window_size} elements {value}',
@@ -58,18 +60,22 @@ class MovingAverageEvent(CurveEvent):
 class BuyEvent(LogEvent):
     def __init__(self, asset_pair: AssetPair, amount: float,
                  price: float, order_id: int):
-        super().__init__(f'Buying {amount} of {asset_pair.amount_asset} for {price} '
-                         f'{asset_pair.price_asset}, order {order_id}',
-                         _create_dict(asset_pair.amount_asset, asset_pair.price_asset, amount, price,
+        super().__init__(
+            f'Buying {amount} of {asset_pair.amount_asset} for {price} '
+            f'{asset_pair.price_asset}, order {order_id}',
+            _create_dict(asset_pair.amount_asset, asset_pair.price_asset,
+                         amount, price,
                          order_id))
 
 
 class SellEvent(LogEvent):
     def __init__(self, asset_pair: AssetPair, amount: float,
                  price: float, order_id: int) -> None:
-        super().__init__(f'Selling {amount} of {asset_pair.price_asset} for {price} '
-                         f'{asset_pair.amount_asset}, order {order_id}',
-                         _create_dict(asset_pair.amount_asset, asset_pair.price_asset, amount, price,
+        super().__init__(
+            f'Selling {amount} of {asset_pair.price_asset} for {price} '
+            f'{asset_pair.amount_asset}, order {order_id}',
+            _create_dict(asset_pair.amount_asset, asset_pair.price_asset,
+                         amount, price,
                          order_id))
 
 

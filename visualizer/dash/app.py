@@ -198,7 +198,7 @@ def generate_indicators_options(labels: tp.List[str]) \
     base = [
         {'label': 'Trend Lines', 'value': 'T'}
     ]
-    base.extend({'label': label, 'value': label} for label in labels)
+    base.extend({'label': label, 'value': label} for label in sorted(labels))
     columns: tp.List[CheckLst] = []
     step = 3
     for i, _ in zip(range(0, len(base), step), range(5)):
