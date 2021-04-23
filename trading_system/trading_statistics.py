@@ -51,7 +51,9 @@ class TradingStatistics:
                f'delta hodl_result(%):   {self._calc_absolute_hodl_delta(): .1f}%\n'
 
     def _calc_absolute_hodl_delta(self) -> float:
-        return (require(self.hodl_result) - require(self.initial_balance)) / (require(self.initial_balance)) * 100
+        if math.isclose(require(self.initial_balance), 0):
+            return 0
+        return (require(self.hodl_result) - require(self.initial_balance)) / require(self.initial_balance) * 100
 
     def _calc_absolute_delta(self) -> float:
         return require(self.final_balance) - require(self.initial_balance)
