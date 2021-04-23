@@ -6,6 +6,8 @@ from trading_system.trading_system_handler import TradingSystemHandler
 from trading_interface.trading_interface import TradingInterface
 
 import typing as tp
+from logger.logger import Logger
+from logger.log_events import RSIEvent
 from helpers.typing import Array
 
 
@@ -22,6 +24,8 @@ class RelativeStrengthIndexHandler(TradingSystemHandler):
         self.relative_strength: tp.List[float] = []
         self.values: tp.List[float] = []
 
+        self.logger = Logger(self.get_name())
+
     def get_name(self) -> str:
         return f'{type(self).__name__}{self.window_size}'
 
@@ -37,6 +41,7 @@ class RelativeStrengthIndexHandler(TradingSystemHandler):
         rs, rsi = self.calculate_from(deltas, self.alpha)
         self.relative_strength.append(rs)
         self.values.append(rsi)
+        self.logger.trading(RSIEvent(rsi))
         return True
 
     def get_last_n_values(self, n: int) -> tp.List[float]:

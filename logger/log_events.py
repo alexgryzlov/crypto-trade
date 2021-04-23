@@ -25,35 +25,73 @@ class TrendLinesEvent(LogEvent):
                          _create_dict(lower_trend_line, upper_trend_line))
 
 
-class ExpMovingAverageEvent(LogEvent):
+class CurveEvent(LogEvent):
+    name = 'Custom Curve'
+
+    def __init__(self,
+                 msg: str,
+                 value: float,
+                 params: str,
+                 min_value: tp.Optional[float] = None,
+                 max_value: tp.Optional[float] = None,
+                 value_fmt: str = 'Value: {value:.4f}'):
+        value_fmt = value_fmt.format(value=value)
+        super().__init__(msg,
+                         _create_dict(value, params, min_value, max_value,
+                                      value_fmt))
+
+
+class ExpMovingAverageEvent(CurveEvent):
+    name = 'Exp Moving Average'
+
     def __init__(self, value: float, window_size: int):
         super().__init__(
             f'New EMA of last {window_size} elements {value}',
-            _create_dict(value, window_size))
+            value,
+            f'{window_size}')
 
 
-class MovingAverageEvent(LogEvent):
+class MovingAverageEvent(CurveEvent):
+    name = 'Moving Average'
+
     def __init__(self, average_value: float, window_size: int):
         super().__init__(
             f'New average of last {window_size} elements {average_value}',
-            _create_dict(average_value, window_size))
+            average_value,
+            f'{window_size}',
+        )
+
+
+class RSIEvent(CurveEvent):
+    name = 'RSI'
+
+    def __init__(self, rsi: float):
+        super().__init__(
+            f'New RSI {rsi:.2f}', rsi, '',
+            min_value=0, max_value=100,
+            value_fmt='RSI: {value:.2f}'
+        )
 
 
 class BuyEvent(LogEvent):
     def __init__(self, asset_pair: AssetPair, amount: float,
                  price: float, order_id: int):
-        super().__init__(f'Buying {amount} of {asset_pair.amount_asset} for {price} '
-                         f'{asset_pair.price_asset}, order {order_id}',
-                         _create_dict(asset_pair.amount_asset, asset_pair.price_asset, amount, price,
+        super().__init__(
+            f'Buying {amount} of {asset_pair.amount_asset} for {price} '
+            f'{asset_pair.price_asset}, order {order_id}',
+            _create_dict(asset_pair.amount_asset, asset_pair.price_asset,
+                         amount, price,
                          order_id))
 
 
 class SellEvent(LogEvent):
     def __init__(self, asset_pair: AssetPair, amount: float,
                  price: float, order_id: int) -> None:
-        super().__init__(f'Selling {amount} of {asset_pair.price_asset} for {price} '
-                         f'{asset_pair.amount_asset}, order {order_id}',
-                         _create_dict(asset_pair.amount_asset, asset_pair.price_asset, amount, price,
+        super().__init__(
+            f'Selling {amount} of {asset_pair.price_asset} for {price} '
+            f'{asset_pair.amount_asset}, order {order_id}',
+            _create_dict(asset_pair.amount_asset, asset_pair.price_asset,
+                         amount, price,
                          order_id))
 
 
