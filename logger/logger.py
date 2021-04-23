@@ -100,7 +100,7 @@ class Logger:
             return True
 
     _clock = Clock()
-    _log_format = (f'[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s ',
+    _log_format = (f'[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s',
                    '%m-%d %H:%M:%S')
     _file_handlers: tp.Dict[Path, logging.FileHandler] = {}
     _dump_logs: tp.List[LogEvent] = []
