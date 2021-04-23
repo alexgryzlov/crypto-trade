@@ -38,20 +38,21 @@ class MovingAverageCDHandler(TradingSystemHandler):
         self.short_handler = tp.cast(ExpMovingAverageHandler, handlers[0])
         self.long_handler = tp.cast(ExpMovingAverageHandler, handlers[1])
 
-    def update(self) -> None:
+    def update(self) -> bool:
         if not super().received_new_candle():
-            return
+            return False
 
         emas_short = self.short_handler.get_last_n_values(1)
         emas_long = self.long_handler.get_last_n_values(1)
         if len(emas_long) == 0 or len(emas_short) == 0:
-            return
+            return False
         ema_short = emas_short[0]
         ema_long = emas_long[0]
 
         self.macd_values.append(ema_short - ema_long)
         self.signal_values.append(ExpMovingAverageHandler.calculate_from(
             self.macd_values[-self.average:]))
+        return True
 
     def get_last_n_values(self, n: int) -> tp.List[tp.Tuple[float, float]]:
         """ Returns MACD and signal value. """

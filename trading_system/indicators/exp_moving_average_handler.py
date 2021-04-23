@@ -1,5 +1,7 @@
 from trading_system.trading_system_handler import TradingSystemHandler
 from trading_interface.trading_interface import TradingInterface
+from logger.logger import Logger
+from logger.log_events import ExpMovingAverageEvent
 
 import numpy as np
 
@@ -20,13 +22,14 @@ class ExpMovingAverageHandler(TradingSystemHandler):
         self.alpha = smoothing / (1 + window_size)
 
         self.values: tp.List[float] = []
+        self.logger = Logger(self.get_name())
 
     def get_name(self) -> str:
         return f'{type(self).__name__}{self.window_size}_{self.smoothing}'
 
-    def update(self) -> None:
+    def update(self) -> bool:
         if not super().received_new_candle():
-            return
+            return False
 
         new_candle = self.ti.get_last_n_candles(1)[0]
         if len(self.values) > 0:
@@ -35,6 +38,9 @@ class ExpMovingAverageHandler(TradingSystemHandler):
                 self.values[-1] * (1 - self.alpha))
         else:
             self.values.append(new_candle.get_mid_price())
+        self.logger.trading(
+            ExpMovingAverageEvent(self.values[-1], self.window_size))
+        return True
 
     def get_last_n_values(self, n: int) -> tp.List[float]:
         return self.values[-n:]

@@ -1,10 +1,11 @@
+import pytest
+import numpy as np
+
 from trading_interface.simulator.price_simulator import PriceSimulator, \
     PriceSimulatorType
 from trading.candle import Candle
-import numpy as np
 
 from tests.logger.empty_logger_mock import empty_logger_mock
-import pytest
 
 
 def test_three_interval_big_random(
@@ -60,7 +61,7 @@ def test_multi_interval_big_random(
         for j in range(1000):
             intervals.append([intervals[-1][1], np.random.uniform(0, 10)])
         path = ps._build_multi_interval_path(intervals, total_steps)
-        assert(len(path) == total_steps)
+        assert (len(path) == total_steps)
 
 
 @pytest.mark.parametrize("candles_lifetime", [25])

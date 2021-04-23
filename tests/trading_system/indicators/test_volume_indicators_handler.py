@@ -1,3 +1,6 @@
+import pytest
+import typing as tp
+
 from trading_system.indicators import *
 from trading_system.indicators.accumulation_distribution_handler import AccumulationDistributionHandler
 from trading_system.indicators.on_balance_volume_handler import OnBalanceVolumeHandler
@@ -6,10 +9,6 @@ from test_volume_indicators_formulas import AD_TEST_CASES, OBV_TEST_CASES, VRSI_
 from tests.trading_interface.trading_interface_mock import TradingInterfaceMock
 
 from trading.candle import Candle
-
-import typing as tp
-
-import pytest
 
 
 def simulate_handler(handler: TradingSystemHandler) -> None:

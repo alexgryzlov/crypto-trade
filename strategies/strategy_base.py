@@ -25,5 +25,11 @@ class StrategyBase(ABC):
     def handle_moving_average_signal(self, trend: TrendType) -> None:
         pass
 
+    def handle_exp_moving_average_signal(self, trend: TrendType) -> None:
+        pass
+
+    def handle_stochastic_rsi_signal(self, trend: TrendType) -> None:
+        pass
+
     def handle_filled_order_signal(self, order: Order) -> None:
         pass

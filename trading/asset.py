@@ -15,9 +15,12 @@ class Asset:
 
 
 class AssetPair:
-    def __init__(self, main_asset: Asset, secondary_asset: Asset):
-        self.main_asset = main_asset
-        self.secondary_asset = secondary_asset
+    def __init__(self, amount_asset: Asset, price_asset: Asset):
+        self.amount_asset = amount_asset
+        self.price_asset = price_asset
 
     def __repr__(self) -> str:
-        return f"{self.main_asset}/{self.secondary_asset}"
+        return f"{self.amount_asset}/{self.price_asset}"
+
+    def __reversed__(self) -> 'AssetPair':
+        return AssetPair(self.price_asset, self.amount_asset)
