@@ -1,17 +1,15 @@
+import typing as tp
+from logging import INFO
+
 import numpy as np
+from mypy_extensions import Arg
 
 import base.geometry.convex_hull as geom
-
-from trading_system.trading_system_handler import TradingSystemHandler
-from trading_interface.trading_interface import TradingInterface
-
-from trading import TrendLine
-
 from logger.log_events import TrendLinesEvent
 from logger.logger import Logger
-
-import typing as tp
-from mypy_extensions import Arg
+from trading import TrendLine
+from trading_interface.trading_interface import TradingInterface
+from trading_system.trading_system_handler import TradingSystemHandler
 
 MIN_CANDLE_COUNT = 5
 MAX_LAST_CANDLE_COUNT = 40
@@ -29,7 +27,7 @@ class TrendHandler(TradingSystemHandler):
             return False
         lower_trend_line, upper_trend_line = self.get_trend_lines()
         self.logger.trading(
-            TrendLinesEvent(lower_trend_line, upper_trend_line))
+            TrendLinesEvent(lower_trend_line, upper_trend_line), INFO)
         return True
 
     def get_trend_lines(self) -> tp.Tuple[TrendLine, TrendLine]:

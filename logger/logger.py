@@ -1,12 +1,11 @@
 import logging
 import pickle
+import typing as tp
 from datetime import datetime
 from pathlib import Path
 
 from logger.clock import Clock
 from logger.log_events import LogEvent
-
-import typing as tp
 
 TRADING = logging.WARNING + 5
 logging.addLevelName(TRADING, "TRADING")
@@ -81,12 +80,12 @@ class Logger:
         path.parent.mkdir(parents=True, exist_ok=True)
         return path
 
-    def trading(self, log_event: LogEvent,
+    def trading(self, log_event: LogEvent, level: int = TRADING,
                 *args: tp.Any, **kwargs: tp.Any) -> None:
         if self.isEnabledFor(TRADING):
             log_event.obj['ts'] = Logger._clock.get_timestamp()
             log_event.obj['event_type'] = log_event.__class__
-            self._log(TRADING, log_event.msg, args, **kwargs)
+            self._log(level, log_event.msg, args, **kwargs)
             Logger._dump_logs.append(log_event.obj)
 
     class TimestampFilter(logging.Filter):

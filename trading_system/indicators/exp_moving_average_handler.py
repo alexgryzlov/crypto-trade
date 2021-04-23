@@ -1,12 +1,13 @@
-from trading_system.trading_system_handler import TradingSystemHandler
-from trading_interface.trading_interface import TradingInterface
-from logger.logger import Logger
-from logger.log_events import ExpMovingAverageEvent
+import typing as tp
+from logging import INFO
 
 import numpy as np
 
-import typing as tp
 from helpers.typing import Array
+from logger.log_events import ExpMovingAverageEvent
+from logger.logger import Logger
+from trading_interface.trading_interface import TradingInterface
+from trading_system.trading_system_handler import TradingSystemHandler
 
 
 class ExpMovingAverageHandler(TradingSystemHandler):
@@ -39,7 +40,7 @@ class ExpMovingAverageHandler(TradingSystemHandler):
         else:
             self.values.append(new_candle.get_mid_price())
         self.logger.trading(
-            ExpMovingAverageEvent(self.values[-1], self.window_size))
+            ExpMovingAverageEvent(self.values[-1], self.window_size), INFO)
         return True
 
     def get_last_n_values(self, n: int) -> tp.List[float]:
