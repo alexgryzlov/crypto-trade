@@ -46,7 +46,7 @@ class ExpMovingAverageEvent(CurveEvent):
 
     def __init__(self, value: float, window_size: int):
         super().__init__(
-            f'New EMA of last {window_size} elements {value}',
+            f'New EMA of last {window_size} elements: {value}',
             value,
             f'{window_size}')
 
@@ -56,7 +56,7 @@ class MovingAverageEvent(CurveEvent):
 
     def __init__(self, average_value: float, window_size: int):
         super().__init__(
-            f'New average of last {window_size} elements {average_value}',
+            f'New SMA of last {window_size} elements: {average_value}',
             average_value,
             f'{window_size}',
         )
@@ -67,7 +67,7 @@ class RSIEvent(CurveEvent):
 
     def __init__(self, rsi: float):
         super().__init__(
-            f'New RSI {rsi:.2f}', rsi, '',
+            f'New RSI: {rsi:.2f}', rsi, '',
             min_value=0, max_value=100,
             value_fmt='RSI: {value:.2f}'
         )
@@ -77,8 +77,8 @@ class BuyEvent(LogEvent):
     def __init__(self, asset_pair: AssetPair, amount: float,
                  price: float, order_id: int):
         super().__init__(
-            f'Buying {amount} of {asset_pair.amount_asset} for {price} '
-            f'{asset_pair.price_asset}, order {order_id}',
+            f'Buying {amount} {asset_pair.amount_asset} at price {price} '
+            f'{asset_pair.amount_asset}/{asset_pair.price_asset}, order {order_id}',
             _create_dict(asset_pair.amount_asset, asset_pair.price_asset,
                          amount, price,
                          order_id))
@@ -88,8 +88,8 @@ class SellEvent(LogEvent):
     def __init__(self, asset_pair: AssetPair, amount: float,
                  price: float, order_id: int) -> None:
         super().__init__(
-            f'Selling {amount} of {asset_pair.price_asset} for {price} '
-            f'{asset_pair.amount_asset}, order {order_id}',
+            f'Selling {amount} {asset_pair.amount_asset} at price {price} '
+            f'{asset_pair.amount_asset}/{asset_pair.price_asset}, order {order_id}',
             _create_dict(asset_pair.amount_asset, asset_pair.price_asset,
                          amount, price,
                          order_id))
