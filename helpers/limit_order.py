@@ -71,8 +71,8 @@ class LimitOrder():
         take_profit = (1 - int(direction) * take_profit_pct) * price \
             if take_profit_pct is not None \
             else None
-        stop_loss = (1 + int(direction) * take_profit_pct) * price \
-            if take_profit_pct is not None \
+        stop_loss = (1 + int(direction) * stop_loss_pct) * price \
+            if stop_loss_pct is not None \
             else None
         if order is not None:
             self.set_limit(order, take_profit, stop_loss)
