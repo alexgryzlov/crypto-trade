@@ -1,17 +1,19 @@
 import typing as tp
 
-import trading_system.trading_system as ts
-from logger.logger import Logger
 from strategies.strategy_base import StrategyBase
+import trading_system.trading_system as ts
+
+from helpers.typing.common_types import Config
+from logger.logger import Logger
+
 from trading import AssetPair, TrendType
 
 
 class EMASRSIStrategy(StrategyBase):
-    def __init__(self, asset_pair: AssetPair, amount: float = 100.,
-                 **kwargs: tp.Any) -> None:
-        self.asset_pair = asset_pair
+    def __init__(self, config: Config) -> None:
         self.logger = Logger('EMASRSIStrategy')
-        self.amount = amount
+        self.asset_pair = AssetPair(*config['asset_pair'])
+        self.amount = config['amount']
         self.ts: tp.Optional[ts.TradingSystem] = None
         self.ema_trend: tp.Optional[TrendType] = None
 
