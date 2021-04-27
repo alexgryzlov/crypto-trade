@@ -39,7 +39,6 @@ class GridStrategy(StrategyBase):
     def update(self) -> None:
         pass
 
-
     def handle_filled_order_signal(self, order: Order):
         if order.direction.value == Direction.SELL.value:
             level = self.grid[order.order_id]

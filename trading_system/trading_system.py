@@ -7,11 +7,10 @@ from copy import copy
 from helpers.typing.common_types import Config
 
 from trading_interface.trading_interface import TradingInterface
-from trading_system.candles_handler import CandlesHandler
 from trading_system.trading_system_handler import TradingSystemHandler
-from trading_system.trend_handler import TrendHandler
-from trading_system.indicators import *
+from trading_system.candles_handler import CandlesHandler
 from trading_system.orders_handler import OrdersHandler
+from trading_system.indicators import *
 
 from trading_system.trading_statistics import TradingStatistics
 
@@ -54,15 +53,13 @@ class TradingSystem:
         self.trading_signals: tp.List[Signal] = []
         self.handlers = Handlers() \
             .add(CandlesHandler(trading_interface)) \
-            .add(OrdersHandler(trading_interface)) \
-            .add(TrendHandler(trading_interface)) \
-            .add(MovingAverageHandler(trading_interface, 25)) \
-            .add(MovingAverageHandler(trading_interface, 50)) \
-            .add(ExpMovingAverageHandler(trading_interface, 8)) \
-            .add(ExpMovingAverageHandler(trading_interface, 14)) \
-            .add(ExpMovingAverageHandler(trading_interface, 50)) \
-            .add(RelativeStrengthIndexHandler(trading_interface, 14))
+            .add(OrdersHandler(trading_interface))
         self.logger.info('Trading system initialized')
+
+    def add_handler(self, handler_type: tp.Any, params: tp.Dict[str, tp.Any]) -> TradingSystemHandlerT:
+        handler = handler_type(trading_interface=self.ti, **params)
+        self.handlers.add(handler)
+        return handler
 
     def stop_trading(self) -> None:
         self.cancel_all()

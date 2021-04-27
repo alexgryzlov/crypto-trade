@@ -3,7 +3,13 @@ import typing as tp
 import trading_system.trading_system as ts
 from logger.logger import Logger
 from strategies.strategy_base import StrategyBase
+
 from trading import AssetPair, TrendType
+from trading_signal_detectors import (
+    TradingSignalDetector,
+    ExpMovingAverageSignalDetector,
+    StochasticRSISignalDetector
+)
 
 
 class EMASRSIStrategy(StrategyBase):
@@ -17,6 +23,12 @@ class EMASRSIStrategy(StrategyBase):
 
     def init_trading(self, trading_system: ts.TradingSystem) -> None:
         self.ts = trading_system
+
+    def get_signal_generators(self) -> tp.List[TradingSignalDetector]:
+        return [
+            ExpMovingAverageSignalDetector(self.ts),
+            StochasticRSISignalDetector(self.ts)
+        ]
 
     def update(self) -> None:
         pass

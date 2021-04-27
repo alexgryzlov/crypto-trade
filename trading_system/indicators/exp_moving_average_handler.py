@@ -1,7 +1,7 @@
 import typing as tp
-from logging import INFO
-
 import numpy as np
+
+from logging import INFO
 
 from helpers.typing import Array
 from logger.log_events import ExpMovingAverageEvent
@@ -13,8 +13,10 @@ from trading_system.trading_system_handler import TradingSystemHandler
 class ExpMovingAverageHandler(TradingSystemHandler):
     """ Exponential Moving Average (EMA) """
 
-    def __init__(self, trading_interface: TradingInterface, window_size: int,
-                 smoothing: float = 2):
+    def __init__(self,
+                 trading_interface: TradingInterface,
+                 window_size: int,
+                 smoothing: int = 2):
         super().__init__(trading_interface)
         self.ti = trading_interface
 
