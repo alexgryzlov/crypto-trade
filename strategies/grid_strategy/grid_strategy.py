@@ -1,17 +1,17 @@
+import typing as tp
+
 import trading_system.trading_system as ts
 from strategies.strategy_base import StrategyBase
 
+from helpers.typing.common_types import Config
 from logger.logger import Logger
 
-from trading import Trend, TrendType, Asset, AssetPair, Order
-import trading_system.trading_system as ts
-import typing as tp
-from trading import Direction
+from trading import Trend, TrendType, Asset, AssetPair, Order, Direction
 
 
 class GridStrategy(StrategyBase):
-    def __init__(self, **kwargs: tp.Any) -> None:
-        self.asset_pair = AssetPair(Asset('USDT'), Asset('USDN'))
+    def __init__(self, config: Config) -> None:
+        self.asset_pair = AssetPair(*config['asset_pair'])
         self.logger = Logger('GridStrategy')
         self.ts = None
         self.total_levels = 13

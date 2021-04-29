@@ -1,39 +1,44 @@
+import importlib
 import multiprocessing as mp
 import traceback as tb
 import typing as tp
 from pathlib import Path
 
 from helpers.typing.common_types import Config, ConfigsScope
+from logger.logger import Logger
+from base.config_parser import ConfigParser
 
 from trading_interface.simulator.simulator import Simulator
-
+from strategies.strategy_base import StrategyBase
 from trading_system.trading_system import TradingSystem
 from trading_system.trading_statistics import TradingStatistics
 
-from trading_signal_detectors.extremum.extremum_signal_detector \
-    import ExtremumSignalDetector
-from trading_signal_detectors.moving_average.moving_average_signal_detector \
-    import MovingAverageSignalDetector
-from trading_signal_detectors.exp_moving_average.exp_moving_average_signal_detector \
-    import ExpMovingAverageSignalDetector
-from trading_signal_detectors.stochastic_rsi.stochastic_rsi_signal_detector \
-    import StochasticRSISignalDetector
-
-from strategies.strategy_base import StrategyBase
-
-from logger.logger import Logger
-
 from trading import Timestamp, TimeRange
+
+from trading_signal_detectors import (
+    ExtremumSignalDetector,
+    MovingAverageSignalDetector,
+    ExpMovingAverageSignalDetector,
+    StochasticRSISignalDetector
+)
 
 
 class StrategyRunner:
     def __init__(self, base_config: ConfigsScope):
         self.base_config = base_config
 
+    def _get_strategy_instance(self) -> tp.Any:
+        module = importlib.import_module(self.base_config["strategy"]["strategy_module"])
+        strategy_class = module.__getattribute__(self.base_config["strategy"]["strategy_name"])
+        config = {}
+        if "path_to_config" in self.base_config["strategy"]:
+            config = ConfigParser.load_config(
+                Path(self.base_config["strategy"]["path_to_config"]))
+        strategy_instance = strategy_class(config=config)
+        return strategy_instance
+
     def run_strategy(
             self,
-            strategy: tp.Type[StrategyBase],
-            strategy_config: Config,
             time_range: TimeRange,
             logs_path: tp.Optional[Path] = None) -> TradingStatistics:
 
@@ -50,10 +55,10 @@ class StrategyRunner:
             trading_interface=simulator,
             config=self.base_config['trading_system'])
 
-        strategy_instance = strategy(**strategy_config)
+        strategy_instance = self._get_strategy_instance()
         strategy_instance.init_trading(trading_system)
         signal_detectors = strategy_instance.get_signal_generators()
-        signal_detectors.append(trading_system)  # type: ignore
+        signal_detectors.append(trading_system)
 
         while simulator.is_alive():
             trading_system.update()
@@ -77,8 +82,6 @@ class StrategyRunner:
 
     def run_strategy_on_periods(
             self,
-            strategy: tp.Type[StrategyBase],
-            strategy_config: Config,
             time_range: TimeRange,
             period: tp.Optional[int] = None,
             runs: tp.Optional[int] = None,
@@ -103,8 +106,6 @@ class StrategyRunner:
             pool.apply_async(
                 self.run_strategy,
                 kwds={
-                    'strategy': strategy,
-                    'strategy_config': strategy_config,
                     'time_range': TimeRange(current_ts, next_ts),
                     'logs_path': logs_path},
                 callback=lambda run_result: run_results.append(run_result),

@@ -2,12 +2,14 @@ import typing as tp
 from abc import ABC, abstractmethod
 
 import trading_system.trading_system as ts
+
+from helpers.typing.common_types import Config
 from trading_signal_detectors.trading_signal_detector import TradingSignalDetector
 from trading import Trend, TrendType, Order, AssetPair
 
 
 class StrategyBase(ABC):
-    def __init__(self, **kwargs: tp.Any):
+    def __init__(self, config: Config):
         pass
 
     @abstractmethod
