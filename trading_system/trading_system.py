@@ -59,7 +59,7 @@ class TradingSystem:
     def add_handler(self, handler_type: tp.Any, params: tp.Dict[str, tp.Any]) -> TradingSystemHandlerT:
         handler = handler_type(trading_interface=self.ti, **params)
         self.handlers.add(handler)
-        return handler
+        return self.handlers[handler.get_name()]
 
     def stop_trading(self) -> None:
         self.cancel_all()

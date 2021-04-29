@@ -25,7 +25,7 @@ class EMASRSIStrategy(StrategyBase):
     def init_trading(self, trading_system: ts.TradingSystem) -> None:
         self.ts = trading_system
 
-    def get_signal_generators(self) -> tp.List[TradingSignalDetector]:
+    def get_signal_detectors(self) -> tp.List[TradingSignalDetector]:
         return [
             ExpMovingAverageSignalDetector(self.ts),
             StochasticRSISignalDetector(self.ts)

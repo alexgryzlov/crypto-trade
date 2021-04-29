@@ -20,7 +20,7 @@ class StrategyBase(ABC):
     def update(self) -> None:
         pass
 
-    def get_signal_generators(self) -> tp.List[TradingSignalDetector]:
+    def get_signal_detectors(self) -> tp.List[TradingSignalDetector]:
         return []
 
     def handle_new_trend_signal(self, trend: Trend) -> None:

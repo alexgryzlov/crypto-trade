@@ -57,7 +57,7 @@ class StrategyRunner:
 
         strategy_instance = self._get_strategy_instance()
         strategy_instance.init_trading(trading_system)
-        signal_detectors = strategy_instance.get_signal_generators()
+        signal_detectors = strategy_instance.get_signal_detectors()
         signal_detectors.append(trading_system)
 
         while simulator.is_alive():
