@@ -1,11 +1,13 @@
-from trading import Trend, TrendType, Order, AssetPair
-import trading_system.trading_system as ts
 import typing as tp
 from abc import ABC, abstractmethod
 
+import trading_system.trading_system as ts
+from trading import Trend, TrendType, Order, AssetPair
+from helpers.typing.common_types import Config
+
 
 class StrategyBase(ABC):
-    def __init__(self, **kwargs: tp.Any):
+    def __init__(self, config: Config):
         pass
 
     @abstractmethod
