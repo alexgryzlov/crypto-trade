@@ -1,14 +1,11 @@
 from __future__ import annotations
-import typing as tp
 
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict
 from copy import copy
 
 from helpers.typing.common_types import Config
 
-from trading_interface.trading_interface import TradingInterface
 from trading_system.candles_handler import CandlesHandler
-from trading_system.trading_system_handler import TradingSystemHandler
 from trading_system.trend_handler import TrendHandler
 from trading_system.indicators import *
 from trading_system.orders_handler import OrdersHandler
@@ -62,8 +59,7 @@ class TradingSystem:
             .add(ExpMovingAverageHandler(trading_interface, 8)) \
             .add(ExpMovingAverageHandler(trading_interface, 14)) \
             .add(ExpMovingAverageHandler(trading_interface, 50)) \
-            .add(RelativeStrengthIndexHandler(trading_interface, 14))
-            .add(MovingAverageHandler(trading_interface, 50)) \
+            .add(RelativeStrengthIndexHandler(trading_interface, 14)) \
             .add(RelativeStrengthIndexHandler(trading_interface, 9)) \
             .add(MovingAverageCDHandler(trading_interface))
 
@@ -131,7 +127,6 @@ class TradingSystem:
             return None
         self.wallet[asset_pair.amount_asset] -= amount
         order = self.ti.sell(asset_pair, amount, price)
-        self.logger.trading(SellEvent(asset_pair,
         self.logger.trading(SellEvent(asset_pair,
                                       amount,
                                       price,

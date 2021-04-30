@@ -3,7 +3,7 @@ from strategies.strategy_base import StrategyBase
 
 from logger.logger import Logger
 
-from trading import TrendType
+from trading import TrendType, AssetPair
 from trading_signal_detectors.relative_strength_index.relative_strength_index_signal import RsiSignal, RsiSignalType
 
 
@@ -14,10 +14,10 @@ class RSIMACDStrategy(StrategyBase):
         sell when RSI signals overbought and MACD signals downtrend
     """
 
-    def __init__(self, asset_pair, **kwargs) -> None:
-        self.asset_pair = asset_pair
+    def __init__(self, config) -> None:
+        self.asset_pair = AssetPair(*config['asset_pair'])
         self.logger = Logger('RSIMACDStrategy')
-        self.ts_threshold = kwargs['threshold']
+        self.ts_threshold = config['threshold']
         self.ts = None
         self.last_macd_uptrend_ts = -1
         self.last_macd_downtrend_ts = -1
@@ -25,8 +25,8 @@ class RSIMACDStrategy(StrategyBase):
         self.last_rsi_overbought_ts = -1
         self.last_rsi_value = -1.
         self.received_new_signal = False
-        self.scale = kwargs['amount_scale']
-        self.offset = kwargs['amount_offset']
+        self.scale = config['amount_scale']
+        self.offset = config['amount_offset']
 
     def init_trading(self, trading_system: ts.TradingSystem) -> None:
         self.ts = trading_system
