@@ -47,7 +47,7 @@ class Simulator(TradingInterface):
     def get_timestamp(self) -> int:
         return self.clock.get_timestamp()
 
-    def buy(self, amount: float, price: float) -> Order:
+    def buy(self, amount: float, price: float) -> tp.Optional[Order]:
         order = Order(order_id=self.__get_new_order_id(),
                       asset_pair=self.asset_pair,
                       amount=amount,
@@ -56,7 +56,7 @@ class Simulator(TradingInterface):
         self.active_orders.add(copy(order))
         return order
 
-    def sell(self, amount: float, price: float) -> Order:
+    def sell(self, amount: float, price: float) -> tp.Optional[Order]:
         order = Order(order_id=self.__get_new_order_id(),
                       asset_pair=self.asset_pair,
                       amount=amount,
