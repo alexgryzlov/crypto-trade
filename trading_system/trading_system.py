@@ -3,6 +3,7 @@ import typing as tp
 
 from collections import defaultdict, OrderedDict
 from copy import copy
+import math
 
 from helpers.typing.common_types import Config
 
@@ -21,6 +22,7 @@ from logger.logger import Logger
 from trading import Asset, AssetPair, Signal, Order, Direction, Candle
 
 from helpers.typing import TradingSystemHandlerT
+from helpers.typing.utils import require
 
 
 class Handlers(OrderedDict):  # type: ignore
@@ -170,7 +172,8 @@ class TradingSystem:
             if asset != self.currency_asset:
                 total_coins += amount
             else:
-                total_coins += amount / self.ti.get_buy_price()
+                if not math.isclose(require(self.ti.get_buy_price()), 0):
+                    total_coins += amount / self.ti.get_buy_price()
         return total_coins
 
     def get_total_balance(self) -> float:
