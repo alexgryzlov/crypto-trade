@@ -8,13 +8,12 @@
   },
 
   "strategy": {
-    "strategy_name": "TrendStrategy",
-    "strategy_module": "strategies.trend_strategy.trend_strategy",
-    "path_to_config": "strategies/trend_strategy/config.json"
+    "strategy_name": "StrategyMock",
+    "strategy_module": "tests.strategies.strategy_mock"
   },
 
   "trading_interface": {
-    "timeframe": "1h",
+    "timeframe": "15m",
     "asset_pair": ["WAVES", "USDN"],
 
     "simulator": {
@@ -31,7 +30,5 @@
     "market_data_host": "https://api.wavesplatform.com",
     "matcher_host": "https://matcher.waves.exchange",
     "candles_per_request": 1400
-  },
-
-  "strategy_runner": {}
+  }
 }
