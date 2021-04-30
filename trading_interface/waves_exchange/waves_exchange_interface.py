@@ -16,17 +16,17 @@ from logger.logger import Logger
 
 
 class WAVESExchangeInterface(TradingInterface):
-    def __init__(self, trading_config: Config):
+    def __init__(self, trading_config: Config, exchange_config: Config):
         self.logger = Logger("TestnetInterface")
         self.asset_pair = AssetPair(*trading_config['asset_pair'])
-        self._host = 'https://matcher-testnet.waves.exchange'  # exchange_config['matcher']
+        self._host = exchange_config['matcher']
         self._matcher_public_key = bytes(self._request('get', ""), 'utf-8')
-        self._matcher_fee = 300000  # default - 0.003 waves
-        self._price_shift = 10 ** 8
-        self._max_lifetime = 86400 * 30
-        self._private_key = b"7WJxqTfaiMmFFHRvxCwiQ8DAE3qVBd5ziaE5F8qJWXWx"
-        self._public_key = b"DuasNP39N7PCNCKfEkjXniR8otVbriYp3MpBrKKZrH1K"
-        self._version = 3
+        self._matcher_fee = exchange_config['matcher_fee']  # default - 0.003 waves
+        self._price_shift = exchange_config['price_shift']
+        self._max_lifetime = exchange_config['max_lifetime']
+        self._private_key = bytes(exchange_config["private_key"], 'utf-8')
+        self._public_key = bytes(exchange_config["public_key"], 'utf-8')
+        self._version = exchange_config['version']
 
     def is_alive(self) -> bool:
         # return self._exchange.fetchStatus()['status'] == 'ok'
