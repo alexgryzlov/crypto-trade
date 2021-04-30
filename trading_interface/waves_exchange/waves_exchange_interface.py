@@ -20,7 +20,7 @@ class WAVESExchangeInterface(TradingInterface):
         self.logger = Logger("TestnetInterface")
         self.asset_pair = AssetPair(*trading_config['asset_pair'])
         self._host = 'https://matcher-testnet.waves.exchange'  # exchange_config['matcher']
-        self._matcher_public_key = bytes(self._request(""), 'utf-8')
+        self._matcher_public_key = bytes(self._request('get', ""), 'utf-8')
         self._matcher_fee = 300000  # default - 0.003 waves
         self._price_shift = 10 ** 8
         self._max_lifetime = 86400 * 30
@@ -52,10 +52,8 @@ class WAVESExchangeInterface(TradingInterface):
             "orderId": order.order_id,
             "signature": signature
         })
-        response = requests.post(f'https://matcher-testnet.waves.exchange/matcher/orderbook/'
-                                 f'{str(self.asset_pair.amount_asset)}/{str(self.asset_pair.price_asset)}/cancel',
-                                 data=data,
-                                 headers={'content-type': 'application/json'}).json()
+        response = self._request('post', f'orderbook/{str(self.asset_pair)}/cancel',
+                                 body=data).json()
         if response['status'] != 'OrderCancelled':
             self.logger.warning(f"Order is not cancelled. Status: {response['status']}")
 
@@ -72,16 +70,25 @@ class WAVESExchangeInterface(TradingInterface):
         return self.get_orderbook()['asks'][0]['price']
 
     def get_orderbook(self):  # type: ignore
-        return self._request(f'orderbook/{str(self.asset_pair)}')
+        return self._request('get', f'orderbook/{str(self.asset_pair)}')
 
     def get_last_n_candles(self, n: int) -> tp.List[Candle]:
         pass
 
     @retry(RuntimeError, tries=3, delay=1)
-    def _request(self, api_request: str, **request_params) -> tp.Any:
-        response = requests.get(
-            f'{self._host}/matcher/{api_request}',
-            params=request_params)
+    def _request(self, request_type: str, api_request: str, body='', **request_params) -> tp.Any:
+        if request_type == "post":
+            response = requests.post(
+                f'{self._host}/matcher/{api_request}',
+                data=body,
+                headers={'content-type': 'application/json'},
+                params=request_params
+            )
+        else:
+            response = requests.get(
+                f'{self._host}/matcher/{api_request}',
+                params=request_params
+            )
         if not response:
             raise RuntimeError(response.content)
         return response.json()
@@ -90,7 +97,7 @@ class WAVESExchangeInterface(TradingInterface):
         scaled_price = int(price * self._price_shift)
         scaled_amount = int(amount * self._price_shift)
         timestamp = int(time() * 1000)
-        expiration = timestamp + self._max_lifetime
+        expiration = timestamp + self._max_lifetime * 1000
         signature_data = pack("B", self._version) + \
                          b58decode(self._public_key) + \
                          b58decode(self._matcher_public_key) + \
@@ -122,10 +129,7 @@ class WAVESExchangeInterface(TradingInterface):
             "signature": signature,
             "version": self._version
         })
-
-        response = requests.post('https://matcher-testnet.waves.exchange/matcher/orderbook', data=data,
-                                 headers={'content-type': 'application/json'}).json()
-
+        response = self._request('post', 'orderbook', body=data)
         if response['status'] != "OrderAccepted":
             self.logger.warning(f"Order is not accepted. Status: {response['status']}")
             return None
