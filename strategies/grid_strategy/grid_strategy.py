@@ -11,7 +11,7 @@ from trading import Trend, TrendType, Asset, AssetPair, Order, Direction
 
 class GridStrategy(StrategyBase):
     def __init__(self, config: Config) -> None:
-        self.asset_pair = AssetPair(*config['asset_pair'])
+        self.asset_pair = AssetPair(*[Asset(x) for x in config['asset_pair']])
         self.logger = Logger('GridStrategy')
         self.ts = None
         self.total_levels = 13
