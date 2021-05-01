@@ -55,15 +55,10 @@ class StrategyRunner:
             trading_interface=simulator,
             config=self.base_config['trading_system'])
 
-        signal_detectors = [
-            trading_system,
-            ExtremumSignalDetector(trading_system, 2),
-            MovingAverageSignalDetector(trading_system, 25, 50),
-            ExpMovingAverageSignalDetector(trading_system),
-            StochasticRSISignalDetector(trading_system)]
-
         strategy_instance = self._get_strategy_instance()
         strategy_instance.init_trading(trading_system)
+        signal_detectors = strategy_instance.get_signal_detectors()
+        signal_detectors.append(trading_system)
 
         while simulator.is_alive():
             trading_system.update()

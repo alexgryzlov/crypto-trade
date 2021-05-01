@@ -1,12 +1,11 @@
-from trading_signal_detectors.trading_signal_detector import \
-    TradingSignalDetector
+import typing as tp
+
+from logger.logger import Logger
 
 from trading import Signal, TrendType
 import trading_system.trading_system as ts
 
-from logger.logger import Logger
-
-import typing as tp
+from trading_signal_detectors.trading_signal_detector import TradingSignalDetector
 
 PRICE_SHIFT = 0.005
 

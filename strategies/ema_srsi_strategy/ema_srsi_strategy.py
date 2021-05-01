@@ -7,6 +7,11 @@ from helpers.typing.common_types import Config
 from logger.logger import Logger
 
 from trading import AssetPair, TrendType
+from trading_signal_detectors import (
+    TradingSignalDetector,
+    ExpMovingAverageSignalDetector,
+    StochasticRSISignalDetector
+)
 
 
 class EMASRSIStrategy(StrategyBase):
@@ -19,6 +24,12 @@ class EMASRSIStrategy(StrategyBase):
 
     def init_trading(self, trading_system: ts.TradingSystem) -> None:
         self.ts = trading_system
+
+    def get_signal_detectors(self) -> tp.List[TradingSignalDetector]:
+        return [
+            ExpMovingAverageSignalDetector(self.ts),
+            StochasticRSISignalDetector(self.ts)
+        ]
 
     def update(self) -> None:
         pass
