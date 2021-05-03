@@ -2,17 +2,24 @@ import math
 import typing as tp
 import plotly.graph_objects as go
 
-from trading import Order, Timestamp
+from collections import Counter
+
+from trading import Asset, Order, Timestamp
 from helpers.typing.utils import require
 
 
 class TradingStatistics:
     def __init__(self,
+                 price_asset: tp.Optional[Asset] = None,
+                 initial_wallet: tp.Optional[tp.Dict[Asset, float]] = None,
                  initial_balance: tp.Optional[float] = None,
                  start_timestamp: tp.Optional[int] = None,
                  initial_coin_balance: tp.Optional[float] = None) -> None:
         self.initial_balance = initial_balance
         self.initial_coin_balance = initial_coin_balance
+        self.price_asset = price_asset
+        self.initial_wallet = initial_wallet
+        self.final_wallet: tp.Optional[tp.Dict[Asset, float]] = None
         self.final_balance: tp.Optional[float] = None
         self.hodl_result: tp.Optional[float] = None
         self.start_timestamp = start_timestamp
@@ -22,8 +29,17 @@ class TradingStatistics:
     def set_hodl_result(self, balance: float) -> None:
         self.hodl_result = balance
 
+    def set_price_asset(self, asset: Asset) -> None:
+        self.price_asset = asset
+
+    def set_initial_wallet(self, wallet: tp.Dict[Asset, float]) -> None:
+        self.initial_wallet = wallet
+
     def set_initial_balance(self, balance: float) -> None:
         self.initial_balance = balance
+
+    def set_final_wallet(self, wallet: tp.Dict[Asset, float]) -> None:
+        self.final_wallet = wallet
 
     def set_final_balance(self, balance: float) -> None:
         self.final_balance = balance
@@ -40,8 +56,12 @@ class TradingStatistics:
     def __str__(self) -> str:
         return f'{Timestamp.to_iso_format(require(self.start_timestamp))} - ' \
                f'{Timestamp.to_iso_format(require(self.finish_timestamp))}\n' \
-               f'initial balance: {require(self.initial_balance):.2f}\n' \
-               f'final balance:   {require(self.final_balance):.2f}\n' \
+               f'initial wallet ({require(self.initial_balance):.2f} ' \
+               f'{require(self.price_asset)}):\n' \
+               f'{self._wallet_pretty_format(require(self.initial_wallet))}' \
+               f'\nfinal wallet ({require(self.final_balance):.2f} ' \
+               f'{require(self.price_asset)}):\n' \
+               f'{self._wallet_pretty_format(require(self.final_wallet))}\n' \
                f'delta:           {self._calc_absolute_delta():.2f}\n' \
                f'delta(%):        {self._calc_relative_delta():.1f}%\n' \
                f'filled orders:   {self.filled_order_count}\n' \
@@ -54,6 +74,9 @@ class TradingStatistics:
         if math.isclose(require(self.initial_balance), 0):
             return 0
         return (require(self.hodl_result) - require(self.initial_balance)) / require(self.initial_balance) * 100
+
+    def _wallet_pretty_format(self, wallet: tp.Dict[Asset, float]) -> str:
+        return '\n'.join([f'* {asset}: {amount}' for asset, amount in wallet.items()])
 
     def _calc_absolute_delta(self) -> float:
         return require(self.final_balance) - require(self.initial_balance)
@@ -69,8 +92,11 @@ class TradingStatistics:
             raise ValueError("empty stats array")
 
         stats = cls()
+        stats.set_price_asset(require(stats_array[0].price_asset))
+        stats.set_initial_wallet(dict(sum([Counter(require(x.initial_wallet)) for x in stats_array], Counter())))
         stats.set_initial_balance(sum([require(s.initial_balance) for s in stats_array]))
         stats.set_hodl_result(sum([require(s.hodl_result) for s in stats_array]))
+        stats.set_final_wallet(dict(sum([Counter(require(x.final_wallet)) for x in stats_array], Counter())))
         stats.set_final_balance(sum([require(s.final_balance) for s in stats_array]))
         stats.set_start_timestamp(min([require(s.start_timestamp) for s in stats_array]))
         stats.set_finish_timestamp(max([require(s.finish_timestamp) for s in stats_array]))
