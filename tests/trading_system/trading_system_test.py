@@ -20,7 +20,7 @@ real_ti.order_is_filled = MagicMock(return_value=True)
 
 
 @pytest.fixture
-def ts(request) -> TradingSystem:
+def ts(request, empty_logger_mock) -> TradingSystem:
     return TradingSystem(request.param, config={"currency_asset": "USDN", "wallet": {"USDN": 999999.0, "WAVES": 10.0}})
 
 

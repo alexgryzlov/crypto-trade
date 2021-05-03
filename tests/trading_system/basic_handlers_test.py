@@ -19,7 +19,7 @@ def sample_orders() -> tp.List[Order]:
 
 
 @pytest.fixture
-def orders_handler(request, sample_orders) -> OrdersHandler:
+def orders_handler(request, sample_orders, empty_logger_mock) -> OrdersHandler:
     handler = OrdersHandler(request.param)
     for order in sample_orders:
         handler.add_new_order(order)
