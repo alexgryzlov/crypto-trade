@@ -1,11 +1,27 @@
 import math
 import typing as tp
-import plotly.graph_objects as go
-
 from collections import Counter
 
-from trading import Asset, Order, Timestamp
+import plotly.graph_objects as go
+from rich.box import Box
+from rich.console import Console
+from rich.table import Table
+
 from helpers.typing.utils import require
+from trading import Asset, Order, Timestamp
+
+TABLE_STYLE: Box = Box(
+    """\
+┏━┳┓
+┃ ┃┃
+┡━╇┩
+│ ││
+├─┼┤
+╞═╪╡
+│ ││
+╰─┴╯
+"""
+)
 
 
 class TradingStatistics:
@@ -53,6 +69,22 @@ class TradingStatistics:
     def add_filled_order(self, _order: Order) -> None:
         self.filled_order_count += 1
 
+    def pretty_print(self) -> None:
+        color = 'green' if self._calc_relative_delta() > 0 else 'red'
+        console = Console()
+        table = Table(show_footer=True, box=TABLE_STYLE, show_lines=True,
+            title=f'{Timestamp.to_iso_format(require(self.start_timestamp))} - '
+                  f'{Timestamp.to_iso_format(require(self.finish_timestamp))}')
+        table.add_column('')
+        table.add_column('Initial', f'Filled orders: {self.filled_order_count}')
+        table.add_column('Final', f'Profit: [{color}]{self._calc_relative_delta():.1f}%[/{color}]\nHODL:   [{color}]{self._calc_absolute_hodl_delta():.1f}%[/{color}]')
+        table.add_row('Balance', f'{require(self.initial_balance):.2f} {require(self.price_asset)}',
+                      f'{require(self.final_balance):.2f} {require(self.price_asset)}')
+        table.add_row('Wallet',
+            self._wallet_pretty_format(require(self.initial_wallet)),
+            self._wallet_pretty_format(require(self.final_wallet)))
+        console.print(table)
+
     def __str__(self) -> str:
         return f'{Timestamp.to_iso_format(require(self.start_timestamp))} - ' \
                f'{Timestamp.to_iso_format(require(self.finish_timestamp))}\n' \
@@ -76,7 +108,7 @@ class TradingStatistics:
         return (require(self.hodl_result) - require(self.initial_balance)) / require(self.initial_balance) * 100
 
     def _wallet_pretty_format(self, wallet: tp.Dict[Asset, float]) -> str:
-        return '\n'.join([f'* {asset}: {amount}' for asset, amount in wallet.items()])
+        return '\n'.join([f'{asset}: {amount}' for asset, amount in wallet.items()])
 
     def _calc_absolute_delta(self) -> float:
         return require(self.final_balance) - require(self.initial_balance)

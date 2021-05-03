@@ -40,7 +40,8 @@ class StrategyRunner:
     def run_strategy(
             self,
             time_range: TimeRange,
-            logs_path: tp.Optional[Path] = None) -> TradingStatistics:
+            logs_path: tp.Optional[Path] = None,
+            pretty_print: bool = True) -> TradingStatistics:
 
         Logger.set_log_file_name(Timestamp.to_iso_format(time_range.from_ts))
         if logs_path is not None:
@@ -75,7 +76,10 @@ class StrategyRunner:
 
         stats = trading_system.get_trading_statistics()
         Logger.store_log()
-        print(stats)
+        if pretty_print:
+            stats.pretty_print()
+        else:
+            print(stats)
 
         return stats
 
@@ -86,7 +90,8 @@ class StrategyRunner:
             runs: tp.Optional[int] = None,
             visualize: bool = False,
             processes: int = 4,
-            logs_path: tp.Optional[Path] = None) -> TradingStatistics:
+            logs_path: tp.Optional[Path] = None,
+            pretty_print: bool = True) -> TradingStatistics:
 
         if period is None and runs is None:
             raise ValueError('Run type not selected')
@@ -114,7 +119,10 @@ class StrategyRunner:
         pool.close()
         pool.join()
         stats = TradingStatistics.merge(run_results)
-        print(stats)
+        if pretty_print:
+            stats.pretty_print()
+        else:
+            print(stats)
 
         if visualize:
             TradingStatistics.visualize(run_results)
