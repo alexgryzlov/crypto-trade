@@ -1,6 +1,7 @@
-from trading import Signal
 import typing as tp
 from abc import ABC, abstractmethod
+
+from trading import Signal
 
 
 class TradingSignalDetector(ABC):

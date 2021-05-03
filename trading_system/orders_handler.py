@@ -8,6 +8,7 @@ from trading import Order
 
 from logger.log_events import FilledOrderEvent
 from logger.logger import Logger
+from copy import copy
 
 
 class OrdersHandler(TradingSystemHandler):

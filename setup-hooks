@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+ln -s -r -t ./.git/hooks/ ./githooks/*
