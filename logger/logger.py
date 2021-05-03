@@ -7,22 +7,32 @@ from pathlib import Path
 from logger.clock import Clock
 from logger.log_events import LogEvent
 
+import typing as tp
+from helpers.typing.common_types import Config
+
 TRADING = logging.WARNING + 5
 logging.addLevelName(TRADING, "TRADING")
 
 
 class Logger:
-    def __init__(self, name: str, stdout: bool = False):
+    def __init__(self, name: str, config: Config = None):
+        self.config = Logger._default_config if config is None else config
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.INFO)
-        self.logger.addHandler(self._get_trading_file_handler())
-        self.logger.addHandler(self._get_info_file_handler())
-        self.logger.addFilter(Logger.TimestampFilter())
-        if stdout:
+        if self.config["file_output"]:
+            self.logger.addHandler(self._get_trading_file_handler())
+            self.logger.addHandler(self._get_info_file_handler())
+        if self.config["std_output"]:
             self.logger.addHandler(self.__get_stream_handler())
+        if not self.config["system_time"]:
+            self.logger.addFilter(Logger.TimestampFilter())
 
     def __getattr__(self, item: str) -> tp.Any:
         return getattr(self.logger, item)
+
+    @classmethod
+    def set_default_config(cls, cfg: Config):
+        cls._default_config = cfg
 
     @classmethod
     def set_clock(cls, clock: Clock) -> None:
@@ -105,3 +115,4 @@ class Logger:
     _dump_logs: tp.List[LogEvent] = []
     _file_name: tp.Optional[str] = None
     _logs_path = Path('logs')
+    _default_config: Config = None
