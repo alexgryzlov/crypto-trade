@@ -29,20 +29,19 @@ class WAVESExchangeInterface(TradingInterface):
         self._version = exchange_config['version']
 
     def is_alive(self) -> bool:
-        # return self._exchange.fetchStatus()['status'] == 'ok'
-        return True
+        return len(self._request("get", "")) != 0
 
     def stop_trading(self) -> None:
         pass
 
     def get_timestamp(self) -> int:
-        pass
+        return int(time() * 1000)
 
     def buy(self, amount: float, price: float) -> tp.Optional[Order]:
-        return self._place_order(0, amount, price)
+        return self._place_order(Direction.BUY, amount, price)
 
     def sell(self, amount: float, price: float) -> tp.Optional[Order]:
-        return self._place_order(1, amount, price)
+        return self._place_order(Direction.SELL, amount, price)
 
     def cancel_order(self, order: Order) -> None:
         signature_data = b58decode(self._public_key) + b58decode(order.order_id)
@@ -93,27 +92,28 @@ class WAVESExchangeInterface(TradingInterface):
             raise RuntimeError(response.content)
         return response.json()
 
-    def _place_order(self, optype: int, amount: float, price: float) -> tp.Optional[Order]:
+    def _place_order(self, direction: Direction, amount: float, price: float) -> tp.Optional[Order]:
         scaled_price = int(price * self._price_shift)
         scaled_amount = int(amount * self._price_shift)
-        timestamp = int(time() * 1000)
+        timestamp = self.get_timestamp()
         expiration = timestamp + self._max_lifetime * 1000
-        signature_data = pack("B", self._version) + \
-                         b58decode(self._public_key) + \
-                         b58decode(self._matcher_public_key) + \
-                         self._serialize_asset_id(self.asset_pair.amount_asset) + \
-                         self._serialize_asset_id(self.asset_pair.price_asset) + \
-                         pack("B", optype) + \
-                         pack(">Q", scaled_price) + \
-                         pack(">Q", scaled_amount) + \
-                         pack(">Q", timestamp) + \
-                         pack(">Q", expiration) + \
-                         pack(">Q", self._matcher_fee) + \
-                         b'\0'
+        optype: int = 0 if direction == Direction.BUY else 1
+        signature_data: bytes = pack("B", self._version) + \
+                                b58decode(self._public_key) + \
+                                b58decode(self._matcher_public_key) + \
+                                self._serialize_asset_id(self.asset_pair.amount_asset) + \
+                                self._serialize_asset_id(self.asset_pair.price_asset) + \
+                                pack("B", optype) + \
+                                pack(">Q", scaled_price) + \
+                                pack(">Q", scaled_amount) + \
+                                pack(">Q", timestamp) + \
+                                pack(">Q", expiration) + \
+                                pack(">Q", self._matcher_fee) + \
+                                b'\0'
 
-        signature = self._sign(signature_data)
-        order_direction = "sell" if optype == 1 else "buy"
-        data = json.dumps({
+        signature: bytes = self._sign(signature_data)
+        order_direction: str = "buy" if direction == Direction.BUY else "sell"
+        data: str = json.dumps({
             "senderPublicKey": self._public_key.decode("utf-8"),
             "matcherPublicKey": self._matcher_public_key.decode("utf-8"),
             "assetPair": {
@@ -141,9 +141,9 @@ class WAVESExchangeInterface(TradingInterface):
                      direction=Direction.from_string(order_direction))
 
     @staticmethod
-    def _serialize_asset_id(asset: Asset):
+    def _serialize_asset_id(asset: Asset) -> bytes:
         return b'\1' + b58decode(str(asset)) if str(asset) != "WAVES" else b'\0'
 
-    def _sign(self, data):
+    def _sign(self, data: bytes) -> bytes:
         return b58encode(calculateSignature(urandom(64),
                                             b58decode(self._private_key), data))
