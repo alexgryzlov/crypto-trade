@@ -6,7 +6,7 @@ from strategies.strategy_base import StrategyBase
 from helpers.typing.common_types import Config
 from logger.logger import Logger
 
-from trading import Trend, TrendType, Asset, AssetPair, Order, Direction
+from trading import Asset, AssetPair, Order, Direction
 
 
 class GridStrategy(StrategyBase):

@@ -1,5 +1,7 @@
+import typing as tp
+
 from helpers.updates_checker import UpdatesChecker, FromClass
-from trading_signal_detectors.relative_strength_index.relative_strength_index_signal import RsiSignal, RsiSignalType
+from trading_signal_detectors.relative_strength_index.relative_strength_index_signal import RSISignal, RSISignalType
 from trading_signal_detectors.trading_signal_detector import TradingSignalDetector
 from trading import Signal
 from trading_system.indicators import RelativeStrengthIndexHandler
@@ -24,7 +26,7 @@ class RelativeStrengthIndexSignalDetector(TradingSignalDetector):
             trading_system.handlers[f'RelativeStrengthIndexHandler{window_size}']
 
     @UpdatesChecker.on_updates(FromClass(lambda detector: [detector.handler.get_name()]), [])
-    def get_trading_signals(self):
+    def get_trading_signals(self) -> tp.List[Signal]:
         values = self.handler.get_last_n_values(1)
 
         if len(values) < 1:
@@ -32,12 +34,12 @@ class RelativeStrengthIndexSignalDetector(TradingSignalDetector):
 
         if values[0] < self.oversold_bound:
             return [Signal("relative_strength_index",
-                           RsiSignal(RsiSignalType.OVERSOLD,
+                           RSISignal(RSISignalType.OVERSOLD,
                                      (self.oversold_bound - values[0]) / self.oversold_bound))]
 
         if values[0] > self.overbought_bound:
             return [Signal("relative_strength_index",
-                           RsiSignal(RsiSignalType.OVERBOUGHT,
+                           RSISignal(RSISignalType.OVERBOUGHT,
                                      (values[0] - self.overbought_bound) / (100 - self.overbought_bound)))]
 
         return []

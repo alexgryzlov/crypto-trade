@@ -1,6 +1,6 @@
 import logging
 import pickle
-import typing as tp
+
 from datetime import datetime
 from pathlib import Path
 
@@ -31,7 +31,7 @@ class Logger:
         return getattr(self.logger, item)
 
     @classmethod
-    def set_default_config(cls, cfg: Config):
+    def set_default_config(cls, cfg: Config) -> None:
         cls._default_config = cfg
 
     @classmethod
@@ -115,4 +115,4 @@ class Logger:
     _dump_logs: tp.List[LogEvent] = []
     _file_name: tp.Optional[str] = None
     _logs_path = Path('logs')
-    _default_config: Config = None
+    _default_config: tp.Optional[Config] = None

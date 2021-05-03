@@ -30,5 +30,14 @@
     "market_data_host": "https://api.wavesplatform.com",
     "matcher_host": "https://matcher.waves.exchange",
     "candles_per_request": 1400
+  },
+
+  "strategy_runner": {
+    "logger": {
+      "file_output": false,
+      "std_output": false,
+      "system_time": false
+    },
+    "stdout_frequency": 10
   }
 }

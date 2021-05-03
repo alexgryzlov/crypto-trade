@@ -1,12 +1,12 @@
 from enum import Enum, auto
 
 
-class RsiSignalType(Enum):
+class RSISignalType(Enum):
     OVERSOLD = auto()
     OVERBOUGHT = auto()
 
 
-class RsiSignal:
-    def __init__(self, rsi_type: RsiSignalType, value: float):
+class RSISignal:
+    def __init__(self, rsi_type: RSISignalType, value: float):
         self.type = rsi_type
         self.value = value

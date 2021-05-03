@@ -4,7 +4,8 @@ from strategies.strategy_base import StrategyBase
 from logger.logger import Logger
 
 from trading import TrendType, AssetPair
-from trading_signal_detectors.relative_strength_index.relative_strength_index_signal import RsiSignal, RsiSignalType
+from trading_signal_detectors.relative_strength_index.relative_strength_index_signal import RSISignal, RSISignalType
+from trading_system.indicators import RelativeStrengthIndexHandler, MovingAverageCDHandler
 
 
 class RSIMACDStrategy(StrategyBase):
@@ -30,6 +31,8 @@ class RSIMACDStrategy(StrategyBase):
 
     def init_trading(self, trading_system: ts.TradingSystem) -> None:
         self.ts = trading_system
+        self.ts.add_handler(RelativeStrengthIndexHandler, params={"window_size": 9})
+        self.ts.add_handler(MovingAverageCDHandler, params={})
 
     def update(self) -> None:
         if not self.received_new_signal:
@@ -55,14 +58,14 @@ class RSIMACDStrategy(StrategyBase):
         else:
             self.last_macd_downtrend_ts = self.ts.get_timestamp()
 
-    def handle_relative_strength_index_signal(self, signal: RsiSignal) -> None:
+    def handle_relative_strength_index_signal(self, signal: RSISignal) -> None:
         self.logger.info(f'Strategy received RSI signal of type {signal.type}.')
         self.received_new_signal = True
         self.last_rsi_value = signal.value
-        if signal.type == RsiSignalType.OVERSOLD:
+        if signal.type == RSISignalType.OVERSOLD:
             self.last_rsi_oversold_ts = self.ts.get_timestamp()
         else:
             self.last_rsi_overbought_ts = self.ts.get_timestamp()
 
-    def __get_timestamp_border(self):
+    def __get_timestamp_border(self) -> int:
         return self.ts.get_timestamp() - self.ts_threshold

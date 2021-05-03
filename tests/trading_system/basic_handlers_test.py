@@ -5,7 +5,7 @@ from tests.logger.empty_logger_mock import empty_logger_mock
 
 from tests.trading_interface.trading_interface_mock import TradingInterfaceMock
 from trading import Order, AssetPair, Asset, Direction
-from trading_system.trading_system import TradingSystem, OrdersHandler, CandlesHandler
+from trading_system.trading_system import OrdersHandler, CandlesHandler
 import typing as tp
 
 one_values = [1] * 10
