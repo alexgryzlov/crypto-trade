@@ -68,8 +68,7 @@ class TradingSystem:
 
     def get_trading_statistics(self) -> TradingStatistics:
         stats = copy(self.stats)
-        if self.stats.initial_coin_balance:
-            stats.set_hodl_result(self.stats.initial_coin_balance * self.ti.get_sell_price())
+        stats.set_hodl_result(require(self.stats.initial_coin_balance) * self.ti.get_sell_price())
         stats.set_final_wallet(self.get_wallet())
         stats.set_final_balance(self.get_total_balance())
         stats.set_finish_timestamp(self.get_timestamp())
