@@ -22,8 +22,9 @@ class RelativeStrengthIndexSignalDetector(TradingSignalDetector):
         self.ts = trading_system
         self.oversold_bound = oversold_bound
         self.overbought_bound = overbought_bound
-        self.handler: RelativeStrengthIndexHandler = \
-            trading_system.handlers[f'RelativeStrengthIndexHandler{window_size}']
+        self.handler: RelativeStrengthIndexHandler = trading_system.add_handler(
+            RelativeStrengthIndexHandler, params={"window_size": window_size}
+        )
 
     @UpdatesChecker.on_updates(FromClass(lambda detector: [detector.handler.get_name()]), [])
     def get_trading_signals(self) -> tp.List[Signal]:

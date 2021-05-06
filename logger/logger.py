@@ -15,8 +15,8 @@ logging.addLevelName(TRADING, "TRADING")
 
 
 class Logger:
-    def __init__(self, name: str, config: Config = None):
-        self.config = Logger._default_config if config is None else config
+    def __init__(self, name: str, config: tp.Optional[Config] = None):
+        self.config: Config = Logger._default_config if config is None else config  # type: ignore
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.INFO)
         if self.config["file_output"]:

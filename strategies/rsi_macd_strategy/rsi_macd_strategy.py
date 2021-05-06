@@ -7,8 +7,11 @@ from strategies.strategy_base import StrategyBase
 from logger.logger import Logger
 
 from trading import TrendType, AssetPair, Signal
+from trading_signal_detectors import TradingSignalDetector
+from trading_signal_detectors.macd.macd_signal_detector import MACDSignalDetector
 from trading_signal_detectors.relative_strength_index.relative_strength_index_signal import RSISignal, RSISignalType
-from trading_system.indicators import RelativeStrengthIndexHandler, MovingAverageCDHandler
+from trading_signal_detectors.relative_strength_index.relative_strength_index_signal_detector import \
+    RelativeStrengthIndexSignalDetector
 
 
 class RSIMACDStrategy(StrategyBase):
@@ -34,17 +37,29 @@ class RSIMACDStrategy(StrategyBase):
 
     def init_trading(self, trading_system: ts.TradingSystem) -> None:
         self.ts = trading_system
-        self.ts.add_handler(RelativeStrengthIndexHandler, params={"window_size": 9})
-        self.ts.add_handler(MovingAverageCDHandler, params={})
+
+    def get_signal_detectors(self) -> tp.List[TradingSignalDetector]:
+        return [
+            MACDSignalDetector(self.ts),
+            RelativeStrengthIndexSignalDetector(self.ts, 9),
+        ]
 
     def update(self) -> None:
         if not self.received_new_signal:
             return
 
         if self.__sell():
-            self.ts.sell(self.asset_pair, self.scale * self.last_rsi_value + self.offset, self.ts.get_buy_price())
+            self.ts.sell(
+                self.asset_pair,
+                self.scale * self.last_rsi_value + self.offset,
+                self.ts.get_buy_price(),
+            )
         elif self.__buy():
-            self.ts.buy(self.asset_pair, self.scale * self.last_rsi_value + self.offset, self.ts.get_sell_price())
+            self.ts.buy(
+                self.asset_pair,
+                self.scale * self.last_rsi_value + self.offset,
+                self.ts.get_sell_price(),
+            )
         self.received_new_signal = False
 
     def handle_moving_average_cd_signal(self, trend: Signal) -> None:

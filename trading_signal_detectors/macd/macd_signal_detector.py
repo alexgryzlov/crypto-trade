@@ -5,7 +5,7 @@ from helpers.updates_checker import UpdatesChecker, FromClass
 from trading_signal_detectors.trading_signal_detector import TradingSignalDetector
 from trading import Signal, TrendType
 from trading_system.indicators import MovingAverageCDHandler
-
+from trading_system.trading_system import TradingSystem
 
 PRICE_EPS = 1e-5
 
@@ -16,10 +16,10 @@ class MACDSignalDetector(TradingSignalDetector):
         Uptrend signal when macd crosses signal line upwards
         Downtrend signal when macd crosses signal line downwards
     """
-    def __init__(self, trading_system):
+    def __init__(self, trading_system: TradingSystem):
         self.ts = trading_system
         self.handler: MovingAverageCDHandler = \
-            trading_system.handlers[f'MovingAverageCDHandler_s{12}_l{26}']
+            trading_system.add_handler(MovingAverageCDHandler, params={})
 
     @UpdatesChecker.on_updates(FromClass(lambda detector: [detector.handler.get_name()]), [])
     def get_trading_signals(self) -> tp.List[Signal]:
