@@ -1,5 +1,4 @@
 import pytest
-from pathlib import Path
 
 from tests.configs import base_config
 from helpers.typing.common_types import ConfigsScope

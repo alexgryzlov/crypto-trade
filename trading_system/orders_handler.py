@@ -1,5 +1,4 @@
 import typing as tp
-from copy import copy
 
 from trading_system.trading_system_handler import TradingSystemHandler
 from trading_interface.trading_interface import TradingInterface

@@ -5,23 +5,16 @@ import typing as tp
 from pathlib import Path
 from os import getpid
 
-from helpers.typing.common_types import Config, ConfigsScope
+from helpers.typing.common_types import ConfigsScope
 from logger.logger import Logger
 from base.config_parser import ConfigParser
 
 from trading_interface.simulator.simulator import Simulator
-from strategies.strategy_base import StrategyBase
+
 from trading_system.trading_system import TradingSystem
 from trading_system.trading_statistics import TradingStatistics
 
 from trading import Timestamp, TimeRange
-
-from trading_signal_detectors import (
-    ExtremumSignalDetector,
-    MovingAverageSignalDetector,
-    ExpMovingAverageSignalDetector,
-    StochasticRSISignalDetector
-)
 
 
 class StrategyRunner:

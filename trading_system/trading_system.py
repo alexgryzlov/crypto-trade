@@ -1,14 +1,11 @@
 from __future__ import annotations
-import typing as tp
 
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict
 from copy import copy
 import math
 
 from helpers.typing.common_types import Config
 
-from trading_interface.trading_interface import TradingInterface
-from trading_system.trading_system_handler import TradingSystemHandler
 from trading_system.candles_handler import CandlesHandler
 from trading_system.orders_handler import OrdersHandler
 from trading_system.indicators import *
@@ -71,7 +68,7 @@ class TradingSystem:
 
     def get_trading_statistics(self) -> TradingStatistics:
         stats = copy(self.stats)
-        stats.set_hodl_result(self.stats.initial_coin_balance * self.ti.get_sell_price())
+        stats.set_hodl_result(require(self.stats.initial_coin_balance) * self.ti.get_sell_price())
         stats.set_final_wallet(self.get_wallet())
         stats.set_final_balance(self.get_total_balance())
         stats.set_finish_timestamp(self.get_timestamp())

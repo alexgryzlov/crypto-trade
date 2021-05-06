@@ -6,6 +6,7 @@ from helpers.typing import Array
 from logger.log_events import RSIEvent
 from logger.logger import Logger
 from trading_interface.trading_interface import TradingInterface
+from helpers.updates_checker import UpdatesChecker, handlers_name
 from trading_system.indicators.exp_moving_average_handler import \
     ExpMovingAverageHandler
 from trading_system.trading_system_handler import TradingSystemHandler
@@ -29,6 +30,7 @@ class RelativeStrengthIndexHandler(TradingSystemHandler):
     def get_name(self) -> str:
         return f'{type(self).__name__}{self.window_size}'
 
+    @UpdatesChecker.check_update(handlers_name)
     def update(self) -> bool:
         if not super().received_new_candle():
             return False
