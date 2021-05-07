@@ -1,5 +1,6 @@
 import math
 import typing as tp
+from copy import copy
 from collections import Counter
 
 import plotly.graph_objects as go
@@ -34,7 +35,7 @@ class TradingStatistics:
         self.initial_balance = initial_balance
         self.initial_coin_balance = initial_coin_balance
         self.price_asset = price_asset
-        self.initial_wallet = initial_wallet
+        self.initial_wallet = copy(initial_wallet)
         self.final_wallet: tp.Optional[tp.Dict[Asset, float]] = None
         self.final_balance: tp.Optional[float] = None
         self.hodl_result: tp.Optional[float] = None
@@ -49,13 +50,13 @@ class TradingStatistics:
         self.price_asset = asset
 
     def set_initial_wallet(self, wallet: tp.Dict[Asset, float]) -> None:
-        self.initial_wallet = wallet
+        self.initial_wallet = copy(wallet)
 
     def set_initial_balance(self, balance: float) -> None:
         self.initial_balance = balance
 
     def set_final_wallet(self, wallet: tp.Dict[Asset, float]) -> None:
-        self.final_wallet = wallet
+        self.final_wallet = copy(wallet)
 
     def set_final_balance(self, balance: float) -> None:
         self.final_balance = balance
