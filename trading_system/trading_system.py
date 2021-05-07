@@ -1,5 +1,6 @@
 from __future__ import annotations
 import typing as tp
+from helpers.typing.utils import require
 
 from collections import defaultdict, OrderedDict
 from copy import copy
@@ -74,7 +75,8 @@ class TradingSystem:
 
     def get_trading_statistics(self) -> TradingStatistics:
         stats = copy(self.stats)
-        stats.set_hodl_result(self.stats.initial_coin_balance * self.ti.get_sell_price())
+        stats.set_hodl_result(require(self.stats.initial_coin_balance) *
+                              self.ti.get_sell_price())
         stats.set_final_balance(self.get_total_balance())
         stats.set_finish_timestamp(self.get_timestamp())
         return stats
@@ -112,10 +114,10 @@ class TradingSystem:
             return None
         self.wallet[asset_pair.price_asset] -= price * amount
         order = self.ti.buy(asset_pair, amount, price)
-        self.logger.trading(BuyEvent(asset_pair,
-                                     amount,
-                                     price,
-                                     order.order_id))
+        self.logger.trading_event(BuyEvent(asset_pair,
+                                           amount,
+                                           price,
+                                           order.order_id))
         self.get_handler(OrdersHandler).add_new_order(copy(order))
         return order
 
@@ -127,10 +129,10 @@ class TradingSystem:
             return None
         self.wallet[asset_pair.amount_asset] -= amount
         order = self.ti.sell(asset_pair, amount, price)
-        self.logger.trading(SellEvent(asset_pair,
-                                      amount,
-                                      price,
-                                      order.order_id))
+        self.logger.trading_event(SellEvent(asset_pair,
+                                            amount,
+                                            price,
+                                            order.order_id))
         self.get_handler(OrdersHandler).add_new_order(copy(order))
         return order
 
@@ -200,7 +202,7 @@ class TradingSystem:
             self.wallet[order.asset_pair.price_asset] += order.price * order.amount
         else:  # Direction.SELL
             self.wallet[order.asset_pair.amount_asset] += order.amount
-        self.logger.trading(CancelEvent(order))
+        self.logger.trading_event(CancelEvent(order))
 
     def _handle_filled_order(self, order: Order) -> None:
         if order.direction == Direction.BUY:

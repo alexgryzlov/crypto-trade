@@ -39,8 +39,8 @@ class ExpMovingAverageHandler(TradingSystemHandler):
                 self.values[-1] * (1 - self.alpha))
         else:
             self.values.append(new_candle.get_mid_price())
-        self.logger.trading(
-            ExpMovingAverageEvent(self.values[-1], self.window_size), INFO)
+        self.logger.info_event(
+            ExpMovingAverageEvent(self.values[-1], self.window_size))
         return True
 
     def get_last_n_values(self, n: int) -> tp.List[float]:
