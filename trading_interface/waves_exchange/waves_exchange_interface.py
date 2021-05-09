@@ -35,6 +35,7 @@ class WAVESExchangeInterface(TradingInterface):
         pass
 
     def get_timestamp(self) -> int:
+        # TODO: use system time from logger
         return int(time() * 1000)
 
     def buy(self, amount: float, price: float) -> tp.Optional[Order]:
@@ -43,7 +44,7 @@ class WAVESExchangeInterface(TradingInterface):
     def sell(self, amount: float, price: float) -> tp.Optional[Order]:
         return self._place_order(Direction.SELL, amount, price)
 
-    def cancel_order(self, order: Order) -> None:
+    def cancel_order(self, order: Order) -> bool:
         signature_data = b58decode(self._public_key) + b58decode(order.order_id)
         signature = self._sign(signature_data)
         data = json.dumps({
@@ -55,6 +56,8 @@ class WAVESExchangeInterface(TradingInterface):
                                  body=data).json()
         if response['status'] != 'OrderCancelled':
             self.logger.warning(f"Order is not cancelled. Status: {response['status']}")
+            return False
+        return True
 
     def cancel_all(self) -> None:
         pass
@@ -83,11 +86,13 @@ class WAVESExchangeInterface(TradingInterface):
                 headers={'content-type': 'application/json'},
                 params=request_params
             )
-        else:
+        elif request_type == "get":
             response = requests.get(
                 f'{self._host}/matcher/{api_request}',
                 params=request_params
             )
+        else:
+            raise ValueError(f"Unknown request type: {request_type}")
         if not response:
             raise RuntimeError(response.content)
         return response.json()
@@ -98,6 +103,7 @@ class WAVESExchangeInterface(TradingInterface):
         timestamp = self.get_timestamp()
         expiration = timestamp + self._max_lifetime * 1000
         optype: int = 0 if direction == Direction.BUY else 1
+        # https://docs.waves.exchange/en/waves-matcher/matcher-api
         signature_data: bytes = pack("B", self._version) + \
                                 b58decode(self._public_key) + \
                                 b58decode(self._matcher_public_key) + \
