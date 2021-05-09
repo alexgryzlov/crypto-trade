@@ -12,6 +12,15 @@
     "strategy_module": "tests.strategies.strategy_mock"
   },
 
+  "strategy_runner": {
+    "logger": {
+      "file_output": false,
+      "std_output": true,
+      "system_time": true
+    },
+    "stdout_frequency": 10
+  },
+
   "trading_interface": {
     "timeframe": "15m",
     "asset_pair": ["WAVES", "USDN"],
