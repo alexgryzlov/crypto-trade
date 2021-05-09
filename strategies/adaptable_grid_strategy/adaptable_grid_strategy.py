@@ -8,9 +8,9 @@ from trading import Order
 class AdaptableGridStrategy(GridStrategy):  # type: ignore
     def __init__(self, config: Config) -> None:
         super().__init__(config)
-        self.threshold = 0.4
-        self.window = 160
-        self.coef = 25
+        self.threshold = config['threshold']
+        self.window = config['window']
+        self.coef = config['coef']
 
     def calculate_base_price(self) -> float:
         return self.__get_last_n_mid_prices().mean()

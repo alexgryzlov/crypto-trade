@@ -1,0 +1,6 @@
+{
+  "asset_pair": ["USDT", "USDN"],
+  "threshold": 0.4,
+  "window": 160,
+  "coef": 25
+}
