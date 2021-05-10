@@ -71,14 +71,14 @@ class TradingStatistics:
         self.filled_order_count += 1
 
     def pretty_print(self) -> None:
-        color = 'green' if self._calc_relative_delta() > 0 else 'red'
+        color = 'green' if self.calc_relative_delta() > 0 else 'red'
         console = Console()
         table = Table(show_footer=True, box=TABLE_STYLE, show_lines=True,
             title=f'{Timestamp.to_iso_format(require(self.start_timestamp))} - '
                   f'{Timestamp.to_iso_format(require(self.finish_timestamp))}')
         table.add_column('')
         table.add_column('Initial', f'Filled orders: {self.filled_order_count}')
-        table.add_column('Final', f'Profit: [{color}]{self._calc_relative_delta():.1f}%[/{color}]\nHODL:   [{color}]{self._calc_absolute_hodl_delta():.1f}%[/{color}]')
+        table.add_column('Final', f'Profit: [{color}]{self.calc_relative_delta():.1f}%[/{color}]\nHODL:   [{color}]{self._calc_absolute_hodl_delta():.1f}%[/{color}]')
         table.add_row('Balance', f'{require(self.initial_balance):.2f} {require(self.price_asset)}',
                       f'{require(self.final_balance):.2f} {require(self.price_asset)}')
         table.add_row('Wallet',
@@ -95,13 +95,21 @@ class TradingStatistics:
                f'\nfinal wallet ({require(self.final_balance):.2f} ' \
                f'{require(self.price_asset)}):\n' \
                f'{self._wallet_pretty_format(require(self.final_wallet))}\n' \
-               f'delta:           {self._calc_absolute_delta():.2f}\n' \
-               f'delta(%):        {self._calc_relative_delta():.1f}%\n' \
+               f'delta:           {self.calc_absolute_delta():.2f}\n' \
+               f'delta(%):        {self.calc_relative_delta():.1f}%\n' \
                f'filled orders:   {self.filled_order_count}\n' \
                f'--------------------------------------------------------\n' \
                f'hodl_result:   {require(self.hodl_result): .2f}\n' \
                f'delta hodl_result:   {require(self.hodl_result) - require(self.initial_balance): .2f}\n' \
                f'delta hodl_result(%):   {self._calc_absolute_hodl_delta(): .1f}%\n'
+
+    def calc_absolute_delta(self) -> float:
+        return require(self.final_balance) - require(self.initial_balance)
+
+    def calc_relative_delta(self) -> float:
+        if math.isclose(require(self.initial_balance), 0):
+            return 0
+        return self.calc_absolute_delta() / require(self.initial_balance) * 100
 
     def _calc_absolute_hodl_delta(self) -> float:
         if math.isclose(require(self.initial_balance), 0):
@@ -110,14 +118,6 @@ class TradingStatistics:
 
     def _wallet_pretty_format(self, wallet: tp.Dict[Asset, float]) -> str:
         return '\n'.join([f'{asset}: {amount}' for asset, amount in wallet.items()])
-
-    def _calc_absolute_delta(self) -> float:
-        return require(self.final_balance) - require(self.initial_balance)
-
-    def _calc_relative_delta(self) -> float:
-        if math.isclose(require(self.initial_balance), 0):
-            return 0
-        return self._calc_absolute_delta() / require(self.initial_balance) * 100
 
     @classmethod
     def merge(cls, stats_array: tp.List['TradingStatistics']) -> 'TradingStatistics':
@@ -138,7 +138,7 @@ class TradingStatistics:
 
     @staticmethod
     def get_absolute_delta(stats_array: tp.List['TradingStatistics']) -> tp.List[float]:
-        return [s._calc_absolute_delta() for s in stats_array]
+        return [s.calc_absolute_delta() for s in stats_array]
 
     @staticmethod
     def get_start_time(stats_array: tp.List['TradingStatistics']) -> tp.List[str]:
