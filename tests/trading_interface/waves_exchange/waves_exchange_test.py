@@ -2,7 +2,7 @@ import pytest
 import requests_mock
 import json
 import typing as tp
-from trading import AssetPair, Direction
+from trading import AssetPair, Direction, Order
 
 from trading_interface.waves_exchange.waves_exchange_interface import \
     WAVESExchangeInterface
@@ -174,7 +174,7 @@ def test_order_place(empty_logger_mock: empty_logger_mock,
         price = ti.get_buy_price()
         order = ti.buy(amount, price)
 
-    if response['status'] == 'OrderAccepted':
+    if response['success']:
         assert order is not None
     else:
         assert order is None
@@ -194,3 +194,29 @@ def test_order_place(empty_logger_mock: empty_logger_mock,
         assert request_body['orderType'] == 'buy'
     assert float(request_body['amount']) == amount * price_shift
     assert float(request_body['price']) == price * price_shift
+
+
+@pytest.mark.parametrize("response", [
+    sample_order_canceled,
+    sample_order_canceled_reject,
+])
+@requests_mock.Mocker(kw="m")
+def test_cancel_order(empty_logger_mock: empty_logger_mock,
+                      response: tp.Dict[str, tp.Any],
+                      **kwargs: requests_mock.Mocker):
+    m = setup_mocker(kwargs["m"])
+    ti = WAVESExchangeInterface(trading_config=ti_config,
+                                exchange_config=exchange_config)
+    add_orderbook(m, sample_orderbook)
+
+    m.post(make_request_url(f'orderbook/{str(asset_pair)}/cancel'),
+           text=json.dumps(response))
+
+    order = Order(sample_order_id, asset_pair, 0, 0, Direction.SELL)
+    assert ti.cancel_order(order) == response['success']
+
+    order_request = m.request_history[-1]
+    request_body = json.loads(order_request.text)
+    require_equal_structure(request_body, sample_cancel_order_request)
+
+    assert request_body['orderId'] == sample_order_id

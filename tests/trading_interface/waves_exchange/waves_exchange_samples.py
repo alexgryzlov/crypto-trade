@@ -78,10 +78,23 @@ sample_order_rejected = {
     "success": False
 }
 
+sample_order_id = '2CRyxsvDYJ4FVwV5TE3Kqxw7Cr8cmfnhDafVsKY1hEBz'
+
 sample_order_canceled = {
     'orderId': '2CRyxsvDYJ4FVwV5TE3Kqxw7Cr8cmfnhDafVsKY1hEBz',
     'success': True,
     'status': 'OrderCanceled'
+}
+
+sample_order_canceled_reject = {
+    'error': 9437194,
+    'message': 'The order 2CRyxsvDYJ4FVwV5TE3Kqxw7Cr8cmfnhDafVsKY1hEBz is canceled',
+    'template': 'The order {{id}} is canceled',
+    'params': {
+        'id': '2CRyxsvDYJ4FVwV5TE3Kqxw7Cr8cmfnhDafVsKY1hEBz'
+    },
+    'status': 'OrderCancelRejected',
+    'success': False
 }
 
 sample_place_order_request = {
@@ -99,4 +112,10 @@ sample_place_order_request = {
     'matcherFee': 300000,
     'signature': 'wgXj3F3mi19aZXA8WHeKbdqF9xTnkBYij27Hd8uTx5DjnNkNmsjxJYFis83fxudt96mB8U8LLczgC1dXkW2mBDN',
     'version': 3
+}
+
+sample_cancel_order_request = {
+    'sender': 'DuasNP39N7PCNCKfEkjXniR8otVbriYp3MpBrKKZrH1K',
+    'orderId': '2CRyxsvDYJ4FVwV5TE3Kqxw7Cr8cmfnhDafVsKY1hEBz',
+    'signature': '2GUjK8knXr8PgtSWZxQcDkKyG4pB4pXFMX9CX3qdepRonZLXR3tjzdoNQqeFjUM2Z7hHFHoPvV2kpsRxwjbzm4Zf',
 }
