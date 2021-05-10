@@ -149,4 +149,4 @@ class WAVESExchangeInterface(TradingInterface):
 
     def _sign(self, data: bytes) -> str:
         return b58encode(calculateSignature(urandom(64),
-                                            b58decode(self._private_key), data))
+                                            b58decode(self._private_key), data)).decode('ascii')
