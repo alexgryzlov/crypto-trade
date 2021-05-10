@@ -7,6 +7,7 @@ from helpers.typing.common_types import Config
 from logger.logger import Logger
 
 from trading import Asset, AssetPair, Order, Direction
+from helpers.ceil import ceil
 
 
 class GridStrategy(StrategyBase):
@@ -18,7 +19,7 @@ class GridStrategy(StrategyBase):
         self.base_level = self.total_levels // 2
         self.base_price = 1.001
         self.interval = 0.002
-        self.tranche = 100
+        self.min_amount = 10
         self.grid = {}
 
     def get_level_price(self, level):
@@ -32,24 +33,33 @@ class GridStrategy(StrategyBase):
         pass
 
     def place_orders(self) -> None:
-        for level in range(0, self.base_level):
-            order = self.ts.buy(self.asset_pair, self.tranche, self.get_level_price(level))
-            if order is not None:
-                self.grid[order.order_id] = level
+        price_asset = self.ts.wallet[self.asset_pair.price_asset]
+        amount_asset = self.ts.wallet[self.asset_pair.amount_asset]
 
-        for level in range(self.base_level + 1, self.total_levels):
-            order = self.ts.sell(self.asset_pair, self.tranche, self.get_level_price(level))
-            if order is not None:
-                self.grid[order.order_id] = level
+        if price_asset > self.min_amount:
+            buy_amount = ceil(price_asset / self.base_level, 4)
+            for level in range(0, self.base_level):
+                order = self.ts.buy(self.asset_pair, buy_amount, self.get_level_price(level))
+                if order is not None:
+                    self.grid[order.order_id] = level
+
+        if amount_asset > self.min_amount:
+            sell_amount = ceil(amount_asset / self.base_level, 4)
+            for level in range(self.base_level + 1, self.total_levels):
+                order = self.ts.sell(self.asset_pair, sell_amount, self.get_level_price(level))
+                if order is not None:
+                    self.grid[order.order_id] = level
 
     def handle_filled_order_signal(self, order: Order):
         if order.direction.value == Direction.SELL.value:
             level = self.grid[order.order_id]
             self.grid.pop(order.order_id)
-            order = self.ts.buy(self.asset_pair, self.tranche, self.get_level_price(level - 1))
-            self.grid[order.order_id] = level
+            order = self.ts.buy(self.asset_pair, order.amount, self.get_level_price(level - 1))
+            if order is not None:
+                self.grid[order.order_id] = level
         elif order.direction.value == Direction.BUY.value:
             level = self.grid[order.order_id]
             self.grid.pop(order.order_id)
-            order = self.ts.sell(self.asset_pair, self.tranche, self.get_level_price(level + 1))
-            self.grid[order.order_id] = level
+            order = self.ts.sell(self.asset_pair, order.amount, self.get_level_price(level + 1))
+            if order is not None:
+                self.grid[order.order_id] = level

@@ -1,11 +1,11 @@
 {
     "asset_pair": ["USDT", "USDN"],
-    "total_levels": 15,
+    "total_levels": 3,
     "threshold": 0.0,
-    "window": 35,
+    "window": 50,
     "coef": 16,
-    "candles_timeout": 20,
+    "candles_timeout": 25,
     "candles_lifetime": 8,
     "timeout_only": true,
-    "handle_filled_orders": false
+    "handle_filled_orders": true
 }

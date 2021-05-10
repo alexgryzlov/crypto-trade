@@ -29,18 +29,18 @@ def grid_generator(
 
 
 time_range = TimeRange.from_iso_format(
-    from_ts='2021-01-01 00:00:00',
-    to_ts='2021-05-01 00:00:00')
+    from_ts='2020-10-01 00:00:00',
+    to_ts='2021-05-09 00:00:00')
 base_config = ConfigParser.load_config(Path('configs/base.json'))
 MarketDataDownloader.init(base_config['market_data_downloader'])
 strategy_runner = StrategyRunner(base_config=base_config)
 console = Console()
 
 fee = 0.1
-window_grid = [25, 30, 35]
-coef_grid = [16, 17, 18]
-timeout_grid = [16, 18, 20]
-total_levels_grid = [9, 11, 13, 15]
+window_grid = [40, 50]
+coef_grid = [16]
+timeout_grid = [20, 25]
+total_levels_grid = [3, 5, 7]
 param_grids: tp.List[tp.Dict[str, tp.List[tp.Any]]] = [{
   'asset_pair': [['USDT', 'USDN']],
   'total_levels': total_levels_grid,
