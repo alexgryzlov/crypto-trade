@@ -18,15 +18,15 @@ from logger.logger import Logger
 class WAVESExchangeInterface(TradingInterface):
     def __init__(self, trading_config: Config, exchange_config: Config):
         self.logger = Logger("TestnetInterface")
-        self.asset_pair = AssetPair(*[Asset(asset_name) for asset_name in trading_config['asset_pair']])
-        self._host = exchange_config['matcher']
+        self.asset_pair = AssetPair.from_string(*trading_config['asset_pair'])
+        self._host: str = exchange_config['matcher']
         self._matcher_public_key = bytes(self._request('get', ""), 'utf-8')
-        self._matcher_fee = exchange_config['matcher_fee']  # default - 0.003 waves
-        self._price_shift = exchange_config['price_shift']
-        self._max_lifetime = exchange_config['max_lifetime']
+        self._matcher_fee: int = exchange_config['matcher_fee']  # default - 0.003 waves
+        self._price_shift: int = exchange_config['price_shift']
+        self._max_lifetime: int = exchange_config['max_lifetime']
         self._private_key = bytes(exchange_config["private_key"], 'utf-8')
         self._public_key = bytes(exchange_config["public_key"], 'utf-8')
-        self._version = exchange_config['version']
+        self._version: int = exchange_config['version']
 
     def is_alive(self) -> bool:
         return len(self._request("get", "")) != 0
@@ -45,16 +45,16 @@ class WAVESExchangeInterface(TradingInterface):
         return self._place_order(Direction.SELL, amount, price)
 
     def cancel_order(self, order: Order) -> bool:
-        signature_data = b58decode(self._public_key) + b58decode(order.order_id)
-        signature = self._sign(signature_data)
-        data = json.dumps({
+        signature_data: bytes = b58decode(self._public_key) + b58decode(order.order_id)
+        signature: str = self._sign(signature_data)
+        data: str = json.dumps({
             "sender": self._public_key.decode("utf-8"),
             "orderId": order.order_id,
-            "signature": signature.decode('ascii')
+            "signature": signature
         })
         response = self._request('post', f'orderbook/{str(self.asset_pair)}/cancel',
                                  body=data)
-        if response['status'] != 'OrderCancelled':
+        if response['status'] != 'OrderCanceled':
             self.logger.warning(f"Order is not cancelled. Status: {response['status']}")
             return False
         return True
@@ -93,8 +93,6 @@ class WAVESExchangeInterface(TradingInterface):
             )
         else:
             raise ValueError(f"Unknown request type: {request_type}")
-        if not response:
-            raise RuntimeError(response.content)
         return response.json()
 
     def _place_order(self, direction: Direction, amount: float, price: float) -> tp.Optional[Order]:
@@ -116,8 +114,7 @@ class WAVESExchangeInterface(TradingInterface):
                                 pack(">Q", expiration) + \
                                 pack(">Q", self._matcher_fee) + \
                                 b'\0'
-
-        signature: bytes = self._sign(signature_data)
+        signature: str = self._sign(signature_data)
         order_direction: str = "buy" if direction == Direction.BUY else "sell"
         data: str = json.dumps({
             "senderPublicKey": self._public_key.decode("utf-8"),
@@ -132,7 +129,7 @@ class WAVESExchangeInterface(TradingInterface):
             "timestamp": timestamp,
             "expiration": expiration,
             "matcherFee": self._matcher_fee,
-            "signature": signature.decode('ascii'),
+            "signature": signature,
             "version": self._version
         })
         response = self._request('post', 'orderbook', body=data)
@@ -150,6 +147,6 @@ class WAVESExchangeInterface(TradingInterface):
     def _serialize_asset_id(asset: Asset) -> bytes:
         return b'\1' + b58decode(str(asset)) if str(asset) != "WAVES" else b'\0'
 
-    def _sign(self, data: bytes) -> bytes:
+    def _sign(self, data: bytes) -> str:
         return b58encode(calculateSignature(urandom(64),
                                             b58decode(self._private_key), data))
