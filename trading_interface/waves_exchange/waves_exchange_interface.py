@@ -50,10 +50,10 @@ class WAVESExchangeInterface(TradingInterface):
         data = json.dumps({
             "sender": self._public_key.decode("utf-8"),
             "orderId": order.order_id,
-            "signature": signature
+            "signature": signature.decode('ascii')
         })
         response = self._request('post', f'orderbook/{str(self.asset_pair)}/cancel',
-                                 body=data).json()
+                                 body=data)
         if response['status'] != 'OrderCancelled':
             self.logger.warning(f"Order is not cancelled. Status: {response['status']}")
             return False
