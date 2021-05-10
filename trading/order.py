@@ -37,7 +37,7 @@ class Order:
                f"Direction: {self.direction}"
 
     def __hash__(self) -> int:
-        return self.order_id
+        return hash(self.order_id)
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Order):
