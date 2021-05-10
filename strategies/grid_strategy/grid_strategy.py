@@ -14,8 +14,8 @@ class GridStrategy(StrategyBase):
         self.asset_pair = AssetPair(*[Asset(x) for x in config['asset_pair']])
         self.logger = Logger('GridStrategy')
         self.ts = None
-        self.total_levels = 13
-        self.base_level = 6
+        self.total_levels = config['total_levels']
+        self.base_level = self.total_levels // 2
         self.base_price = 1.001
         self.interval = 0.002
         self.tranche = 100

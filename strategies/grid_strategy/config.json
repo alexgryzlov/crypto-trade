@@ -1,3 +1,4 @@
 {
-  "asset_pair": ["USDT", "USDN"]
+  "asset_pair": ["USDT", "USDN"],
+  "total_levels": 13
 }
