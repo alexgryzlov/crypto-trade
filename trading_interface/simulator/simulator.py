@@ -116,6 +116,6 @@ class Simulator(TradingInterface):
             return index
         return min(index, len(self.candles) - 1)
 
-    def __get_new_order_id(self) -> int:
+    def __get_new_order_id(self) -> str:
         self.last_used_order_id += 1
-        return self.last_used_order_id
+        return str(self.last_used_order_id)

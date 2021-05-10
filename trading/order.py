@@ -2,7 +2,7 @@ from __future__ import annotations
 from enum import IntEnum
 
 from trading import AssetPair
-import typing as tp
+
 
 class Direction(IntEnum):
     BUY = -1
@@ -18,7 +18,7 @@ class Direction(IntEnum):
 
 
 class Order:
-    def __init__(self, order_id: tp.Union[int, str], asset_pair: AssetPair, amount: float,
+    def __init__(self, order_id: str, asset_pair: AssetPair, amount: float,
                  price: float, direction: Direction):
         self.order_id = order_id
         self.asset_pair = asset_pair
