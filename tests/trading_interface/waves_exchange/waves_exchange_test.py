@@ -2,7 +2,7 @@ import pytest
 import requests_mock
 import json
 import typing as tp
-from trading import AssetPair, Asset
+from trading import AssetPair, Direction
 
 from trading_interface.waves_exchange.waves_exchange_interface import \
     WAVESExchangeInterface
@@ -10,13 +10,13 @@ from trading_interface.waves_exchange.waves_exchange_interface import \
 from tests.logger.empty_logger_mock import empty_logger_mock
 from helpers.typing.common_types import Config
 
-from waves_exchange_responses import *
+from waves_exchange_samples import *
 
 ti_config: Config = {
     "timeframe": "15m",
     "asset_pair": ["WAVES", "25FEqEjRkqK6yCkiT7Lz6SAYz7gUFCtxfCChnrVFD5AT"],
 }
-asset_pair = AssetPair(*[Asset(name) for name in ti_config["asset_pair"]])
+asset_pair = AssetPair.from_string(*ti_config["asset_pair"])
 
 exchange_config: Config = {
     "matcher": "https://matcher-testnet.waves.exchange",
@@ -27,6 +27,8 @@ exchange_config: Config = {
     "private_key": "7WJxqTfaiMmFFHRvxCwiQ8DAE3qVBd5ziaE5F8qJWXWx",
     "public_key": "DuasNP39N7PCNCKfEkjXniR8otVbriYp3MpBrKKZrH1K"
 }
+
+price_shift = exchange_config['price_shift']
 
 
 def require_equal_structure(lhs: tp.Any,
@@ -146,31 +148,49 @@ def test_get_sell_price(empty_logger_mock: empty_logger_mock,
     assert sell_price == resp_sell_price
 
 
+@pytest.mark.parametrize("direction,response", [
+    (Direction.SELL, sample_sell_order_accepted),
+    (Direction.BUY, sample_buy_order_accepted),
+    (Direction.SELL, sample_order_rejected),
+    (Direction.BUY, sample_order_rejected)
+])
 @requests_mock.Mocker(kw="m")
-def test_sell(empty_logger_mock: empty_logger_mock,
-              **kwargs: requests_mock.Mocker):
+def test_order_place(empty_logger_mock: empty_logger_mock,
+                     direction: str,
+                     response: tp.Dict[str, tp.Any],
+                     **kwargs: requests_mock.Mocker):
     m = setup_mocker(kwargs["m"])
     ti = WAVESExchangeInterface(trading_config=ti_config,
                                 exchange_config=exchange_config)
     add_orderbook(m, sample_orderbook)
 
     m.post(make_request_url('orderbook'),
-           text=json.dumps(sample_sell_order_accepted))
-    amount = sample_sell_order_accepted['message']['amount'] / 100000
-    order = ti.sell(amount, ti.get_sell_price())
-    assert order is not None
+           text=json.dumps(response))
+    amount = 1
+    if direction == Direction.SELL:
+        price = ti.get_sell_price()
+        order = ti.sell(amount, price)
+    else:
+        price = ti.get_buy_price()
+        order = ti.buy(amount, price)
 
+    if response['status'] == 'OrderAccepted':
+        assert order is not None
+    else:
+        assert order is None
 
-@requests_mock.Mocker(kw="m")
-def test_sell_fail(empty_logger_mock: empty_logger_mock,
-                   **kwargs: requests_mock.Mocker):
-    m = setup_mocker(kwargs["m"])
-    ti = WAVESExchangeInterface(trading_config=ti_config,
-                                exchange_config=exchange_config)
-    add_orderbook(m, sample_orderbook)
+    order_request = m.request_history[-1]
+    request_body = json.loads(order_request.text)
+    require_equal_structure(request_body, sample_place_order_request)
 
-    m.post(make_request_url('orderbook'),
-           text=json.dumps(sample_order_rejected))
-    amount = sample_sell_order_accepted['message']['amount'] / 100000
-    order = ti.sell(amount, ti.get_sell_price())
-    assert order is None
+    assert request_body['matcherPublicKey'] == mock_matcher_pubkey
+    assert request_body['assetPair']['amountAsset'] == \
+           asset_pair.amount_asset.name
+    assert request_body['assetPair']['priceAsset'] == \
+           asset_pair.price_asset.name
+    if direction == Direction.SELL:
+        assert request_body['orderType'] == 'sell'
+    else:
+        assert request_body['orderType'] == 'buy'
+    assert float(request_body['amount']) == amount * price_shift
+    assert float(request_body['price']) == price * price_shift
