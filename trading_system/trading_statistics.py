@@ -87,21 +87,20 @@ class TradingStatistics:
         console.print(table)
 
     def __str__(self) -> str:
-        return f'{Timestamp.to_iso_format(require(self.start_timestamp))} - ' \
-               f'{Timestamp.to_iso_format(require(self.finish_timestamp))}\n' \
-               f'initial wallet ({require(self.initial_balance):.2f} ' \
-               f'{require(self.price_asset)}):\n' \
-               f'{self._wallet_pretty_format(require(self.initial_wallet))}' \
-               f'\nfinal wallet ({require(self.final_balance):.2f} ' \
-               f'{require(self.price_asset)}):\n' \
-               f'{self._wallet_pretty_format(require(self.final_wallet))}\n' \
-               f'delta:           {self.calc_absolute_delta():.2f}\n' \
-               f'delta(%):        {self.calc_relative_delta():.1f}%\n' \
-               f'filled orders:   {self.filled_order_count}\n' \
-               f'--------------------------------------------------------\n' \
-               f'hodl_result:   {require(self.hodl_result): .2f}\n' \
-               f'delta hodl_result:   {require(self.hodl_result) - require(self.initial_balance): .2f}\n' \
-               f'delta hodl_result(%):   {self._calc_absolute_hodl_delta(): .1f}%\n'
+        return f"""\
+{Timestamp.to_iso_format(require(self.start_timestamp))} - {Timestamp.to_iso_format(require(self.finish_timestamp))}
+initial wallet ({require(self.initial_balance):.2f} {require(self.price_asset)}):
+{self._wallet_pretty_format(require(self.initial_wallet))}
+final wallet ({require(self.final_balance):.2f} {require(self.price_asset)}):
+{self._wallet_pretty_format(require(self.final_wallet))}
+delta:                  {self.calc_absolute_delta():.2f}
+delta(%):               {self.calc_relative_delta():.1f}%
+filled orders:          {self.filled_order_count}
+--------------------------------------------------------
+hodl_result:            {require(self.hodl_result):.2f}
+delta hodl_result:      {require(self.hodl_result) - require(self.initial_balance):.2f}
+delta hodl_result(%):   {self._calc_absolute_hodl_delta():.1f}%
+"""
 
     def calc_absolute_delta(self) -> float:
         return require(self.final_balance) - require(self.initial_balance)
