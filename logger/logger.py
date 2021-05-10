@@ -9,6 +9,7 @@ from logger.log_events import LogEvent
 
 import typing as tp
 from helpers.typing.common_types import Config
+from base.config_parser import ConfigParser
 
 TRADING = logging.WARNING + 5
 logging.addLevelName(TRADING, "TRADING")
@@ -115,4 +116,5 @@ class Logger:
     _dump_logs: tp.List[LogEvent] = []
     _file_name: tp.Optional[str] = None
     _logs_path = Path('logs')
-    _default_config: tp.Optional[Config] = None
+    _default_config: Config = ConfigParser.load_config(
+        Path('configs/base.json'))['default_logger']
