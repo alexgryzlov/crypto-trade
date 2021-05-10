@@ -65,8 +65,12 @@ class Simulator(TradingInterface):
         self.active_orders.add(copy(order))
         return order
 
-    def cancel_order(self, order: Order) -> None:
-        self.active_orders.discard(order)
+    def cancel_order(self, order: Order) -> bool:
+        try:
+            self.active_orders.remove(order)
+            return True
+        except KeyError:
+            return False
 
     def cancel_all(self) -> None:
         self.active_orders.clear()

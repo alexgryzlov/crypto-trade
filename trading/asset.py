@@ -19,6 +19,10 @@ class AssetPair:
         self.amount_asset = amount_asset
         self.price_asset = price_asset
 
+    @classmethod
+    def from_string(cls, amount_asset: str, price_asset: str):
+        return cls(Asset(amount_asset), Asset(price_asset))
+
     def __repr__(self) -> str:
         return f"{self.amount_asset}/{self.price_asset}"
 

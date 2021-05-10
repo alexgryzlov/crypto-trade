@@ -26,7 +26,7 @@ class TradingInterface(ABC):
         pass
 
     @abstractmethod
-    def cancel_order(self, order: Order) -> None:
+    def cancel_order(self, order: Order) -> bool:
         pass
 
     @abstractmethod
