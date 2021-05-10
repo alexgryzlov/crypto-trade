@@ -7,7 +7,7 @@ from helpers.typing.common_types import Config
 from logger.logger import Logger
 
 from trading import Asset, AssetPair, Order, Direction
-from helpers.ceil import ceil
+from helpers.floor import floor
 
 
 class GridStrategy(StrategyBase):
@@ -37,14 +37,14 @@ class GridStrategy(StrategyBase):
         amount_asset = self.ts.wallet[self.asset_pair.amount_asset]
 
         if price_asset > self.min_amount:
-            buy_amount = ceil(price_asset / self.base_level, 4)
+            buy_amount = floor(price_asset / self.base_level, 4)
             for level in range(0, self.base_level):
                 order = self.ts.buy(self.asset_pair, buy_amount, self.get_level_price(level))
                 if order is not None:
                     self.grid[order.order_id] = level
 
         if amount_asset > self.min_amount:
-            sell_amount = ceil(amount_asset / self.base_level, 4)
+            sell_amount = floor(amount_asset / self.base_level, 4)
             for level in range(self.base_level + 1, self.total_levels):
                 order = self.ts.sell(self.asset_pair, sell_amount, self.get_level_price(level))
                 if order is not None:
