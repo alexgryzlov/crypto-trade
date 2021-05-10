@@ -3,6 +3,9 @@ import typing as tp
 from itertools import product
 from pathlib import Path
 
+from numpy import prod
+from rich.console import Console
+
 from base.config_parser import ConfigParser
 from market_data_api.market_data_downloader import MarketDataDownloader
 from strategy_runner.strategy_runner import StrategyRunner
@@ -16,10 +19,11 @@ def generate_config(config: tp.Dict[str, tp.Any]) -> None:
 
 
 def grid_generator(
-        grid: tp.Dict[str, tp.List[tp.Any]]
+        grids: tp.List[tp.Dict[str, tp.List[tp.Any]]]
         ) -> tp.Generator[tp.Dict[str, tp.Any], None, None]:
-    names = list(grid.keys())
-    param_grid = product(*list(grid.values()))
+    names = list(grids[0].keys())
+    param_grid: tp.List[tp.Any] = sum(
+        [list(product(*list(grid.values()))) for grid in grids], [])
     for params in param_grid:
         yield dict(zip(names, params))
 
@@ -30,30 +34,43 @@ time_range = TimeRange.from_iso_format(
 base_config = ConfigParser.load_config(Path('configs/base.json'))
 MarketDataDownloader.init(base_config['market_data_downloader'])
 strategy_runner = StrategyRunner(base_config=base_config)
+console = Console()
 
-param_grid: tp.Dict[str, tp.List[tp.Any]] = {
+fee = 0.1
+window_grid = [25, 30, 35]
+coef_grid = [16, 17, 18]
+timeout_grid = [16, 18, 20]
+total_levels_grid = [9, 11, 13, 15]
+param_grids: tp.List[tp.Dict[str, tp.List[tp.Any]]] = [{
   'asset_pair': [['USDT', 'USDN']],
-  'threshold': [0.4],
-  'window': [80],
-  'coef': [25],
-  'candles_timeout': [48],
+  'total_levels': total_levels_grid,
+  'threshold': [0.],
+  'window': window_grid,
+  'coef': coef_grid,
+  'candles_timeout': timeout_grid,
   'candles_lifetime': [8],
-  'timeout_only': [True, False],
-  'handle_filled_orders': [False]
-}
+  'timeout_only': [True],
+  'handle_filled_orders': [True, False]
+}]
+total = sum(prod(list(
+    map(len, param_grid.values()))) for param_grid in param_grids)
 best_profit = float('-inf')
 best_stats: tp.Optional[TradingStatistics] = None
 best_params: tp.Dict[str, tp.List[tp.Any]] = {}
 
-for params_dict in grid_generator(param_grid):
+for i, params_dict in enumerate(grid_generator(param_grids)):
     generate_config(params_dict)
     stats = strategy_runner.run_strategy(time_range=time_range)
-    profit = stats.calc_relative_delta()
+    profit = stats.calc_absolute_delta() - fee * stats.filled_order_count
+    console.print(f'Checked {i + 1} out of {total}')
     if profit > best_profit:
         best_profit = profit
         best_stats = stats
         best_params = params_dict
 
-
-print(f'Optimal parameters: {best_params}')
-print(f'Profit: {best_profit}%')
+color = 'green' if best_profit > 0 else 'red'
+console.print('[bold]Optimal parameters:[/bold]')
+console.print(best_params)
+console.print(
+    f'[bold]Profit (including fee): [{color}]{best_profit:.1f}[/{color}] '
+    f'{best_stats.price_asset}[/bold]')
