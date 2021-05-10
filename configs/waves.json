@@ -6,9 +6,10 @@
     "matcher": "https://matcher-testnet.waves.exchange",
     "matcher_fee": 300000,
     "price_shift": 100000000,
-    "max_lifetime": 2592000,
+    "max_lifetime": 2160000,
     "version": 3,
     "private_key": "7WJxqTfaiMmFFHRvxCwiQ8DAE3qVBd5ziaE5F8qJWXWx",
-    "public_key": "DuasNP39N7PCNCKfEkjXniR8otVbriYp3MpBrKKZrH1K"
+    "public_key": "DuasNP39N7PCNCKfEkjXniR8otVbriYp3MpBrKKZrH1K",
+    "before_start_offset": 86400
   }
 }
