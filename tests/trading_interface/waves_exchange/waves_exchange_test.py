@@ -32,7 +32,7 @@ price_shift = exchange_config['price_shift']
 
 
 def require_equal_structure(lhs: tp.Any,
-                            rhs: tp.Any):
+                            rhs: tp.Any) -> None:
     assert isinstance(lhs, type(rhs)) or \
            isinstance(rhs, type(lhs))
     if isinstance(lhs, dict):  # not Mapping
@@ -48,7 +48,7 @@ def require_equal_structure(lhs: tp.Any,
                 require_equal_structure(lhs_val, rhs_val)
 
 
-def make_request_url(api_request: str):
+def make_request_url(api_request: str) -> str:
     return f"{exchange_config['matcher']}/matcher/{api_request}"
 
 
@@ -58,8 +58,10 @@ def setup_mocker(m: requests_mock.Mocker) -> requests_mock.Mocker:
     return m
 
 
-def add_orderbook(m: requests_mock.Mocker,
-                  orderbook=None) -> requests_mock.Mocker:
+def add_orderbook(
+        m: requests_mock.Mocker,
+        orderbook: tp.Optional[tp.Dict[str, tp.Any]] = None
+) -> requests_mock.Mocker:
     if orderbook is None:
         orderbook = sample_orderbook
     m.get(make_request_url(f'orderbook/{str(asset_pair)}'),
@@ -69,7 +71,7 @@ def add_orderbook(m: requests_mock.Mocker,
 
 @requests_mock.Mocker(kw="m")
 def test_init_matcher_public_key(empty_logger_mock: empty_logger_mock,
-                                 **kwargs: requests_mock.Mocker):
+                                 **kwargs: requests_mock.Mocker) -> None:
     setup_mocker(kwargs["m"])
     ti = WAVESExchangeInterface(trading_config=ti_config,
                                 exchange_config=exchange_config)
@@ -78,7 +80,8 @@ def test_init_matcher_public_key(empty_logger_mock: empty_logger_mock,
     assert ti._matcher_public_key == mock_matcher_pubkey.encode('ascii')
 
 
-def test_init_matcher_public_key_testnet(empty_logger_mock: empty_logger_mock):
+def test_init_matcher_public_key_testnet(
+        empty_logger_mock: empty_logger_mock) -> None:
     ti = WAVESExchangeInterface(trading_config=ti_config,
                                 exchange_config=exchange_config)
     assert ti.is_alive()
@@ -86,7 +89,7 @@ def test_init_matcher_public_key_testnet(empty_logger_mock: empty_logger_mock):
 
 @requests_mock.Mocker(kw="m")
 def test_get_orderbook(empty_logger_mock: empty_logger_mock,
-                       **kwargs: requests_mock.Mocker):
+                       **kwargs: requests_mock.Mocker) -> None:
     m = setup_mocker(kwargs["m"])
 
     ti = WAVESExchangeInterface(trading_config=ti_config,
@@ -97,7 +100,7 @@ def test_get_orderbook(empty_logger_mock: empty_logger_mock,
     assert ti.get_orderbook() == data
 
 
-def test_get_orderbook_testnet(empty_logger_mock: empty_logger_mock):
+def test_get_orderbook_testnet(empty_logger_mock: empty_logger_mock) -> None:
     ti = WAVESExchangeInterface(trading_config=ti_config,
                                 exchange_config=exchange_config)
     orderbook = ti.get_orderbook()
@@ -113,39 +116,35 @@ def test_get_orderbook_testnet(empty_logger_mock: empty_logger_mock):
     assert isinstance(orderbook['asks'], list)
 
 
-def test_orderbook_testnet_api_change(empty_logger_mock: empty_logger_mock):
+def test_orderbook_testnet_api_change(
+        empty_logger_mock: empty_logger_mock) -> None:
     ti = WAVESExchangeInterface(trading_config=ti_config,
                                 exchange_config=exchange_config)
     orderbook = ti.get_orderbook()
     require_equal_structure(orderbook, sample_orderbook)
 
 
+@pytest.mark.parametrize("direction,name_in_orderbook", [
+    (Direction.SELL, 'asks'),
+    (Direction.BUY, 'bids'),
+])
 @requests_mock.Mocker(kw="m")
 def test_get_buy_price(empty_logger_mock: empty_logger_mock,
-                       **kwargs: requests_mock.Mocker):
+                       direction: Direction,
+                       name_in_orderbook: str,
+                       **kwargs: requests_mock.Mocker) -> None:
     m = setup_mocker(kwargs["m"])
 
     ti = WAVESExchangeInterface(trading_config=ti_config,
                                 exchange_config=exchange_config)
     add_orderbook(m, sample_orderbook)
 
-    buy_price = sample_orderbook['bids'][0]['price']
-    resp_buy_price = ti.get_buy_price()
-    assert buy_price == resp_buy_price
-
-
-@requests_mock.Mocker(kw="m")
-def test_get_sell_price(empty_logger_mock: empty_logger_mock,
-                        **kwargs: requests_mock.Mocker):
-    m = setup_mocker(kwargs["m"])
-
-    ti = WAVESExchangeInterface(trading_config=ti_config,
-                                exchange_config=exchange_config)
-    add_orderbook(m, sample_orderbook)
-
-    sell_price = sample_orderbook['asks'][0]['price']
-    resp_sell_price = ti.get_sell_price()
-    assert sell_price == resp_sell_price
+    price = sample_orderbook[name_in_orderbook][0]['price']  # type: ignore
+    if direction == Direction.SELL:
+        resp_price = ti.get_sell_price()
+    else:
+        resp_price = ti.get_buy_price()
+    assert price == resp_price
 
 
 @pytest.mark.parametrize("direction,response", [
@@ -158,7 +157,7 @@ def test_get_sell_price(empty_logger_mock: empty_logger_mock,
 def test_order_place(empty_logger_mock: empty_logger_mock,
                      direction: str,
                      response: tp.Dict[str, tp.Any],
-                     **kwargs: requests_mock.Mocker):
+                     **kwargs: requests_mock.Mocker) -> None:
     m = setup_mocker(kwargs["m"])
     ti = WAVESExchangeInterface(trading_config=ti_config,
                                 exchange_config=exchange_config)
@@ -203,7 +202,7 @@ def test_order_place(empty_logger_mock: empty_logger_mock,
 @requests_mock.Mocker(kw="m")
 def test_cancel_order(empty_logger_mock: empty_logger_mock,
                       response: tp.Dict[str, tp.Any],
-                      **kwargs: requests_mock.Mocker):
+                      **kwargs: requests_mock.Mocker) -> None:
     m = setup_mocker(kwargs["m"])
     ti = WAVESExchangeInterface(trading_config=ti_config,
                                 exchange_config=exchange_config)
