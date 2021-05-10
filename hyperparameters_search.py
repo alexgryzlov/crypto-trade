@@ -18,10 +18,10 @@ def generate_config(config: tp.Dict[str, tp.Any]) -> None:
 
 
 def grid_generator(
-        grid: tp.Dict[str, tp.List[tp.Any]]
+        grids: tp.List[tp.Dict[str, tp.List[tp.Any]]]
         ) -> tp.Generator[tp.Dict[str, tp.Any], None, None]:
-    names = list(grid.keys())
-    param_grid = product(*list(grid.values()))
+    names = list(grids[0].keys())
+    param_grid = sum([list(product(*list(grid.values()))) for grid in grids], [])
     for params in param_grid:
         yield dict(zip(names, params))
 
@@ -33,22 +33,35 @@ base_config = ConfigParser.load_config(Path('configs/base.json'))
 MarketDataDownloader.init(base_config['market_data_downloader'])
 strategy_runner = StrategyRunner(base_config=base_config)
 
-param_grid: tp.Dict[str, tp.List[tp.Any]] = {
+window_grid = [40, 80, 160]
+coef_grid = [8, 10, 14, 20, 25]
+timeout_grid = [24, 48, 96]
+param_grids: tp.List[tp.Dict[str, tp.List[tp.Any]]] = [{
   'asset_pair': [['USDT', 'USDN']],
-  'threshold': [0.4],
-  'window': [80],
-  'coef': [25],
-  'candles_timeout': [48],
+  'threshold': [0.],
+  'window': window_grid,
+  'coef': coef_grid,
+  'candles_timeout': timeout_grid,
   'candles_lifetime': [8],
-  'timeout_only': [True, False],
-  'handle_filled_orders': [False]
-}
-total = prod(list(map(len, param_grid.values())))
+  'timeout_only': [True],
+  'handle_filled_orders': [True, False]
+}, {
+  'asset_pair': [['USDT', 'USDN']],
+  'threshold': [0.2, 0.4],
+  'window': window_grid,
+  'coef': coef_grid,
+  'candles_timeout': timeout_grid,
+  'candles_lifetime': [8],
+  'timeout_only': [False],
+  'handle_filled_orders': [True, False]
+}]
+total = sum(prod(list(
+    map(len, param_grid.values()))) for param_grid in param_grids)
 best_profit = float('-inf')
 best_stats: tp.Optional[TradingStatistics] = None
 best_params: tp.Dict[str, tp.List[tp.Any]] = {}
 
-for i, params_dict in enumerate(grid_generator(param_grid)):
+for i, params_dict in enumerate(grid_generator(param_grids)):
     generate_config(params_dict)
     stats = strategy_runner.run_strategy(time_range=time_range)
     profit = stats.calc_relative_delta()
@@ -57,7 +70,6 @@ for i, params_dict in enumerate(grid_generator(param_grid)):
         best_profit = profit
         best_stats = stats
         best_params = params_dict
-
 
 console = Console()
 color = 'green' if best_profit > 0 else 'red'
