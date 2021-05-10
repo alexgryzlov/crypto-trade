@@ -34,7 +34,7 @@ class MovingAverageEvent(LogEvent):
 
 class BuyEvent(LogEvent):
     def __init__(self, asset_pair: AssetPair, amount: float,
-                 price: float, order_id: int):
+                 price: float, order_id: str):
         super().__init__(f'Buying {amount} of {asset_pair.amount_asset} for {price} '
                          f'{asset_pair.price_asset}, order {order_id}',
                          _create_dict(asset_pair.amount_asset, asset_pair.price_asset, amount, price,
@@ -43,7 +43,7 @@ class BuyEvent(LogEvent):
 
 class SellEvent(LogEvent):
     def __init__(self, asset_pair: AssetPair, amount: float,
-                 price: float, order_id: int) -> None:
+                 price: float, order_id: str) -> None:
         super().__init__(f'Selling {amount} of {asset_pair.price_asset} for {price} '
                          f'{asset_pair.amount_asset}, order {order_id}',
                          _create_dict(asset_pair.amount_asset, asset_pair.price_asset, amount, price,
@@ -61,7 +61,7 @@ class CancelEvent(LogEvent):
 
 
 class FilledOrderEvent(LogEvent):
-    def __init__(self, order_id: int) -> None:
+    def __init__(self, order_id: str) -> None:
         super().__init__(f'Order {order_id} is filled',
                          _create_dict(order_id))
 

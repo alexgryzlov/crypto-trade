@@ -12,9 +12,13 @@ class Direction(IntEnum):
     def from_value(value: float) -> Direction:
         return Direction.BUY if value > 0 else Direction.SELL
 
+    @staticmethod
+    def from_string(value: str) -> Direction:
+        return Direction.BUY if value.lower() == "buy" else Direction.SELL
+
 
 class Order:
-    def __init__(self, order_id: int, asset_pair: AssetPair, amount: float,
+    def __init__(self, order_id: str, asset_pair: AssetPair, amount: float,
                  price: float, direction: Direction):
         self.order_id = order_id
         self.asset_pair = asset_pair
@@ -33,7 +37,7 @@ class Order:
                f"Direction: {self.direction}"
 
     def __hash__(self) -> int:
-        return self.order_id
+        return hash(self.order_id)
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Order):

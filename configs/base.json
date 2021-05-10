@@ -9,7 +9,7 @@
 
   "trading_interface": {
     "timeframe": "15m",
-    "asset_pair": ["WAVES","25FEqEjRkqK6yCkiT7Lz6SAYz7gUFCtxfCChnrVFD5AT"],
+    "asset_pair": ["WAVES","25FEqEjRkqK6yCkiT7Lz6SAYz7gUFCtxfCChnrVFD5AT"]
   },
 
   "market_data_downloader": {

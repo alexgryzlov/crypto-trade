@@ -18,15 +18,15 @@ class TradingInterface(ABC):
         pass
 
     @abstractmethod
-    def buy(self, amount: float, price: float) -> Order:
+    def buy(self, amount: float, price: float) -> tp.Optional[Order]:
         pass
 
     @abstractmethod
-    def sell(self, amount: float, price: float) -> Order:
+    def sell(self, amount: float, price: float) -> tp.Optional[Order]:
         pass
 
     @abstractmethod
-    def cancel_order(self, order: Order) -> None:
+    def cancel_order(self, order: Order) -> bool:
         pass
 
     @abstractmethod
