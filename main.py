@@ -20,8 +20,13 @@ if __name__ == "__main__":
         simulator_config=ConfigParser.load_config(Path('configs/simulator.json')),
         exchange_config=ConfigParser.load_config(Path('configs/waves.json')))
 
-    e = WAVESExchangeInterface(base_config['trading_interface'])
-    print(e.get_sell_price())
+    e = WAVESExchangeInterface(base_config['trading_interface'],
+                               ConfigParser.load_config(
+                                   Path('configs/waves.json'))['testnet'])
+    # print(e.get_sell_price())
+    # e.sell(1, e.get_sell_price())
+    # e.buy(1, e.get_buy_price())
+    print(e.get_orderbook())
    # print(e.get_buy_price(), e.get_sell_price())
 
     # strategy_runner.run_simulation_on_periods(

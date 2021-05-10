@@ -18,7 +18,7 @@ from logger.logger import Logger
 class WAVESExchangeInterface(TradingInterface):
     def __init__(self, trading_config: Config, exchange_config: Config):
         self.logger = Logger("TestnetInterface")
-        self.asset_pair = AssetPair(*trading_config['asset_pair'])
+        self.asset_pair = AssetPair(*[Asset(asset_name) for asset_name in trading_config['asset_pair']])
         self._host = exchange_config['matcher']
         self._matcher_public_key = bytes(self._request('get', ""), 'utf-8')
         self._matcher_fee = exchange_config['matcher_fee']  # default - 0.003 waves
@@ -132,7 +132,7 @@ class WAVESExchangeInterface(TradingInterface):
             "timestamp": timestamp,
             "expiration": expiration,
             "matcherFee": self._matcher_fee,
-            "signature": signature,
+            "signature": signature.decode('ascii'),
             "version": self._version
         })
         response = self._request('post', 'orderbook', body=data)
