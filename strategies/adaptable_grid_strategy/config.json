@@ -4,7 +4,7 @@
     "threshold": 0.0,
     "window": 50,
     "coef": 16,
-    "candles_timeout": 25,
+    "timeout_in_candles": 25,
     "candles_lifetime": 8,
     "timeout_only": true,
     "handle_filled_orders": true

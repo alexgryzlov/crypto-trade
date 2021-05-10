@@ -47,7 +47,7 @@ param_grids: tp.List[tp.Dict[str, tp.List[tp.Any]]] = [{
   'threshold': [0.],
   'window': window_grid,
   'coef': coef_grid,
-  'candles_timeout': timeout_grid,
+  'timeout_in_candles': timeout_grid,
   'candles_lifetime': [8],
   'timeout_only': [True],
   'handle_filled_orders': [True, False]

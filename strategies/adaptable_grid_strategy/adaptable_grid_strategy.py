@@ -4,6 +4,8 @@ import trading_system.trading_system as ts
 from helpers.typing.common_types import Config
 from strategies.grid_strategy.grid_strategy import GridStrategy
 from trading import Order
+import typing as tp
+from itertools import chain
 
 
 class AdaptableGridStrategy(GridStrategy):  # type: ignore
@@ -12,17 +14,21 @@ class AdaptableGridStrategy(GridStrategy):  # type: ignore
         self.threshold = config['threshold']
         self.window = config['window']
         self.coef = config['coef']
-        self.timeout = config['candles_timeout'] * config['candles_lifetime']
+        self.timeout = config['timeout_in_candles'] * config['candles_lifetime']
         self.timeout_only = config['timeout_only']
         self.handle_filled_orders = config['handle_filled_orders']
         self.ticks = 0
 
     def calculate_base_price(self) -> float:
-        return self.__get_last_n_mid_prices().mean()
+        opens_and_closes = np.array(list(chain(
+            *self.__get_last_n_opens_and_closes())))
+        return 1.005 * np.median(opens_and_closes)
 
     def calculate_interval(self) -> float:
-        return (self.coef * self.__get_last_n_mid_prices().std() /
-                self.base_level)
+        opens_and_closes = np.array(list(chain(
+            *self.__get_last_n_opens_and_closes())))
+        #print(self.coef * opens_and_closes.std())
+        return self.coef * opens_and_closes.std()
 
     def init_trading(self, trading_system: ts.TradingSystem) -> None:
         self.ts = trading_system
@@ -49,6 +55,10 @@ class AdaptableGridStrategy(GridStrategy):  # type: ignore
     def handle_filled_order_signal(self, order: Order) -> None:
         if self.handle_filled_orders:
             super().handle_filled_order_signal(order)
+
+    def __get_last_n_opens_and_closes(self) -> tp.List[tp.Tuple[float]]:
+        return [(candle.open, candle.close) for candle in
+            self.ts.ti.get_last_n_candles(self.window)]
 
     def __get_last_n_mid_prices(self) -> np.array:
         return np.array(list(
