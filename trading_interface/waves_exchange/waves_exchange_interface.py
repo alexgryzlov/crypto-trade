@@ -53,8 +53,8 @@ class WAVESExchangeInterface(TradingInterface):
             "signature": signature
         })
         response = self._request('post', f'orderbook/{str(self.asset_pair)}/cancel',
-                                 body=data).json()
-        if response['status'] != 'OrderCancelled':
+                                 body=data)
+        if response['status'] != 'OrderCanceled':
             self.logger.warning(f"Order is not cancelled. Status: {response['status']}")
             return False
         return True
@@ -93,8 +93,6 @@ class WAVESExchangeInterface(TradingInterface):
             )
         else:
             raise ValueError(f"Unknown request type: {request_type}")
-        if not response:
-            raise RuntimeError(response.content)
         return response.json()
 
     def _place_order(self, direction: Direction, amount: float, price: float) -> tp.Optional[Order]:
