@@ -20,6 +20,8 @@ from trading import Timestamp, TimeRange
 class StrategyRunner:
     def __init__(self, base_config: ConfigsScope):
         self.base_config = base_config
+        self.logger = Logger(f"Runner{getpid()}",
+            config=self.base_config['strategy_runner']['logger'])
 
     def _get_strategy_instance(self) -> tp.Any:
         module = importlib.import_module(self.base_config["strategy"]["strategy_module"])
@@ -36,9 +38,6 @@ class StrategyRunner:
             time_range: TimeRange,
             logs_path: tp.Optional[Path] = None,
             pretty_print: bool = True) -> TradingStatistics:
-
-        logger = Logger(f"Runner{getpid()}",
-                        config=self.base_config['strategy_runner']['logger'])
 
         def get_progress() -> float:
             return (min(simulator.get_timestamp(), time_range.to_ts) - time_range.from_ts)\
@@ -64,12 +63,12 @@ class StrategyRunner:
 
         last_checkpoint = 0
         stdout_frequency = self.base_config['strategy_runner']['stdout_frequency']
-        logger.info("Strategy started")
+        self.logger.info("Strategy started")
         while simulator.is_alive():
             current_checkpoint = get_progress() // stdout_frequency * stdout_frequency
             if current_checkpoint != last_checkpoint:
                 last_checkpoint = current_checkpoint
-                logger.info(f"{last_checkpoint}% of simulation passed."
+                self.logger.info(f"{last_checkpoint}% of simulation passed."
                             f" Simulation time: {Timestamp.to_iso_format(simulator.get_timestamp())}")
             trading_system.update()
             signals = []
