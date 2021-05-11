@@ -1,5 +1,6 @@
 import typing as tp
 
+from helpers.updates_checker import UpdatesChecker, handlers_name
 from trading_system.indicators.exp_moving_average_handler import \
     ExpMovingAverageHandler
 from trading_system.trading_system_handler import TradingSystemHandler
@@ -38,6 +39,7 @@ class MovingAverageCDHandler(TradingSystemHandler):
         self.short_handler = tp.cast(ExpMovingAverageHandler, handlers[0])
         self.long_handler = tp.cast(ExpMovingAverageHandler, handlers[1])
 
+    @UpdatesChecker.check_update(handlers_name)
     def update(self) -> bool:
         if not super().received_new_candle():
             return False

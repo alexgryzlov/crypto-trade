@@ -1,12 +1,12 @@
 import typing as tp
-
 import pandas as pd
 
 import trading_system.trading_system as ts
 from logger.logger import Logger
 from trading import Signal, TrendType
-from trading_signal_detectors.trading_signal_detector import \
-    TradingSignalDetector
+
+from trading_signal_detectors.trading_signal_detector import TradingSignalDetector
+from trading_system.indicators import RelativeStrengthIndexHandler
 
 
 class StochasticRSISignalDetector(TradingSignalDetector):
@@ -15,8 +15,9 @@ class StochasticRSISignalDetector(TradingSignalDetector):
                  k: int = 3, d: int = 3):
         self.ts = trading_system
         self.logger = Logger('StochasticRSISignalDetector')
-        self.rsi = \
-            trading_system.handlers[f'RelativeStrengthIndexHandler{rsi_len}']
+        self.rsi: RelativeStrengthIndexHandler = self.ts.add_handler(
+            RelativeStrengthIndexHandler,
+            params={"window_size": rsi_len})
         self.stoch_len = stoch_len
         self.k = k
         self.d = d

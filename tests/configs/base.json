@@ -12,6 +12,15 @@
     "strategy_module": "tests.strategies.strategy_mock"
   },
 
+  "strategy_runner": {
+    "logger": {
+      "file_output": false,
+      "std_output": true,
+      "system_time": true
+    },
+    "stdout_frequency": 10
+  },
+
   "trading_interface": {
     "timeframe": "15m",
     "asset_pair": ["WAVES", "USDN"],
@@ -30,5 +39,14 @@
     "market_data_host": "https://api.wavesplatform.com",
     "matcher_host": "https://matcher.waves.exchange",
     "candles_per_request": 1400
+  },
+
+  "strategy_runner": {
+    "logger": {
+      "file_output": false,
+      "std_output": false,
+      "system_time": false
+    },
+    "stdout_frequency": 10
   }
 }

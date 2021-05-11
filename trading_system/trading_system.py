@@ -1,18 +1,14 @@
 from __future__ import annotations
-import typing as tp
-from helpers.typing.utils import require
 
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict
 from copy import copy
+import math
 
 from helpers.typing.common_types import Config
 
-from trading_interface.trading_interface import TradingInterface
 from trading_system.candles_handler import CandlesHandler
-from trading_system.trading_system_handler import TradingSystemHandler
-from trading_system.trend_handler import TrendHandler
-from trading_system.indicators import *
 from trading_system.orders_handler import OrdersHandler
+from trading_system.indicators import *
 
 from trading_system.trading_statistics import TradingStatistics
 
@@ -22,6 +18,7 @@ from logger.logger import Logger
 from trading import Asset, AssetPair, Signal, Order, Direction, Candle
 
 from helpers.typing import TradingSystemHandlerT
+from helpers.typing.utils import require
 
 
 class Handlers(OrderedDict):  # type: ignore
@@ -46,37 +43,33 @@ class TradingSystem:
         self.logger = Logger('TradingSystem')
         self.ti = trading_interface
         self.currency_asset = Asset(config['currency_asset'])
-        self.wallet: tp.Dict[Asset, float] = {}
-        for asset_name, amount in config['wallet'].items():
-            self.wallet[Asset(asset_name)] = amount
+        self.wallet: tp.Dict[Asset, float] = {Asset(asset_name): amount
+            for asset_name, amount in config['wallet'].items()}
         self.stats = TradingStatistics(
+            price_asset=self.currency_asset,
+            initial_wallet=self.wallet,
             initial_balance=self.get_total_balance(),
             start_timestamp=self.ti.get_timestamp(),
             initial_coin_balance=self.get_total_coin_balance())
         self.trading_signals: tp.List[Signal] = []
         self.handlers = Handlers() \
             .add(CandlesHandler(trading_interface)) \
-            .add(OrdersHandler(trading_interface)) \
-            .add(TrendHandler(trading_interface)) \
-            .add(MovingAverageHandler(trading_interface, 25)) \
-            .add(MovingAverageHandler(trading_interface, 50)) \
-            .add(ExpMovingAverageHandler(trading_interface, 8)) \
-            .add(ExpMovingAverageHandler(trading_interface, 14)) \
-            .add(ExpMovingAverageHandler(trading_interface, 50)) \
-            .add(RelativeStrengthIndexHandler(trading_interface, 14))
+            .add(OrdersHandler(trading_interface))
         self.logger.info('Trading system initialized')
+
+    def add_handler(self, handler_type: tp.Any, params: tp.Dict[str, tp.Any]) -> TradingSystemHandlerT:
+        handler = handler_type(trading_interface=self.ti, **params)
+        self.handlers.add(handler)
+        return self.handlers[handler.get_name()]
 
     def stop_trading(self) -> None:
         self.cancel_all()
-        for asset, amount in self.wallet.items():
-            if asset != self.currency_asset:
-                self.create_order(asset_pair=AssetPair(asset, self.currency_asset),
-                                  amount=-amount)
+        self.update()
 
     def get_trading_statistics(self) -> TradingStatistics:
         stats = copy(self.stats)
-        stats.set_hodl_result(require(self.stats.initial_coin_balance) *
-                              self.ti.get_sell_price())
+        stats.set_hodl_result(require(self.stats.initial_coin_balance) * self.ti.get_sell_price())
+        stats.set_final_wallet(self.get_wallet())
         stats.set_final_balance(self.get_total_balance())
         stats.set_finish_timestamp(self.get_timestamp())
         return stats
@@ -109,7 +102,7 @@ class TradingSystem:
     def buy(self, asset_pair: AssetPair, amount: float, price: float) -> tp.Optional[Order]:
         if self.wallet[asset_pair.price_asset] < price * amount:
             self.logger.warning(
-                f"Not enough {asset_pair.amount_asset}. "
+                f"Not enough {asset_pair.price_asset}. "
                 f"Order is not placed.")
             return None
         self.wallet[asset_pair.price_asset] -= price * amount
@@ -124,7 +117,7 @@ class TradingSystem:
     def sell(self, asset_pair: AssetPair, amount: float, price: float) -> tp.Optional[Order]:
         if self.wallet[asset_pair.amount_asset] < amount:
             self.logger.warning(
-                f"Not enough {asset_pair.price_asset}. "
+                f"Not enough {asset_pair.amount_asset}. "
                 f"Order is not placed.")
             return None
         self.wallet[asset_pair.amount_asset] -= amount
@@ -172,7 +165,8 @@ class TradingSystem:
             if asset != self.currency_asset:
                 total_coins += amount
             else:
-                total_coins += amount / self.ti.get_buy_price()
+                if not math.isclose(require(self.ti.get_buy_price()), 0):
+                    total_coins += amount / self.ti.get_buy_price()
         return total_coins
 
     def get_total_balance(self) -> float:

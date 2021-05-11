@@ -1,3 +1,6 @@
+import typing as tp
+
+
 class Asset:
     def __init__(self, asset_name: str):
         self.name = asset_name
@@ -15,9 +18,9 @@ class Asset:
 
 
 class AssetPair:
-    def __init__(self, amount_asset: Asset, price_asset: Asset):
-        self.amount_asset = amount_asset
-        self.price_asset = price_asset
+    def __init__(self, amount_asset: tp.Union[Asset, str], price_asset: tp.Union[Asset, str]):
+        self.amount_asset: Asset = amount_asset if isinstance(amount_asset, Asset) else Asset(amount_asset)
+        self.price_asset: Asset = price_asset if isinstance(price_asset, Asset) else Asset(price_asset)
 
     def __repr__(self) -> str:
         return f"{self.amount_asset}/{self.price_asset}"
