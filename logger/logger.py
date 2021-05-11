@@ -29,6 +29,8 @@ class Logger:
             self.logger.addFilter(Logger.TimestampFilter())
 
     def __getattr__(self, item: str) -> tp.Any:
+        if item == 'logger':
+            raise AttributeError
         return getattr(self.logger, item)
 
     @classmethod
@@ -104,14 +106,14 @@ class Logger:
 
     def trading_event(self, event: LogEvent,
                       *args: tp.Any, **kwargs: tp.Any) -> None:
-        self.event(event, TRADING, *args, **kwargs)
+        self.log_event(event, TRADING, *args, **kwargs)
 
     def info_event(self, event: LogEvent,
                    *args: tp.Any, **kwargs: tp.Any) -> None:
-        self.event(event, logging.INFO, *args, **kwargs)
+        self.log_event(event, logging.INFO, *args, **kwargs)
 
-    def event(self, event: LogEvent, level: int = TRADING,
-              *args: tp.Any, **kwargs: tp.Any) -> None:
+    def log_event(self, event: LogEvent, level: int = TRADING,
+                  *args: tp.Any, **kwargs: tp.Any) -> None:
         self.to_visualize(event)
         if self.isEnabledFor(level):
             self._log(level, event.msg, args, **kwargs)
