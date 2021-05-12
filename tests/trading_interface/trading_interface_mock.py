@@ -47,7 +47,7 @@ class TradingInterfaceMock(TradingInterface):
 
     def buy(self, amount: float, price: float) -> Order:
         self.order_cnt += 1
-        return Order(self.order_cnt, self.asset_pair, amount, price, Direction.BUY)
+        return Order(str(self.order_cnt), self.asset_pair, amount, price, self.order_cnt, Direction.BUY)
 
     def cancel_all(self) -> None:
         pass
@@ -66,7 +66,7 @@ class TradingInterfaceMock(TradingInterface):
 
     def sell(self, amount: float, price: float) -> Order:
         self.order_cnt += 1
-        return Order(self.order_cnt, self.asset_pair, amount, price, Direction.SELL)
+        return Order(str(self.order_cnt), self.asset_pair, amount, price, self.order_cnt, Direction.SELL)
 
     def stop_trading(self) -> None:
         pass

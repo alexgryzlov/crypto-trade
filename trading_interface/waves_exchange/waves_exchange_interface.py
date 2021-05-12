@@ -182,6 +182,11 @@ class WAVESExchangeInterface(TradingInterface):
         })
         response = self._request('post', 'orderbook', body=data)
         if response['status'] != "OrderAccepted":
+            # Sometimes order is created but response status is something else, so check current active orders
+            self._fetch_orders()
+            for order in self._active_orders:
+                if order.timestamp == timestamp:
+                    return order
             self.logger.warning(f"Order is not accepted. Status: {response['status']}")
             return None
 
@@ -189,6 +194,7 @@ class WAVESExchangeInterface(TradingInterface):
                       asset_pair=self.asset_pair,
                       amount=amount,
                       price=price,
+                      timestamp=timestamp,
                       direction=Direction.from_string(order_direction))
         self._active_orders.add(order)
         return order
@@ -233,6 +239,7 @@ class WAVESExchangeInterface(TradingInterface):
                                                Asset(params['assetPair']['priceAsset'])),
                           price=int(params['price'] / self._price_shift),
                           amount=int(params['amount'] / self._price_shift),
+                          timestamp=params['timestamp'],
                           direction=Direction.from_string(params['type']))
             if params['status'] == 'Accepted' and (fetch_all or active):
                 self._active_orders.add(order)

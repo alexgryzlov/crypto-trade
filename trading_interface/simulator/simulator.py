@@ -52,6 +52,7 @@ class Simulator(TradingInterface):
                       asset_pair=self.asset_pair,
                       amount=amount,
                       price=price,
+                      timestamp=self.clock.get_timestamp(),
                       direction=Direction.BUY)
         self.active_orders.add(copy(order))
         return order
@@ -61,6 +62,7 @@ class Simulator(TradingInterface):
                       asset_pair=self.asset_pair,
                       amount=amount,
                       price=price,
+                      timestamp=self.clock.get_timestamp(),
                       direction=Direction.SELL)
         self.active_orders.add(copy(order))
         return order
