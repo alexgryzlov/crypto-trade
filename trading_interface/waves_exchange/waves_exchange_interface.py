@@ -5,34 +5,27 @@ from retry import retry
 from trading import Asset, AssetPair, Order, Candle, Direction, Timeframe, TimeRange
 from trading_interface.trading_interface import TradingInterface
 from market_data_api.market_data_downloader import MarketDataDownloader
+from trading_interface.waves_exchange.waves_exchange_clock import WAVESExchangeClock
 
 from helpers.typing.common_types import Config
 from axolotl_curve25519 import calculateSignature
-from time import time
 from os import urandom
 from base58 import b58decode, b58encode
 from struct import pack
 import json
 from logger.logger import Logger
 
-# Where to put it?
-exchange_assets = {'WAVES': 'WAVES',
-                   'BTC': 'DWgwcZTMhSvnyYCoWLRUXXSH1RSkzThXLJhww9gwkqdn'}
-
-
-def to_waves_format(asset_pair: AssetPair) -> AssetPair:
-    return AssetPair.from_string(exchange_assets[str(asset_pair.amount_asset)],
-                                 exchange_assets[str(asset_pair.price_asset)])
-
 
 class WAVESExchangeInterface(TradingInterface):
     def __init__(self, trading_config: Config, exchange_config: Config):
         self.logger = Logger("TestnetInterface")
+        self._asset_translation: tp.Dict[str, str] = exchange_config['asset_translation']
         self.asset_pair_human_readable = AssetPair.from_string(*trading_config['asset_pair'])
-        self.asset_pair = to_waves_format(self.asset_pair_human_readable)
+        self.asset_pair = self._to_waves_format(self.asset_pair_human_readable)
         self._host: str = exchange_config['matcher']
         self._matcher_public_key = bytes(self._request('get', ""), 'utf-8')
         self._matcher_fee: int = exchange_config['matcher_fee']  # default - 0.003 waves
+        self._fee_currency = Asset(exchange_config['fee_currency'])
         self._price_shift: int = exchange_config['price_shift']
         self._max_lifetime: int = exchange_config['max_lifetime']
         self._private_key = bytes(exchange_config["private_key"], 'utf-8')
@@ -42,15 +35,14 @@ class WAVESExchangeInterface(TradingInterface):
         self._filled_order_ids: tp.Set[str] = set()
         self._cancelled_orders_ids: tp.Set[str] = set()
         self._candles: tp.List[Candle] = []
-
-        self._timeframe = Timeframe(trading_config['timeframe'])  # TODO: This should be inside clock
-
-        # // 1000 for MarketDataDownloader
-        # 'before_start_offset' probably should not be inside exchange_config (TODO: add clock config)
-        self._last_candle_fetch = self.get_timestamp() // 1000 - exchange_config['before_start_offset']
+        self._clock = WAVESExchangeClock(exchange_config['clock'])
 
         self._fetch_orders()
         self._fetch_candles()
+
+    def _to_waves_format(self, asset_pair: AssetPair) -> AssetPair:
+        return AssetPair.from_string(self._asset_translation[str(asset_pair.amount_asset)],
+                                     self._asset_translation[str(asset_pair.price_asset)])
 
     def is_alive(self) -> bool:
         return len(self._request("get", "")) != 0
@@ -59,10 +51,11 @@ class WAVESExchangeInterface(TradingInterface):
         pass
 
     def get_timestamp(self) -> int:
-        # TODO: WavesEX time -> time()*1000
-        #       DataDownloader -> time()
-        #       Need ExchangeClock class to provide both times
-        return int(time() * 1000)
+        """
+        WavesEX time == time() * 1000
+        DataDownloader time = time()
+        """
+        return self._clock.get_waves_timestamp()
 
     def buy(self, amount: float, price: float) -> tp.Optional[Order]:
         return self._place_order(Direction.BUY, amount, price)
@@ -128,7 +121,8 @@ class WAVESExchangeInterface(TradingInterface):
 
     @retry(RuntimeError, tries=3, delay=1)
     def _request(self, request_type: str, api_request: str, body: str = '',
-                 headers: tp.Optional[dict] = None, params: tp.Optional[dict] = None) -> tp.Any:
+                 headers: tp.Optional[tp.Dict[str, tp.Any]] = None,
+                 params: tp.Optional[tp.Dict[str, tp.Any]] = None) -> tp.Any:
         if headers is None:
             headers = {'content-type': 'application/json'}
         if request_type == "post":
@@ -167,7 +161,7 @@ class WAVESExchangeInterface(TradingInterface):
                                 pack(">Q", timestamp) + \
                                 pack(">Q", expiration) + \
                                 pack(">Q", self._matcher_fee) + \
-                                b'\0'
+                                self._serialize_asset_id(self._fee_currency)
         signature: str = self._sign(signature_data)
         order_direction: str = "buy" if direction == Direction.BUY else "sell"
         data: str = json.dumps({
@@ -220,12 +214,12 @@ class WAVESExchangeInterface(TradingInterface):
         signature_data: bytes = b58decode(self._public_key) + \
                                 pack(">Q", timestamp)
         signature: str = self._sign(signature_data)
-        headers: dict = {
+        headers: tp.Dict[str, tp.Any] = {
             "accept": "application/json",
             "Timestamp": str(timestamp),
             "Signature": signature
         }
-        url_params: dict = {
+        url_params: tp.Dict[str, tp.Any] = {
             "activeOnly": active,
             "closedOnly": cancelled | filled,
         }
@@ -249,12 +243,11 @@ class WAVESExchangeInterface(TradingInterface):
                 self._filled_order_ids.add(order.order_id)
 
     def _fetch_candles(self) -> None:
-        timestamp = self.get_timestamp() // 1000
         new_candles: tp.List[Candle] = MarketDataDownloader.get_candles(
-            self.asset_pair_human_readable, self._timeframe,
-            TimeRange(self._last_candle_fetch, timestamp))
+            self.asset_pair_human_readable, self._clock.get_candles_lifetime(),
+            TimeRange(self._clock.get_last_fetch(), self._clock.get_timestamp()))
         if new_candles:
-            self._last_candle_fetch = new_candles[-1].ts
+            self._clock.update_last_fetch(new_candles[-1].ts)
             if self._candles and self._candles[-1].ts == new_candles[0].ts:
                 self._candles.pop()
             self._candles.extend(new_candles)

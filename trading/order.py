@@ -27,10 +27,10 @@ class Order:
         self.direction = direction
 
     def __repr__(self) -> str:
-        return f"Order{self.order_id}"
+        return f"Order{self.order_id[:min(len(self.order_id), 10)]}"
 
     def __str__(self) -> str:
-        return f"OrderId: {self.order_id} " \
+        return f"OrderId: {self.order_id[:min(len(self.order_id), 10)]} " \
                f"AssetPair: {self.asset_pair.amount_asset}-{self.asset_pair.price_asset} " \
                f"Amount: {self.amount} " \
                f"Price: {self.price} " \

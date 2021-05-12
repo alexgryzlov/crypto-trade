@@ -10,6 +10,14 @@
     "version": 3,
     "private_key": "7WJxqTfaiMmFFHRvxCwiQ8DAE3qVBd5ziaE5F8qJWXWx",
     "public_key": "DuasNP39N7PCNCKfEkjXniR8otVbriYp3MpBrKKZrH1K",
-    "before_start_offset": 86400
+    "fee_currency": "WAVES",
+    "clock" : {
+      "candles_lifetime": "5m",
+      "before_start_offset": 86400
+    },
+    "asset_translation": {
+      "WAVES": "WAVES",
+      "BTC": "DWgwcZTMhSvnyYCoWLRUXXSH1RSkzThXLJhww9gwkqdn"
+    }
   }
 }
