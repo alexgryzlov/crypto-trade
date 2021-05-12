@@ -250,9 +250,12 @@ class WAVESExchangeInterface(TradingInterface):
 
     def _fetch_candles(self) -> None:
         timestamp = self.get_timestamp() // 1000
-        new_candles = MarketDataDownloader.get_candles(self.asset_pair_human_readable, self._timeframe,
-                                                       TimeRange(self._last_candle_fetch, timestamp))
+        new_candles: tp.List[Candle] = MarketDataDownloader.get_candles(
+            self.asset_pair_human_readable, self._timeframe,
+            TimeRange(self._last_candle_fetch, timestamp))
         if new_candles:
-            self._last_candle_fetch = timestamp
+            self._last_candle_fetch = new_candles[-1].ts
+            if self._candles and self._candles[-1].ts == new_candles[0].ts:
+                self._candles.pop()
             self._candles.extend(new_candles)
         # TODO: may be use collections.deque(max_len=const) for candles
