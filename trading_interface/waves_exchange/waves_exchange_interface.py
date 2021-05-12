@@ -189,6 +189,10 @@ class WAVESExchangeInterface(TradingInterface):
                     return order
             self.logger.warning(f"Order is not accepted. Status: {response['status']}")
             return None
+        self._fetch_orders()
+
+        if not any(map(lambda active_order: active_order.order_id == response['message']['id'], self._active_orders)):
+            return self._place_order(direction, amount, price)
 
         order = Order(order_id=response['message']['id'],
                       asset_pair=self.asset_pair,
