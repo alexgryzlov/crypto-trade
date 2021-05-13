@@ -1,4 +1,4 @@
-mock_matcher_pubkey = "8QUAqtTckM5B8gvcuP7mMswat9SjKUuafJMusEoSn1Gy"
+mock_matcher_pubkey = "FakePub1icKeyNotToMessRea1AndMockNetworks"
 
 sample_orderbook = {
     'timestamp': 1620634947373,
