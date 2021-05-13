@@ -7,10 +7,10 @@ from base.config_parser import ConfigParser
 
 
 @pytest.fixture(scope="session")
-def base_config() -> ConfigsScope:
-    return ConfigParser.load_config(Path('configs/base.json'))
+def exchange_config() -> ConfigsScope:
+    return ConfigParser.load_config(Path('configs/waves.json'))
 
 
 @pytest.fixture(scope="session")
-def trading_interface_config(base_config: ConfigsScope) -> Config:
-    return base_config["trading_interface"]
+def testnet_config(exchange_config: ConfigsScope) -> Config:
+    return exchange_config["testnet"]
