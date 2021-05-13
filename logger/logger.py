@@ -29,6 +29,8 @@ class Logger:
             self.logger.addFilter(Logger.TimestampFilter())
 
     def __getattr__(self, item: str) -> tp.Any:
+        if item == 'logger':
+            raise AttributeError
         return getattr(self.logger, item)
 
     @classmethod
@@ -52,7 +54,8 @@ class Logger:
         return Path(cls._logs_path / logs_type)
 
     @classmethod
-    def _get_file_handler(cls, filename: Path, level: int) -> logging.FileHandler:
+    def _get_file_handler(cls, filename: Path,
+                          level: int) -> logging.FileHandler:
         if filename not in cls._file_handlers:
             file_handler = logging.FileHandler(filename, mode='w')
             file_handler.setLevel(level)
@@ -91,13 +94,29 @@ class Logger:
         path.parent.mkdir(parents=True, exist_ok=True)
         return path
 
-    def trading(self, log_event: LogEvent, level: int = TRADING,
-                *args: tp.Any, **kwargs: tp.Any) -> None:
+    def trading(self, msg: str, *args: tp.Any, **kwargs: tp.Any) -> None:
         if self.isEnabledFor(TRADING):
-            log_event.obj['ts'] = Logger._clock.get_timestamp()
-            log_event.obj['event_type'] = log_event.__class__
-            self._log(level, log_event.msg, args, **kwargs)
-            Logger._dump_logs.append(log_event.obj)
+            self._log(TRADING, msg, args, **kwargs)
+
+    @staticmethod
+    def to_visualize(log_event: LogEvent) -> None:
+        log_event.obj['ts'] = Logger._clock.get_timestamp()
+        log_event.obj['event_type'] = log_event.__class__
+        Logger._dump_logs.append(log_event.obj)
+
+    def trading_event(self, event: LogEvent,
+                      *args: tp.Any, **kwargs: tp.Any) -> None:
+        self.log_event(event, TRADING, *args, **kwargs)
+
+    def info_event(self, event: LogEvent,
+                   *args: tp.Any, **kwargs: tp.Any) -> None:
+        self.log_event(event, logging.INFO, *args, **kwargs)
+
+    def log_event(self, event: LogEvent, level: int = TRADING,
+                  *args: tp.Any, **kwargs: tp.Any) -> None:
+        self.to_visualize(event)
+        if self.isEnabledFor(level):
+            self._log(level, event.msg, args, **kwargs)
 
     class TimestampFilter(logging.Filter):
         """
