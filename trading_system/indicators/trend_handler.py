@@ -26,8 +26,8 @@ class TrendHandler(TradingSystemHandler):
         if not super().received_new_candle():
             return False
         lower_trend_line, upper_trend_line = self.get_trend_lines()
-        self.logger.trading(
-            TrendLinesEvent(lower_trend_line, upper_trend_line), INFO)
+        self.logger.info_event(
+            TrendLinesEvent(lower_trend_line, upper_trend_line))
         return True
 
     def get_trend_lines(self) -> tp.Tuple[TrendLine, TrendLine]:

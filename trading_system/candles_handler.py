@@ -13,7 +13,7 @@ class CandlesHandler(TradingSystemHandler):
     def update(self) -> bool:
         if super().received_new_candle():
             last_candle = self.ti.get_last_n_candles(1)[0]
-            self.logger.trading(NewCandleEvent(last_candle))
+            self.logger.trading_event(NewCandleEvent(last_candle))
             return True
         return False
 

@@ -26,6 +26,7 @@ class TrendLinesEvent(LogEvent):
 
 
 class CurveEvent(LogEvent):
+    # This name will appear on legend for this event
     name = 'Custom Curve'
 
     def __init__(self,

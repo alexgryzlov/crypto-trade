@@ -113,10 +113,10 @@ class TradingSystem:
             return None
         self._wallet[asset_pair.price_asset] -= price * amount
         order = self._ti.buy(asset_pair, amount, price)
-        self._logger.trading(BuyEvent(asset_pair,
-                                      amount,
-                                      price,
-                                      order.order_id))
+        self._logger.trading_event(BuyEvent(asset_pair,
+                                            amount,
+                                            price,
+                                            order.order_id))
         self.get_handler(OrdersHandler).add_new_order(copy(order))
         return order
 
@@ -125,10 +125,10 @@ class TradingSystem:
             return None
         self._wallet[asset_pair.amount_asset] -= amount
         order = self._ti.sell(asset_pair, amount, price)
-        self._logger.trading(SellEvent(asset_pair,
-                                       amount,
-                                       price,
-                                       order.order_id))
+        self._logger.trading_event(SellEvent(asset_pair,
+                                             amount,
+                                             price,
+                                             order.order_id))
         self.get_handler(OrdersHandler).add_new_order(copy(order))
         return order
 
@@ -199,7 +199,7 @@ class TradingSystem:
             self._wallet[order.asset_pair.price_asset] += order.price * order.amount
         else:  # Direction.SELL
             self._wallet[order.asset_pair.amount_asset] += order.amount
-        self._logger.trading(CancelEvent(order))
+        self._logger.trading_event(CancelEvent(order))
 
     def _handle_filled_order(self, order: Order) -> None:
         if order.direction == Direction.BUY:

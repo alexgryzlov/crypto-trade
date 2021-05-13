@@ -43,7 +43,7 @@ class RelativeStrengthIndexHandler(TradingSystemHandler):
         rs, rsi = self.calculate_from(deltas, self.alpha)
         self.relative_strength.append(rs)
         self.values.append(rsi)
-        self.logger.trading(RSIEvent(rsi), INFO)
+        self.logger.info_event(RSIEvent(rsi))
         return True
 
     def get_last_n_values(self, n: int) -> tp.List[float]:
