@@ -1,5 +1,6 @@
 import pytest
 import requests_mock
+import typing as tp
 
 from helpers.typing.common_types import Config
 
@@ -33,17 +34,13 @@ def make_request_url(api_request: str,
     return f"{matcher_host}/matcher/{api_request}"
 
 
-def setup_mocker(m: requests_mock.Mocker,
-                 matcher_host: str) -> requests_mock.Mocker:
-    m.get(make_request_url('', matcher_host),
-          text=f'"{mock_matcher_pubkey}"')
-    return m
-
-
 @pytest.fixture
-def mock_matcher(matcher_host: str) -> requests_mock.Mocker:
+def mock_matcher(matcher_host: str) \
+        -> tp.Generator[requests_mock.Mocker, None, None]:
     with requests_mock.Mocker() as m:
-        yield setup_mocker(m, matcher_host)
+        m.get(make_request_url('', matcher_host),
+              text=f'"{mock_matcher_pubkey}"')
+        yield m
 
 
 @pytest.fixture

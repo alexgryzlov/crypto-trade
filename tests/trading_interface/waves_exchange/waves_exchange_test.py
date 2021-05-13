@@ -9,7 +9,11 @@ from trading_interface.waves_exchange.waves_exchange_interface import \
 
 from tests.logger.empty_logger_mock import empty_logger_mock, EmptyLoggerMock
 
-from tests.trading_interface.waves_exchange.waves_exchange import *
+from tests.configs.base_config import base_config, trading_interface_config
+from tests.configs.exchange_config import exchange_config, testnet_config
+from tests.trading_interface.waves_exchange.waves_exchange import asset_pair, \
+    price_shift, matcher_host, make_request_url, mock_matcher, mock_exchange, \
+    real_exchange
 from waves_exchange_samples import *
 
 
