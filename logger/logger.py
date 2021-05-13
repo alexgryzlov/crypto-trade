@@ -1,6 +1,6 @@
 import logging
 import pickle
-import typing as tp
+
 from datetime import datetime
 from pathlib import Path
 
@@ -9,14 +9,15 @@ from logger.log_events import LogEvent
 
 import typing as tp
 from helpers.typing.common_types import Config
+from base.config_parser import ConfigParser
 
 TRADING = logging.WARNING + 5
 logging.addLevelName(TRADING, "TRADING")
 
 
 class Logger:
-    def __init__(self, name: str, config: Config = None):
-        self.config = Logger._default_config if config is None else config
+    def __init__(self, name: str, config: tp.Optional[Config] = None):
+        self.config: Config = Logger._default_config if config is None else config  # type: ignore
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.INFO)
         if self.config["file_output"]:
@@ -31,7 +32,7 @@ class Logger:
         return getattr(self.logger, item)
 
     @classmethod
-    def set_default_config(cls, cfg: Config):
+    def set_default_config(cls, cfg: Config) -> None:
         cls._default_config = cfg
 
     @classmethod
@@ -115,4 +116,5 @@ class Logger:
     _dump_logs: tp.List[LogEvent] = []
     _file_name: tp.Optional[str] = None
     _logs_path = Path('logs')
-    _default_config: Config = None
+    _default_config: Config = ConfigParser.load_config(
+        Path('configs/base.json'))['default_logger']

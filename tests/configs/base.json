@@ -4,6 +4,13 @@
     "wallet": {
       "USDN": 100.0,
       "WAVES": 10.0
+    },
+    "risk_checker": {
+      "max_order_amount": 50,
+      "max_order_price": 50,
+      "available_assets": ["WAVES", "USDN", "USDT"],
+      "max_order_count_per_period": 4,
+      "rejection_period": "1m"
     }
   },
 
@@ -30,5 +37,14 @@
     "market_data_host": "https://api.wavesplatform.com",
     "matcher_host": "https://matcher.waves.exchange",
     "candles_per_request": 1400
+  },
+
+  "strategy_runner": {
+    "logger": {
+      "file_output": false,
+      "std_output": false,
+      "system_time": false
+    },
+    "stdout_frequency": 10
   }
 }

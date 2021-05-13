@@ -4,7 +4,7 @@ import pytest
 import typing as tp
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def empty_logger_mock(monkeypatch: tp.Any) -> None:
     monkeypatch.setattr('logger.logger.Logger.__init__',
                         EmptyLoggerMock.__init__)

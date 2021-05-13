@@ -1,20 +1,19 @@
 from __future__ import annotations
-import typing as tp
 
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict
 from copy import copy
 import math
+import typing as tp
 
 from helpers.typing.common_types import Config
 
 from trading_interface.trading_interface import TradingInterface
-from trading_system.trading_system_handler import TradingSystemHandler
+
 from trading_system.candles_handler import CandlesHandler
 from trading_system.orders_handler import OrdersHandler
-from trading_system.indicators import *
-
 from trading_system.trading_statistics import TradingStatistics
 from trading_system.risk_checker import RiskChecker
+from trading_system.indicators import *
 
 from logger.log_events import BuyEvent, SellEvent, CancelEvent
 from logger.logger import Logger
@@ -26,7 +25,7 @@ from helpers.typing.utils import require
 
 
 class Handlers(OrderedDict):  # type: ignore
-    def add(self, handler: TradingSystemHandler) -> Handlers:
+    def add(self, handler: TradingSystemHandlerT) -> Handlers:
         if handler.get_name() in self.keys():
             return self
 
@@ -49,18 +48,22 @@ class TradingSystem:
         self._risk_checker = RiskChecker(
             trading_interface=trading_interface,
             config=config["risk_checker"])
+
         self._currency_asset = Asset(config['currency_asset'])
-        self._wallet: tp.Dict[Asset, float] = {}
-        for asset_name, amount in config['wallet'].items():
-            self._wallet[Asset(asset_name)] = amount
+        self._wallet: tp.Dict[Asset, float] = {
+            Asset(asset_name): amount for asset_name, amount in config['wallet'].items()}
         self._stats = TradingStatistics(
+            price_asset=self._currency_asset,
+            initial_wallet=copy(self._wallet),
             initial_balance=self.get_total_balance(),
             start_timestamp=self._ti.get_timestamp(),
             initial_coin_balance=self.get_total_coin_balance())
+
         self._trading_signals: tp.List[Signal] = []
         self.handlers = Handlers() \
             .add(CandlesHandler(trading_interface)) \
             .add(OrdersHandler(trading_interface))
+
         self._logger.info('Trading system initialized')
 
     def add_handler(self, handler_type: tp.Any, params: tp.Dict[str, tp.Any]) -> TradingSystemHandlerT:
@@ -70,14 +73,12 @@ class TradingSystem:
 
     def stop_trading(self) -> None:
         self.cancel_all()
-        for asset, amount in self._wallet.items():
-            if asset != self._currency_asset:
-                self.create_order(asset_pair=AssetPair(asset, self._currency_asset),
-                                  amount=-amount)
+        self.update()
 
     def get_trading_statistics(self) -> TradingStatistics:
         stats = copy(self._stats)
-        stats.set_hodl_result(self._stats.initial_coin_balance * self._ti.get_sell_price())
+        stats.set_hodl_result(require(self._stats.initial_coin_balance) * self._ti.get_sell_price())
+        stats.set_final_wallet(self.get_wallet())
         stats.set_final_balance(self.get_total_balance())
         stats.set_finish_timestamp(self.get_timestamp())
         return stats
