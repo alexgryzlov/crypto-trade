@@ -30,18 +30,6 @@ def require_equal_structure(lhs: tp.Any,
                 require_equal_structure(lhs_val, rhs_val)
 
 
-def make_request_url(api_request: str,
-                     matcher_host: str) -> str:
-    return f"{matcher_host}/matcher/{api_request}"
-
-
-def setup_mocker(m: requests_mock.Mocker,
-                 matcher_host: str) -> requests_mock.Mocker:
-    m.get(make_request_url('', matcher_host),
-          text=f'"{mock_matcher_pubkey}"')
-    return m
-
-
 def add_orderbook(
         m: requests_mock.Mocker,
         matcher_host: str,
@@ -55,41 +43,40 @@ def add_orderbook(
     return m
 
 
-@requests_mock.Mocker(kw="m")
 def test_init_matcher_public_key(empty_logger_mock: EmptyLoggerMock,
+                                 mock_matcher: requests_mock.Mocker,
                                  matcher_host: str,
-                                 exchange: WAVESExchangeInterface,
-                                 **kwargs: requests_mock.Mocker) -> None:
-    setup_mocker(kwargs["m"], matcher_host)
-    assert exchange.is_alive()
+                                 mock_exchange: WAVESExchangeInterface) -> None:
+    assert mock_exchange.is_alive()
     # TODO: remove, don't access private members
-    assert exchange._matcher_public_key == mock_matcher_pubkey.encode('ascii')
+    assert mock_exchange._matcher_public_key == \
+           mock_matcher_pubkey.encode('ascii')
 
 
+@pytest.mark.testnet
 def test_init_matcher_public_key_testnet(
         empty_logger_mock: EmptyLoggerMock,
-        exchange: WAVESExchangeInterface) -> None:
-    assert exchange.is_alive()
+        real_exchange: WAVESExchangeInterface) -> None:
+    assert real_exchange.is_alive()
 
 
-@requests_mock.Mocker(kw="m")
 def test_get_orderbook(empty_logger_mock: EmptyLoggerMock,
-                       exchange: WAVESExchangeInterface,
+                       mock_matcher: requests_mock.Mocker,
+                       mock_exchange: WAVESExchangeInterface,
                        matcher_host: str,
                        asset_pair: AssetPair,
                        **kwargs: requests_mock.Mocker) -> None:
-    m = setup_mocker(kwargs["m"], matcher_host)
-
     data = {"lol": 1}
-    add_orderbook(m, matcher_host, asset_pair, data)
+    add_orderbook(mock_matcher, matcher_host, asset_pair, data)
 
-    assert exchange.get_orderbook() == data
+    assert mock_exchange.get_orderbook() == data
 
 
+@pytest.mark.testnet
 def test_get_orderbook_testnet(empty_logger_mock: EmptyLoggerMock,
-                               exchange: WAVESExchangeInterface,
+                               real_exchange: WAVESExchangeInterface,
                                asset_pair: AssetPair) -> None:
-    orderbook = exchange.get_orderbook()
+    orderbook = real_exchange.get_orderbook()
 
     timestamp = orderbook['timestamp']
     assert timestamp > 0
@@ -102,10 +89,11 @@ def test_get_orderbook_testnet(empty_logger_mock: EmptyLoggerMock,
     assert isinstance(orderbook['asks'], list)
 
 
+@pytest.mark.testnet
 def test_orderbook_testnet_api_change(
         empty_logger_mock: EmptyLoggerMock,
-        exchange: WAVESExchangeInterface) -> None:
-    orderbook = exchange.get_orderbook()
+        real_exchange: WAVESExchangeInterface) -> None:
+    orderbook = real_exchange.get_orderbook()
     require_equal_structure(orderbook, sample_orderbook)
 
 
@@ -113,24 +101,21 @@ def test_orderbook_testnet_api_change(
     (Direction.SELL, 'asks'),
     (Direction.BUY, 'bids'),
 ])
-@requests_mock.Mocker(kw="m")
 def test_get_buy_price(empty_logger_mock: EmptyLoggerMock,
-                       exchange: WAVESExchangeInterface,
+                       mock_matcher: requests_mock.Mocker,
+                       mock_exchange: WAVESExchangeInterface,
                        matcher_host: str,
                        asset_pair: AssetPair,
                        price_shift: int,
                        direction: Direction,
-                       name_in_orderbook: str,
-                       **kwargs: requests_mock.Mocker) -> None:
-    m = setup_mocker(kwargs["m"], matcher_host)
-
-    add_orderbook(m, matcher_host, asset_pair, sample_orderbook)
+                       name_in_orderbook: str, ) -> None:
+    add_orderbook(mock_matcher, matcher_host, asset_pair, sample_orderbook)
 
     price = sample_orderbook[name_in_orderbook][0]['price']  # type: ignore
     if direction == Direction.SELL:
-        resp_price = exchange.get_sell_price()
+        resp_price = mock_exchange.get_sell_price()
     else:
-        resp_price = exchange.get_buy_price()
+        resp_price = mock_exchange.get_buy_price()
     assert price == resp_price
 
 
@@ -140,34 +125,32 @@ def test_get_buy_price(empty_logger_mock: EmptyLoggerMock,
     (Direction.SELL, sample_order_rejected),
     (Direction.BUY, sample_order_rejected)
 ])
-@requests_mock.Mocker(kw="m")
 def test_order_place(empty_logger_mock: EmptyLoggerMock,
+                     mock_matcher: requests_mock.Mocker,
                      matcher_host: str,
-                     exchange: WAVESExchangeInterface,
+                     mock_exchange: WAVESExchangeInterface,
                      asset_pair: AssetPair,
                      price_shift: int,
                      direction: str,
-                     response: tp.Dict[str, tp.Any],
-                     **kwargs: requests_mock.Mocker) -> None:
-    m = setup_mocker(kwargs["m"], matcher_host)
-    add_orderbook(m, matcher_host, asset_pair, sample_orderbook)
+                     response: tp.Dict[str, tp.Any]) -> None:
+    add_orderbook(mock_matcher, matcher_host, asset_pair, sample_orderbook)
 
-    m.post(make_request_url('orderbook', matcher_host),
-           text=json.dumps(response))
+    mock_matcher.post(make_request_url('orderbook', matcher_host),
+                      text=json.dumps(response))
     amount = 1
     if direction == Direction.SELL:
-        price = exchange.get_sell_price()
-        order = exchange.sell(amount, price)
+        price = mock_exchange.get_sell_price()
+        order = mock_exchange.sell(amount, price)
     else:
-        price = exchange.get_buy_price()
-        order = exchange.buy(amount, price)
+        price = mock_exchange.get_buy_price()
+        order = mock_exchange.buy(amount, price)
 
     if response['success']:
         assert order is not None
     else:
         assert order is None
 
-    order_request = m.request_history[-1]
+    order_request = mock_matcher.request_history[-1]
     request_body = json.loads(order_request.text)
     require_equal_structure(request_body, sample_place_order_request)
 
@@ -188,24 +171,23 @@ def test_order_place(empty_logger_mock: EmptyLoggerMock,
     sample_order_canceled,
     sample_order_canceled_reject,
 ])
-@requests_mock.Mocker(kw="m")
 def test_cancel_order(empty_logger_mock: EmptyLoggerMock,
+                      mock_matcher: requests_mock.Mocker,
                       matcher_host: str,
-                      exchange: WAVESExchangeInterface,
+                      mock_exchange: WAVESExchangeInterface,
                       asset_pair: AssetPair,
                       response: tp.Dict[str, tp.Any],
                       **kwargs: requests_mock.Mocker) -> None:
-    m = setup_mocker(kwargs["m"], matcher_host)
-    add_orderbook(m, matcher_host, asset_pair, sample_orderbook)
+    add_orderbook(mock_matcher, matcher_host, asset_pair, sample_orderbook)
 
-    m.post(
+    mock_matcher.post(
         make_request_url(f'orderbook/{str(asset_pair)}/cancel', matcher_host),
         text=json.dumps(response))
 
     order = Order(sample_order_id, asset_pair, 0, 0, Direction.SELL)
-    assert exchange.cancel_order(order) == response['success']
+    assert mock_exchange.cancel_order(order) == response['success']
 
-    order_request = m.request_history[-1]
+    order_request = mock_matcher.request_history[-1]
     request_body = json.loads(order_request.text)
     require_equal_structure(request_body, sample_cancel_order_request)
 
