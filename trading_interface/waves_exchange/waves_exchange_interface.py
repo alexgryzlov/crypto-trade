@@ -107,10 +107,12 @@ class WAVESExchangeInterface(TradingInterface):
         return order.order_id in self._filled_order_ids
 
     def get_buy_price(self) -> float:
-        return self.get_orderbook()['bids'][0]['price']
+        price = self.get_orderbook()['bids'][0]['price']
+        return price / self._price_shift
 
     def get_sell_price(self) -> float:
-        return self.get_orderbook()['asks'][0]['price']
+        price = self.get_orderbook()['asks'][0]['price']
+        return price / self._price_shift
 
     def get_orderbook(self):  # type: ignore
         return self._request('get', f'orderbook/{str(self.asset_pair)}')
@@ -257,9 +259,15 @@ class WAVESExchangeInterface(TradingInterface):
         new_candles: tp.List[Candle] = MarketDataDownloader.get_candles(
             self.asset_pair_human_readable, self._clock.get_candles_lifetime(),
             TimeRange(self._clock.get_last_fetch(), self._clock.get_timestamp()))
+        print(new_candles)
         if new_candles:
             self._clock.update_last_fetch(new_candles[-1].ts)
             if self._candles and self._candles[-1].ts == new_candles[0].ts:
                 self._candles.pop()
             self._candles.extend(new_candles)
+
+            # DataDownloader returns a candle full of None if nothing has happened during its timeframe
+            if self._candles[-1].open is None:
+                self._candles.pop()
+
         # TODO: may be use collections.deque(max_len=const) for candles
