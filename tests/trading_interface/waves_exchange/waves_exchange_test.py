@@ -116,6 +116,7 @@ def test_get_buy_price(empty_logger_mock: EmptyLoggerMock,
     add_orderbook(mock_matcher, matcher_host, asset_pair, sample_orderbook)
 
     price = sample_orderbook[name_in_orderbook][0]['price']  # type: ignore
+    price /= price_shift
     if direction == Direction.SELL:
         resp_price = mock_exchange.get_sell_price()
     else:
