@@ -108,10 +108,7 @@ class TradingSystem:
         return None
 
     def buy(self, asset_pair: AssetPair, amount: float, price: float) -> tp.Optional[Order]:
-        if self._wallet[asset_pair.price_asset] < price * amount:
-            self._logger.warning(
-                f"Not enough {asset_pair.amount_asset}. "
-                f"Order is not placed.")
+        if not self._risk_checker.check_order(asset_pair, price, amount, Direction.BUY, self._wallet):
             return None
         self._wallet[asset_pair.price_asset] -= price * amount
         order = self._ti.buy(asset_pair, amount, price)
@@ -123,10 +120,7 @@ class TradingSystem:
         return order
 
     def sell(self, asset_pair: AssetPair, amount: float, price: float) -> tp.Optional[Order]:
-        if self._wallet[asset_pair.amount_asset] < amount:
-            self._logger.warning(
-                f"Not enough {asset_pair.price_asset}. "
-                f"Order is not placed.")
+        if not self._risk_checker.check_order(asset_pair, price, amount, Direction.SELL, self._wallet):
             return None
         self._wallet[asset_pair.amount_asset] -= amount
         order = self._ti.sell(asset_pair, amount, price)
