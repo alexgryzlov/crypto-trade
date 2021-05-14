@@ -55,7 +55,7 @@ class WAVESExchangeInterface(TradingInterface):
         WavesEX time == time() * 1000
         DataDownloader time = time()
         """
-        return self._clock.get_waves_timestamp()
+        return self._clock.get_timestamp()
 
     def buy(self, amount: float, price: float) -> tp.Optional[Order]:
         return self._place_order(Direction.BUY, amount, price)
@@ -90,7 +90,7 @@ class WAVESExchangeInterface(TradingInterface):
         self._active_orders.clear()
 
     def _try_cancel_all(self) -> tp.Any:
-        timestamp = self.get_timestamp()
+        timestamp = self._clock.get_waves_timestamp()
         signature_data: bytes = b58decode(self._public_key) + pack(">Q", timestamp)
         signature: str = self._sign(signature_data)
         data: str = json.dumps({
@@ -148,7 +148,7 @@ class WAVESExchangeInterface(TradingInterface):
     def _place_order(self, direction: Direction, amount: float, price: float) -> tp.Optional[Order]:
         scaled_price = int(price * self._price_shift)
         scaled_amount = int(amount * self._price_shift)
-        timestamp = self.get_timestamp()
+        timestamp = self._clock.get_waves_timestamp()
         expiration = timestamp + self._max_lifetime * 1000
         optype: int = 0 if direction == Direction.BUY else 1
         # https://docs.waves.exchange/en/waves-matcher/matcher-api
@@ -222,7 +222,7 @@ class WAVESExchangeInterface(TradingInterface):
         If active is True and cancelled or filled is True, request will return nothing
         """
         fetch_all: bool = not active and not cancelled and not filled
-        timestamp = self.get_timestamp()
+        timestamp = self._clock.get_waves_timestamp()
         signature_data: bytes = b58decode(self._public_key) + \
                                 pack(">Q", timestamp)
         signature: str = self._sign(signature_data)
