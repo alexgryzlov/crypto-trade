@@ -1,6 +1,28 @@
 {
   "mainnet": {
-    "matcher": "http://matcher.waves.exchange"
+    "matcher": "http://matcher.waves.exchange",
+    "matcher_fee": 300000,
+    "decimals": {
+      "WAVES": 8,
+      "BTC": 8,
+      "USDN": 6,
+      "USDT": 6
+    },
+    "max_lifetime": 2160000,
+    "version": 3,
+    "private_key": "TBD",
+    "public_key": "TBD",
+    "fee_currency": "WAVES",
+    "clock" : {
+      "candles_lifetime": "5m",
+      "before_start_offset": 300
+    },
+    "asset_translation": {
+      "WAVES": "WAVES",
+      "BTC":  "8LQW8f7P5d5PZM7GtZEBgaqRPGSzS3DfPuiXrURJ4AJS",
+      "USDN": "DG2xFkPdDwKUoBkzGAhQtLpSGzfXLiCYPEzeKH2Ad24p",
+      "USDT": "34N9YcEETLWn93qYQ64EsP1x89tSruJU44RrEMSXXEPJ"
+    }
   },
   "testnet": {
     "matcher": "https://matcher-testnet.waves.exchange",
