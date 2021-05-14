@@ -5,7 +5,12 @@
   "testnet": {
     "matcher": "https://matcher-testnet.waves.exchange",
     "matcher_fee": 300000,
-    "price_shift": 100000000,
+    "decimals": {
+      "WAVES": 8,
+      "BTC": 8,
+      "USDN": 6,
+      "USDT": 6
+    },
     "max_lifetime": 2160000,
     "version": 3,
     "private_key": "7WJxqTfaiMmFFHRvxCwiQ8DAE3qVBd5ziaE5F8qJWXWx",
@@ -13,11 +18,13 @@
     "fee_currency": "WAVES",
     "clock" : {
       "candles_lifetime": "5m",
-      "before_start_offset": 86400
+      "before_start_offset": 300
     },
     "asset_translation": {
       "WAVES": "WAVES",
-      "BTC": "DWgwcZTMhSvnyYCoWLRUXXSH1RSkzThXLJhww9gwkqdn"
+      "BTC":  "DWgwcZTMhSvnyYCoWLRUXXSH1RSkzThXLJhww9gwkqdn",
+      "USDN": "25FEqEjRkqK6yCkiT7Lz6SAYz7gUFCtxfCChnrVFD5AT",
+      "USDT": "5Sh9KghfkZyhjwuodovDhB6PghDUGBHiAPZ4MkrPgKtX"
     }
   }
 }

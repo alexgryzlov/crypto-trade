@@ -26,7 +26,7 @@ class WAVESExchangeInterface(TradingInterface):
         self._matcher_public_key = bytes(self._request('get', ""), 'utf-8')
         self._matcher_fee: int = exchange_config['matcher_fee']  # default - 0.003 waves
         self._fee_currency = Asset(exchange_config['fee_currency'])
-        self._price_shift: int = exchange_config['price_shift']
+        self._decimals: tp.Dict[str, int] = exchange_config['decimals']
         self._max_lifetime: int = exchange_config['max_lifetime']
         self._private_key = bytes(exchange_config["private_key"], 'utf-8')
         self._public_key = bytes(exchange_config["public_key"], 'utf-8')
@@ -108,11 +108,11 @@ class WAVESExchangeInterface(TradingInterface):
 
     def get_buy_price(self) -> float:
         price = self.get_orderbook()['bids'][0]['price']
-        return price / self._price_shift
+        return price / 10 ** self._decimals[str(self.asset_pair_human_readable.price_asset)]
 
     def get_sell_price(self) -> float:
         price = self.get_orderbook()['asks'][0]['price']
-        return price / self._price_shift
+        return price / 10 ** self._decimals[str(self.asset_pair_human_readable.price_asset)]
 
     def get_orderbook(self):  # type: ignore
         return self._request('get', f'orderbook/{str(self.asset_pair)}')
@@ -146,8 +146,8 @@ class WAVESExchangeInterface(TradingInterface):
         return response.json()
 
     def _place_order(self, direction: Direction, amount: float, price: float) -> tp.Optional[Order]:
-        scaled_price = int(price * self._price_shift)
-        scaled_amount = int(amount * self._price_shift)
+        scaled_price = int(price * 10 ** self._decimals[str(self.asset_pair_human_readable.price_asset)])
+        scaled_amount = int(amount * 10 ** self._decimals[str(self.asset_pair_human_readable.amount_asset)])
         timestamp = self._clock.get_waves_timestamp()
         expiration = timestamp + self._max_lifetime * 1000
         optype: int = 0 if direction == Direction.BUY else 1
@@ -193,7 +193,9 @@ class WAVESExchangeInterface(TradingInterface):
             return None
         self._fetch_orders()
 
-        if not any(map(lambda active_order: active_order.order_id == response['message']['id'], self._active_orders)):
+        # Order might be filled immediately if price == get_buy_price()
+        if not any(map(lambda active_order: active_order.order_id == response['message']['id'], self._active_orders)) \
+                and not any(map(lambda order_id: order_id == response['message']['id'], self._filled_order_ids)):
             return self._place_order(direction, amount, price)
 
         order = Order(order_id=response['message']['id'],
@@ -243,8 +245,9 @@ class WAVESExchangeInterface(TradingInterface):
             order = Order(order_id=params['id'],
                           asset_pair=AssetPair(Asset(params['assetPair']['amountAsset']),
                                                Asset(params['assetPair']['priceAsset'])),
-                          price=int(params['price'] / self._price_shift),
-                          amount=int(params['amount'] / self._price_shift),
+                          price=int(params['price'] / 10 ** self._decimals[str(self.asset_pair_human_readable.price_asset)]),
+                          amount=int(params['amount'] /
+                                     10 ** self._decimals[str(self.asset_pair_human_readable.amount_asset)]),
                           timestamp=params['timestamp'],
                           direction=Direction.from_string(params['type']))
             if params['status'] == 'Accepted' and (fetch_all or active):
