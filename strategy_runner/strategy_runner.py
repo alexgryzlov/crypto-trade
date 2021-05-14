@@ -6,6 +6,7 @@ from pathlib import Path
 from helpers.typing.common_types import Config, ConfigsScope
 
 from trading_interface.simulator.simulator import Simulator
+from trading_interface.waves_exchange.waves_exchange_interface import WAVESExchangeInterface
 
 from trading_system.trading_system import TradingSystem
 from trading_system.trading_statistics import TradingStatistics
@@ -20,6 +21,7 @@ from strategies.strategy_base import StrategyBase
 from logger.logger import Logger
 
 from trading import Timestamp, TimeRange
+from time import sleep, time
 
 
 class StrategyRunner:
@@ -123,5 +125,54 @@ class StrategyRunner:
 
         if visualize:
             TradingStatistics.visualize(run_results)
+
+        return stats
+
+    def run_exchange(
+            self,
+            strategy: tp.Type[StrategyBase],
+            strategy_config: Config,
+            logs_path: tp.Optional[Path] = None) -> TradingStatistics:
+
+        # TODO: don't use time()
+        Logger.set_log_file_name(Timestamp.to_iso_format(int(time())))
+        if logs_path is not None:
+            Logger.set_logs_path(logs_path)
+
+        exchange = WAVESExchangeInterface(
+            trading_config=self.base_config['trading_info'],
+            exchange_config=self.base_config['trading_interface'])
+        Logger.set_clock(exchange.get_clock())
+
+        trading_system = TradingSystem(
+            trading_interface=exchange,
+            config=self.base_config['trading_system'])
+
+        signal_detectors = [
+            trading_system,
+            ExtremumSignalDetector(trading_system, 2),
+            MovingAverageSignalDetector(trading_system, 25, 50)]
+
+        strategy_inst = strategy(**strategy_config)
+        strategy_inst.init_trading(trading_system)
+
+        while exchange.is_alive():
+            trading_system.update()
+            signals = []
+            for detector in signal_detectors:
+                signals += detector.get_trading_signals()
+            for signal in signals:
+                strategy_inst.__getattribute__(
+                    f'handle_{signal.name}_signal')(signal.content)
+            strategy_inst.update()
+            sleep(2)
+
+        trading_system.stop_trading()
+        exchange.stop_trading()
+        trading_system.update()
+
+        stats = trading_system.get_trading_statistics()
+        Logger.store_log()
+        print(stats)
 
         return stats
