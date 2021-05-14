@@ -19,21 +19,23 @@ class Direction(IntEnum):
 
 class Order:
     def __init__(self, order_id: str, asset_pair: AssetPair, amount: float,
-                 price: float, direction: Direction):
+                 price: float, timestamp: int, direction: Direction):
         self.order_id = order_id
         self.asset_pair = asset_pair
         self.amount = amount
         self.price = price
+        self.timestamp = timestamp
         self.direction = direction
 
     def __repr__(self) -> str:
-        return f"Order{self.order_id}"
+        return f"Order{self.order_id[:min(len(self.order_id), 10)]}"
 
     def __str__(self) -> str:
-        return f"OrderId: {self.order_id} " \
+        return f"OrderId: {self.order_id[:min(len(self.order_id), 10)]} " \
                f"AssetPair: {self.asset_pair.amount_asset}-{self.asset_pair.price_asset} " \
                f"Amount: {self.amount} " \
                f"Price: {self.price} " \
+               f"Timestamp: {self.timestamp} " \
                f"Direction: {self.direction}"
 
     def __hash__(self) -> int:

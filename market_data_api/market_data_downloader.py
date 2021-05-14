@@ -17,6 +17,8 @@ class MarketDataDownloader:
     def init(config: Config) -> None:
         MarketDataDownloader._Config = config
         MarketDataDownloader._Exchange = ccxt.wavesexchange()
+        # TODO: delete this :)
+        MarketDataDownloader._Exchange.verify = False
         MarketDataDownloader._Exchange.load_markets()
 
     @staticmethod
@@ -59,7 +61,7 @@ class MarketDataDownloader:
             params={  # type: ignore
                 'interval': timeframe.to_string(),
                 'timeStart': MarketDataDownloader._to_milliseconds(time_range.from_ts),
-                'timeEnd': MarketDataDownloader._to_milliseconds(time_range.to_ts)
+                'timeEnd': MarketDataDownloader._to_milliseconds(time_range.to_ts),
             })
         if not response:
             raise RuntimeError(response.content)
