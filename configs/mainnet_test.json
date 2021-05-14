@@ -19,8 +19,8 @@
     },
     "max_lifetime": 2160000,
     "version": 3,
-    "private_key": "G853Y7ZqrJAJGQNVsN31NEuFEX5UptNk8x6MXLnbUDQu",
-    "public_key": "GAeJAyMLiojVhou1kKV41VP9cU3YdjotJeUDpLWFM1bb",
+    "private_key": "",
+    "public_key": "",
     "fee_currency": "WAVES",
     "asset_translation": {
       "WAVES": "WAVES",
