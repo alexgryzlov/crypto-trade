@@ -35,7 +35,7 @@ class WAVESExchangeInterface(TradingInterface):
         self._filled_order_ids: tp.Set[str] = set()
         self._cancelled_orders_ids: tp.Set[str] = set()
         self._candles: tp.List[Candle] = []
-        self._clock = WAVESExchangeClock(trading_config['clock'])
+        self._clock = WAVESExchangeClock(exchange_config['clock'])
 
         self._fetch_orders()
         self._fetch_candles()
