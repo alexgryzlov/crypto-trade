@@ -187,7 +187,6 @@ class WAVESExchangeInterface(TradingInterface):
             "version": self._version
         })
         response = self._request('post', 'orderbook', body=data)
-        print(response)
         if response['status'] != "OrderAccepted":
             # Sometimes order is created but response status is something else, so check current active orders
             self._fetch_orders()
