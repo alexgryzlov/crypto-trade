@@ -35,7 +35,7 @@ class WAVESExchangeInterface(TradingInterface):
         self._filled_order_ids: tp.Set[str] = set()
         self._cancelled_orders_ids: tp.Set[str] = set()
         self._candles: tp.List[Candle] = []
-        self._clock = WAVESExchangeClock(exchange_config['clock'])
+        self._clock = WAVESExchangeClock(trading_config['clock'])
 
         self._fetch_orders()
         self._fetch_candles()
@@ -48,7 +48,10 @@ class WAVESExchangeInterface(TradingInterface):
         return len(self._request("get", "")) != 0
 
     def stop_trading(self) -> None:
-        pass
+        self.cancel_all()
+
+    def get_clock(self) -> WAVESExchangeClock:
+        return self._clock
 
     def get_timestamp(self) -> int:
         """
@@ -146,12 +149,13 @@ class WAVESExchangeInterface(TradingInterface):
         return response.json()
 
     def _place_order(self, direction: Direction, amount: float, price: float) -> tp.Optional[Order]:
-        scaled_price = int(price * 10 ** self._decimals[str(self.asset_pair_human_readable.price_asset)])
-        scaled_amount = int(amount * 10 ** self._decimals[str(self.asset_pair_human_readable.amount_asset)])
+        # https://docs.waves.exchange/en/waves-matcher/matcher-api
+        scaled_price = int(price * 10 ** (8 + self._decimals[str(self.asset_pair_human_readable.price_asset)] -
+                                          self._decimals[str(self.asset_pair_human_readable.amount_asset)]))
+        scaled_amount = int(amount * 10 ** (self._decimals[str(self.asset_pair_human_readable.amount_asset)]))
         timestamp = self._clock.get_waves_timestamp()
         expiration = timestamp + self._max_lifetime * 1000
         optype: int = 0 if direction == Direction.BUY else 1
-        # https://docs.waves.exchange/en/waves-matcher/matcher-api
         signature_data: bytes = pack("B", self._version) + \
                                 b58decode(self._public_key) + \
                                 b58decode(self._matcher_public_key) + \
@@ -183,6 +187,7 @@ class WAVESExchangeInterface(TradingInterface):
             "version": self._version
         })
         response = self._request('post', 'orderbook', body=data)
+        print(response)
         if response['status'] != "OrderAccepted":
             # Sometimes order is created but response status is something else, so check current active orders
             self._fetch_orders()
@@ -245,9 +250,11 @@ class WAVESExchangeInterface(TradingInterface):
             order = Order(order_id=params['id'],
                           asset_pair=AssetPair(Asset(params['assetPair']['amountAsset']),
                                                Asset(params['assetPair']['priceAsset'])),
-                          price=int(params['price'] / 10 ** self._decimals[str(self.asset_pair_human_readable.price_asset)]),
+                          price=int(params['price'] /
+                                    (10 ** (8 + self._decimals[str(self.asset_pair_human_readable.price_asset)] -
+                                            self._decimals[str(self.asset_pair_human_readable.amount_asset)]))),
                           amount=int(params['amount'] /
-                                     10 ** self._decimals[str(self.asset_pair_human_readable.amount_asset)]),
+                                     (10 ** self._decimals[str(self.asset_pair_human_readable.amount_asset)])),
                           timestamp=params['timestamp'],
                           direction=Direction.from_string(params['type']))
             if params['status'] == 'Accepted' and (fetch_all or active):
