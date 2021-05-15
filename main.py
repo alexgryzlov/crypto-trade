@@ -5,6 +5,7 @@ from base.config_parser import ConfigParser
 
 from strategy_runner.strategy_runner import StrategyRunner
 from strategies.trend_strategy.trend_strategy import TrendStrategy
+from strategies.grid_strategy.grid_strategy import GridStrategy
 
 from trading import TimeRange
 
@@ -20,6 +21,6 @@ if __name__ == "__main__":
     )
 
     strategy_runner.run_exchange(
-        strategy=TrendStrategy,
-        strategy_config={}
+        strategy=GridStrategy,
+        strategy_config=ConfigParser.load_config(Path('strategies/grid_strategy/config.json'))
     )
