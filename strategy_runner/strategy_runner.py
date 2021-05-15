@@ -144,7 +144,7 @@ class StrategyRunner:
             MovingAverageSignalDetector(self._ts, 25, 50)
         ]
 
-        self._strategy_inst = strategy(**strategy_config)
+        self._strategy_inst = strategy(strategy_config)
         self._strategy_inst.init_trading(self._ts)
 
     def _do_trading_iteration(self) -> None:

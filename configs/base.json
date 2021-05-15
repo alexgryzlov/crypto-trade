@@ -11,7 +11,7 @@
   "trading_interface": {
     "private_key": "7WJxqTfaiMmFFHRvxCwiQ8DAE3qVBd5ziaE5F8qJWXWx",
     "public_key": "DuasNP39N7PCNCKfEkjXniR8otVbriYp3MpBrKKZrH1K",
-    "asset_pair": ["WAVES", "USDN"],
+    "asset_pair": ["USDT", "USDN"],
     "timeframe": "5m"
   },
 
