@@ -2,6 +2,7 @@ import multiprocessing as mp
 import traceback as tb
 import typing as tp
 from pathlib import Path
+from time import sleep, time
 
 from helpers.typing.common_types import Config, ConfigsScope
 
@@ -21,7 +22,6 @@ from strategies.strategy_base import StrategyBase
 from logger.logger import Logger
 
 from trading import Timestamp, TimeRange
-from time import sleep, time
 
 
 class StrategyRunner:
@@ -140,8 +140,8 @@ class StrategyRunner:
             Logger.set_logs_path(logs_path)
 
         exchange = WAVESExchangeInterface(
-            trading_config=self.base_config['trading_info'],
-            exchange_config=self.base_config['trading_interface'])
+            trading_config=self.base_config['trading_interface'],
+            exchange_config=self.exchange_config)
         Logger.set_clock(exchange.get_clock())
 
         trading_system = TradingSystem(
@@ -151,7 +151,8 @@ class StrategyRunner:
         signal_detectors = [
             trading_system,
             ExtremumSignalDetector(trading_system, 2),
-            MovingAverageSignalDetector(trading_system, 25, 50)]
+            MovingAverageSignalDetector(trading_system, 25, 50)
+        ]
 
         strategy_inst = strategy(**strategy_config)
         strategy_inst.init_trading(trading_system)
