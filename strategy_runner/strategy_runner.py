@@ -6,12 +6,14 @@ from time import sleep, time
 
 from helpers.typing.common_types import Config, ConfigsScope
 
+from trading_interface.trading_interface import TradingInterface
 from trading_interface.simulator.simulator import Simulator
 from trading_interface.waves_exchange.waves_exchange_interface import WAVESExchangeInterface
 
 from trading_system.trading_system import TradingSystem
 from trading_system.trading_statistics import TradingStatistics
 
+from trading_signal_detectors.trading_signal_detector import TradingSignalDetector
 from trading_signal_detectors.extremum.extremum_signal_detector \
     import ExtremumSignalDetector
 from trading_signal_detectors.moving_average.moving_average_signal_detector \
@@ -21,7 +23,7 @@ from strategies.strategy_base import StrategyBase
 
 from logger.logger import Logger
 
-from trading import Timestamp, TimeRange
+from trading import Timestamp, TimeRange, Signal
 
 
 class StrategyRunner:
@@ -32,6 +34,10 @@ class StrategyRunner:
         self.base_config = base_config
         self.simulator_config = simulator_config
         self.exchange_config = exchange_config
+        self._ti: tp.Optional[TradingInterface] = None
+        self._ts: tp.Optional[TradingSystem] = None
+        self._strategy_inst: tp.Optional[StrategyBase] = None
+        self._signal_detectors: tp.List[TradingSignalDetector] = []
 
     def run_simulation(
             self,
@@ -44,43 +50,18 @@ class StrategyRunner:
         if logs_path is not None:
             Logger.set_logs_path(logs_path)
 
-        simulator = Simulator(
+        self._ti = Simulator(
             time_range=time_range,
             trading_config=self.base_config['trading_interface'],
             exchange_config=self.simulator_config )
-        Logger.set_clock(simulator.get_clock())
+        Logger.set_clock(self._ti.get_clock())
 
-        trading_system = TradingSystem(
-            trading_interface=simulator,
-            config=self.base_config['trading_system'])
+        self._init_trading(strategy, strategy_config)
 
-        signal_detectors = [
-            trading_system,
-            ExtremumSignalDetector(trading_system, 2),
-            MovingAverageSignalDetector(trading_system, 25, 50)]
+        while self._ti.is_alive():
+            self._do_trading_iteration()
 
-        strategy_inst = strategy(**strategy_config)
-        strategy_inst.init_trading(trading_system)
-
-        while simulator.is_alive():
-            trading_system.update()
-            signals = []
-            for detector in signal_detectors:
-                signals += detector.get_trading_signals()
-            for signal in signals:
-                strategy_inst.__getattribute__(
-                    f'handle_{signal.name}_signal')(signal.content)
-            strategy_inst.update()
-
-        trading_system.stop_trading()
-        simulator.stop_trading()
-        trading_system.update()
-
-        stats = trading_system.get_trading_statistics()
-        Logger.store_log()
-        print(stats)
-
-        return stats
+        return self._stop_trading()
 
     def run_simulation_on_periods(
             self,
@@ -139,40 +120,49 @@ class StrategyRunner:
         if logs_path is not None:
             Logger.set_logs_path(logs_path)
 
-        exchange = WAVESExchangeInterface(
+        self._ti = WAVESExchangeInterface(
             trading_config=self.base_config['trading_interface'],
             exchange_config=self.exchange_config)
-        Logger.set_clock(exchange.get_clock())
+        Logger.set_clock(self._ti.get_clock())
 
-        trading_system = TradingSystem(
-            trading_interface=exchange,
-            config=self.base_config['trading_system'])
+        self._init_trading(strategy, strategy_config)
 
-        signal_detectors = [
-            trading_system,
-            ExtremumSignalDetector(trading_system, 2),
-            MovingAverageSignalDetector(trading_system, 25, 50)
-        ]
-
-        strategy_inst = strategy(**strategy_config)
-        strategy_inst.init_trading(trading_system)
-
-        while exchange.is_alive():
-            trading_system.update()
-            signals = []
-            for detector in signal_detectors:
-                signals += detector.get_trading_signals()
-            for signal in signals:
-                strategy_inst.__getattribute__(
-                    f'handle_{signal.name}_signal')(signal.content)
-            strategy_inst.update()
+        while self._ti.is_alive():
+            self._do_trading_iteration()
             sleep(2)
 
-        trading_system.stop_trading()
-        exchange.stop_trading()
-        trading_system.update()
+        return self._stop_trading()
 
-        stats = trading_system.get_trading_statistics()
+    def _init_trading(self, strategy: tp.Type[StrategyBase], strategy_config: Config) -> None:
+        self._ts = TradingSystem(
+            trading_interface=self._ti,
+            config=self.base_config['trading_system'])
+
+        self._signal_detectors = [
+            self._ts,
+            ExtremumSignalDetector(self._ts, 2),
+            MovingAverageSignalDetector(self._ts, 25, 50)
+        ]
+
+        self._strategy_inst = strategy(**strategy_config)
+        self._strategy_inst.init_trading(self._ts)
+
+    def _do_trading_iteration(self) -> None:
+        self._ts.update()
+        signals: tp.List[Signal] = []
+        for detector in self._signal_detectors:
+            signals += detector.get_trading_signals()
+        for signal in signals:
+            self._strategy_inst.__getattribute__(
+                f'handle_{signal.name}_signal')(signal.content)
+        self._strategy_inst.update()
+
+    def _stop_trading(self) -> TradingStatistics:
+        self._ts.stop_trading()
+        self._ti.stop_trading()
+        self._ts.update()
+
+        stats = self._ts.get_trading_statistics()
         Logger.store_log()
         print(stats)
 
