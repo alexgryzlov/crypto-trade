@@ -28,13 +28,14 @@ class WAVESExchangeInterface(TradingInterface):
         self._fee_currency = Asset(exchange_config['fee_currency'])
         self._decimals: tp.Dict[str, int] = exchange_config['decimals']
         self._max_lifetime: int = exchange_config['max_lifetime']
-        self._private_key = bytes(exchange_config["private_key"], 'utf-8')
-        self._public_key = bytes(exchange_config["public_key"], 'utf-8')
+        self._private_key = bytes(trading_config["private_key"], 'utf-8')
+        self._public_key = bytes(trading_config["public_key"], 'utf-8')
         self._version: int = exchange_config['version']
         self._active_orders: tp.Set[Order] = set()
         self._filled_order_ids: tp.Set[str] = set()
         self._cancelled_orders_ids: tp.Set[str] = set()
         self._candles: tp.List[Candle] = []
+        self._candles_lifetime = Timeframe(trading_config['timeframe'])
         self._clock = WAVESExchangeClock(exchange_config['clock'])
 
         self._fetch_orders()
@@ -266,7 +267,7 @@ class WAVESExchangeInterface(TradingInterface):
 
     def _fetch_candles(self) -> None:
         new_candles: tp.List[Candle] = MarketDataDownloader.get_candles(
-            self.asset_pair_human_readable, self._clock.get_candles_lifetime(),
+            self.asset_pair_human_readable, self._candles_lifetime,
             TimeRange(self._clock.get_last_fetch(), self._clock.get_timestamp()))
         if new_candles:
             self._clock.update_last_fetch(new_candles[-1].ts)

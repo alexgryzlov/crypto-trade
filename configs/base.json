@@ -2,14 +2,17 @@
   "trading_system": {
     "currency_asset": "USDN",
     "wallet": {
-      "USDN": 100.0,
-      "WAVES": 10.0
+      "USDN": 5,
+      "WAVES": 0.1,
+      "USDT": 0
     }
   },
 
   "trading_interface": {
-    "timeframe": "15m",
-    "asset_pair": ["WAVES","25FEqEjRkqK6yCkiT7Lz6SAYz7gUFCtxfCChnrVFD5AT"]
+    "private_key": "7WJxqTfaiMmFFHRvxCwiQ8DAE3qVBd5ziaE5F8qJWXWx",
+    "public_key": "DuasNP39N7PCNCKfEkjXniR8otVbriYp3MpBrKKZrH1K",
+    "asset_pair": ["WAVES", "USDN"],
+    "timeframe": "5m"
   },
 
   "market_data_downloader": {

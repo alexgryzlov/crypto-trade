@@ -8,8 +8,6 @@ from strategies.trend_strategy.trend_strategy import TrendStrategy
 
 from trading import TimeRange
 
-from trading_interface.waves_exchange.waves_exchange_interface import WAVESExchangeInterface
-
 if __name__ == "__main__":
     base_config = ConfigParser.load_config(Path('configs/base.json'))
 
@@ -17,24 +15,11 @@ if __name__ == "__main__":
 
     strategy_runner = StrategyRunner(
         base_config=base_config,
-        simulator_config=ConfigParser.load_config(Path('configs/simulator.json')),
-        exchange_config=ConfigParser.load_config(Path('configs/waves.json')))
+        simulator_config={},
+        exchange_config=ConfigParser.load_config(Path('configs/waves.json'))['testnet']
+    )
 
-    e = WAVESExchangeInterface(base_config['trading_interface'],
-                               ConfigParser.load_config(
-                                   Path('configs/waves.json'))['testnet'])
-    # print(e.get_sell_price())
-    # e.sell(1, e.get_sell_price())
-    # e.buy(1, e.get_buy_price())
-    print(e.get_orderbook())
-   # print(e.get_buy_price(), e.get_sell_price())
-
-    # strategy_runner.run_simulation_on_periods(
-    #    strategy=TrendStrategy,
-    #    strategy_config={},
-    #    time_range=TimeRange.from_iso_format(
-    #        from_ts='2021-02-01 00:00:00',
-    #        to_ts='2021-02-01 12:00:00'),
-    #    runs=4,
-    #    processes=2,
-    #    visualize=False)
+    strategy_runner.run_exchange(
+        strategy=TrendStrategy,
+        strategy_config={}
+    )

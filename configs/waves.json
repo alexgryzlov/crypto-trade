@@ -10,11 +10,8 @@
     },
     "max_lifetime": 2160000,
     "version": 3,
-    "private_key": "TBD",
-    "public_key": "TBD",
     "fee_currency": "WAVES",
     "clock" : {
-      "candles_lifetime": "5m",
       "before_start_offset": 300
     },
     "asset_translation": {
@@ -35,11 +32,8 @@
     },
     "max_lifetime": 2160000,
     "version": 3,
-    "private_key": "7WJxqTfaiMmFFHRvxCwiQ8DAE3qVBd5ziaE5F8qJWXWx",
-    "public_key": "DuasNP39N7PCNCKfEkjXniR8otVbriYp3MpBrKKZrH1K",
     "fee_currency": "WAVES",
     "clock" : {
-      "candles_lifetime": "5m",
       "before_start_offset": 300
     },
     "asset_translation": {
