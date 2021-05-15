@@ -16,7 +16,7 @@ if __name__ == "__main__":
     strategy_runner = StrategyRunner(
         base_config=base_config,
         simulator_config={},
-        exchange_config=ConfigParser.load_config(Path('configs/waves.json')['mainnet'])
+        exchange_config=ConfigParser.load_config(Path('configs/waves.json'))['testnet']
     )
 
     strategy_runner.run_exchange(
