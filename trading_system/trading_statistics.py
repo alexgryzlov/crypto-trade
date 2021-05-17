@@ -72,13 +72,14 @@ class TradingStatistics:
 
     def pretty_print(self) -> None:
         color = 'green' if self.calc_relative_delta() > 0 else 'red'
+        hodl_color = 'green' if self._calc_relative_hodl_delta() > 0 else 'red'
         console = Console()
         table = Table(show_footer=True, box=TABLE_STYLE, show_lines=True,
             title=f'{Timestamp.to_iso_format(require(self.start_timestamp))} - '
                   f'{Timestamp.to_iso_format(require(self.finish_timestamp))}')
         table.add_column('')
         table.add_column('Initial', f'Filled orders: {self.filled_order_count}')
-        table.add_column('Final', f'Profit: [{color}]{self.calc_relative_delta():.1f}%[/{color}]\nHODL:   [{color}]{self._calc_relative_hodl_delta():.1f}%[/{color}]')
+        table.add_column('Final', f'Profit: [{color}]{self.calc_relative_delta():.1f}%[/{color}]\nHODL:   [{hodl_color}]{self._calc_relative_hodl_delta():.1f}%[/{hodl_color}]')
         table.add_row('Balance', f'{require(self.initial_balance):.2f} {require(self.price_asset)}',
                       f'{require(self.final_balance):.2f} {require(self.price_asset)}')
         table.add_row('Wallet',
