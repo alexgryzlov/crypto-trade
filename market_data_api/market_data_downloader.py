@@ -26,7 +26,7 @@ class MarketDataDownloader:
 
     @staticmethod
     def get_candles(asset_pair: AssetPair, timeframe: Timeframe, time_range: TimeRange) -> tp.List[Candle]:
-        MarketDataDownloader._Logger.info(f"Loading candles in range {TimeRange}")
+        MarketDataDownloader._Logger.info(f"Loading candles in range {time_range}")
         candles: tp.List[Candle] = []
         current_ts = time_range.from_ts
 

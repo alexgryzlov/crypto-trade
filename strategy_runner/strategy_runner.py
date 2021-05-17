@@ -140,9 +140,8 @@ class StrategyRunner:
 
     def run_exchange(
             self,
-            strategy: tp.Type[StrategyBase],
-            strategy_config: Config,
-            logs_path: tp.Optional[Path] = None) -> TradingStatistics:
+            logs_path: tp.Optional[Path] = None,
+            pretty_print: bool = True) -> TradingStatistics:
 
         # TODO: don't use time()
         Logger.set_log_file_name(Timestamp.to_iso_format(int(time())))
@@ -160,7 +159,7 @@ class StrategyRunner:
             self._do_trading_iteration()
             sleep(2)
 
-        return self._stop_trading()
+        return self._stop_trading(pretty_print)
 
     def _init_trading(self) -> None:
         self._ts = TradingSystem(

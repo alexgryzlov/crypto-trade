@@ -2,22 +2,22 @@
   "trading_system": {
     "currency_asset": "USDN",
     "wallet": {
-      "USDN": 5,
-      "WAVES": 0.1,
+      "USDN": 45,
+      "WAVES": 5.5,
       "USDT": 0
     }
   },
 
   "strategy": {
-    "strategy_name": "TrendStrategy",
-    "strategy_module": "strategies.trend_strategy.trend_strategy",
-    "path_to_config": "strategies/trend_strategy/config.json"
+    "strategy_name": "GridStrategy",
+    "strategy_module": "strategies.grid_strategy.grid_strategy",
+    "path_to_config": "strategies/grid_strategy/config.json"
   },
 
   "trading_interface": {
     "private_key": "7WJxqTfaiMmFFHRvxCwiQ8DAE3qVBd5ziaE5F8qJWXWx",
     "public_key": "DuasNP39N7PCNCKfEkjXniR8otVbriYp3MpBrKKZrH1K",
-    "asset_pair": ["USDT", "USDN"],
+    "asset_pair": ["WAVES", "USDN"],
     "timeframe": "5m"
   },
 
