@@ -117,7 +117,7 @@ delta hodl_result(%):   {self._calc_relative_hodl_delta():.1f}%
         return (require(self.hodl_result) - require(self.initial_balance)) / require(self.initial_balance) * 100
 
     def _wallet_pretty_format(self, wallet: tp.Dict[Asset, float]) -> str:
-        return '\n'.join([f'{asset}: {amount}' for asset, amount in wallet.items()])
+        return '\n'.join([f'{asset}: {amount:.2f}' for asset, amount in wallet.items()])
 
     @classmethod
     def merge(cls, stats_array: tp.List['TradingStatistics']) -> 'TradingStatistics':
