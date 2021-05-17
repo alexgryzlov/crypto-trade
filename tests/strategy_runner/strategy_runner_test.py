@@ -1,7 +1,7 @@
 import pytest
 
-from tests.configs import base_config
-from helpers.typing.common_types import ConfigsScope
+from tests.configs import base_config, simulator_config
+from helpers.typing.common_types import Config, ConfigsScope
 
 from strategy_runner.strategy_runner import StrategyRunner
 from trading import TimeRange
@@ -13,8 +13,13 @@ from tests.market_data_api.md_downloader import market_data_downloader
 @pytest.fixture
 def strategy_runner(
         base_config: ConfigsScope,
+        simulator_config: Config,
         market_data_downloader: market_data_downloader) -> StrategyRunner:
-    return StrategyRunner(base_config=base_config)
+    return StrategyRunner(
+        base_config=base_config,
+        simulator_config=simulator_config,
+        exchange_config={}
+    )
 
 
 def test_dummy_simulation_run(

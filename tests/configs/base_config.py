@@ -12,5 +12,10 @@ def base_config() -> ConfigsScope:
 
 
 @pytest.fixture(scope="session")
+def simulator_config() -> Config:
+    return ConfigParser.load_config(Path('tests/configs/simulator.json'))
+
+
+@pytest.fixture(scope="session")
 def trading_interface_config(base_config: ConfigsScope) -> Config:
     return base_config["trading_interface"]
