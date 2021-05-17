@@ -79,7 +79,7 @@ class TradingStatistics:
                   f'{Timestamp.to_iso_format(require(self.finish_timestamp))}')
         table.add_column('')
         table.add_column('Initial', f'Filled orders: {self.filled_order_count}')
-        table.add_column('Final', f'Profit: [{color}]{self.calc_relative_delta():.1f}%[/{color}]\nHODL:   [{hodl_color}]{self._calc_relative_hodl_delta():.1f}%[/{hodl_color}]')
+        table.add_column('Final', f'Profit: [{color}]{self.calc_relative_delta():+.1f}%[/{color}]\nHODL:   [{hodl_color}]{self._calc_relative_hodl_delta():+.1f}%[/{hodl_color}]')
         table.add_row('Balance', f'{require(self.initial_balance):.2f} {require(self.price_asset)}',
                       f'{require(self.final_balance):.2f} {require(self.price_asset)}')
         table.add_row('Wallet',
@@ -117,7 +117,13 @@ delta hodl_result(%):   {self._calc_relative_hodl_delta():.1f}%
         return (require(self.hodl_result) - require(self.initial_balance)) / require(self.initial_balance) * 100
 
     def _wallet_pretty_format(self, wallet: tp.Dict[Asset, float]) -> str:
-        return '\n'.join([f'{asset}: {amount:.2f}' for asset, amount in wallet.items()])
+        assets = [str(asset) + ':' for asset in wallet.keys()]
+        assets_max_len = max(map(len, assets)) + 1
+        assets = list(map(lambda x: x.ljust(assets_max_len), assets))
+        amounts = [f'{amount:2f}' for amount in wallet.values()]
+        amounts_max_len = max(map(len, amounts))
+        amounts = list(map(lambda x: x.rjust(amounts_max_len), amounts))
+        return '\n'.join(map(lambda x: x[0] + x[1], zip(assets, amounts)))
 
     @classmethod
     def merge(cls, stats_array: tp.List['TradingStatistics']) -> 'TradingStatistics':
