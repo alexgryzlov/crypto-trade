@@ -28,7 +28,7 @@ class WAVESExchangeClock(Clock):
     def get_last_request(self) -> int:
         return self._last_candle_request
 
-    def update_last_requeset(self, new_time: int) -> None:
+    def update_last_request(self, new_time: int) -> None:
         self._last_candle_request = new_time
 
     def get_candles_update_rate(self) -> int:

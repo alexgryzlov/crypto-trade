@@ -271,7 +271,7 @@ class WAVESExchangeInterface(TradingInterface):
             new_candles: tp.List[Candle] = MarketDataDownloader.get_candles(
                 self.asset_pair_human_readable, self._candles_lifetime,
                 TimeRange(self._clock.get_last_fetch(), self._clock.get_timestamp()))
-            self._clock.update_last_requeset(self.get_timestamp())
+            self._clock.update_last_request(self.get_timestamp())
             if new_candles:
                 self._clock.update_last_fetch(new_candles[-1].ts)
                 if self._candles and self._candles[-1].ts == new_candles[0].ts:

@@ -1,10 +1,11 @@
-from trading_system.trading_system_handler import TradingSystemHandler
-from trading_interface.trading_interface import TradingInterface
-from logger.logger import Logger
-from logger.log_events import MovingAverageEvent
-
 import typing as tp
+from logging import INFO
+
 from helpers.typing import Array
+from logger.log_events import MovingAverageEvent
+from logger.logger import Logger
+from trading_interface.trading_interface import TradingInterface
+from trading_system.trading_system_handler import TradingSystemHandler
 
 
 class MovingAverageHandler(TradingSystemHandler):
@@ -32,7 +33,7 @@ class MovingAverageHandler(TradingSystemHandler):
 
         candle_values = list(map(lambda c: c.get_mid_price(), candles))
         self.values.append(self.calculate_from(candle_values))
-        self.logger.trading(
+        self.logger.info_event(
             MovingAverageEvent(self.get_last_n_values(1)[0], self.window_size))
         return True
 

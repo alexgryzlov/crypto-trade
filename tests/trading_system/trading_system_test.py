@@ -4,8 +4,8 @@ from mock import MagicMock
 from tests.logger.empty_logger_mock import empty_logger_mock
 
 from tests.trading_interface.trading_interface_mock import TradingInterfaceMock
-from trading_system.trading_system import Handlers, TradingSystem
-from trading import Order, AssetPair, Asset, Direction
+from trading_system.trading_system import TradingSystem
+from trading import AssetPair, Asset, Direction
 
 one_values = [1] * 10
 real_values = [10.2717, 10.295, 10.330, 10.332, 10.326, 10.303, 10.355, 10.341,
@@ -20,7 +20,7 @@ real_ti.order_is_filled = MagicMock(return_value=True)
 
 
 @pytest.fixture
-def ts(request) -> TradingSystem:
+def ts(request, empty_logger_mock) -> TradingSystem:
     return TradingSystem(request.param, config={"currency_asset": "USDN", "wallet": {"USDN": 999999.0, "WAVES": 10.0}})
 
 

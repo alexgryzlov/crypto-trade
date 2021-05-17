@@ -5,6 +5,7 @@ from retry import retry
 import typing as tp
 
 from helpers.typing.common_types import Config
+from logger.logger import Logger
 
 from trading import Candle, AssetPair, Timeframe, TimeRange, Timestamp
 
@@ -12,17 +13,20 @@ from trading import Candle, AssetPair, Timeframe, TimeRange, Timestamp
 class MarketDataDownloader:
     _Config: Config = None
     _Exchange = None
+    _Logger = None
 
     @staticmethod
     def init(config: Config) -> None:
         MarketDataDownloader._Config = config
         MarketDataDownloader._Exchange = ccxt.wavesexchange()
+        MarketDataDownloader._Logger = Logger("MarketDataDownloader")
         # TODO: delete this :)
         MarketDataDownloader._Exchange.verify = False
         MarketDataDownloader._Exchange.load_markets()
 
     @staticmethod
     def get_candles(asset_pair: AssetPair, timeframe: Timeframe, time_range: TimeRange) -> tp.List[Candle]:
+        MarketDataDownloader._Logger.info(f"Loading candles in range {time_range}")
         candles: tp.List[Candle] = []
         current_ts = time_range.from_ts
 
