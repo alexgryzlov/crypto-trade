@@ -8,6 +8,12 @@
     }
   },
 
+  "strategy": {
+    "strategy_name": "TrendStrategy",
+    "strategy_module": "strategies.trend_strategy.trend_strategy",
+    "path_to_config": "strategies/trend_strategy/config.json"
+  },
+
   "trading_interface": {
     "private_key": "7WJxqTfaiMmFFHRvxCwiQ8DAE3qVBd5ziaE5F8qJWXWx",
     "public_key": "DuasNP39N7PCNCKfEkjXniR8otVbriYp3MpBrKKZrH1K",
@@ -21,5 +27,18 @@
     "candles_per_request": 1400
   },
 
-  "strategy_runner": {}
+  "strategy_runner": {
+    "logger": {
+      "file_output": false,
+      "std_output": true,
+      "system_time": true
+    },
+    "stdout_frequency": 10
+  },
+
+  "default_logger": {
+    "file_output": true,
+    "std_output": false,
+    "system_time": false
+  }
 }

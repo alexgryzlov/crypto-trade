@@ -9,7 +9,6 @@ import bisect
 
 from trading import TrendLine, Candle
 
-
 # fix for Windows https://bugs.python.org/issue36439
 MIN_TIMESTAMP = 86400
 
@@ -40,7 +39,7 @@ class GraphicLayer:
         self.buy_trace = None
         self.sell_trace = None
         self.trend_traces: tp.List[go.Scatter] = []
-        self.ma_traces: tp.List[go.Scatter] = []
+        self.curve_traces: tp.List[go.Scatter] = []
         self.ts_line = go.Scatter(visible=False,
                                   x=[to_time(ts), to_time(ts)],
                                   y=[visualizer._y_min, visualizer._y_max],
@@ -114,18 +113,21 @@ class GraphicLayer:
                                  ))
         self.trend_traces.append(trend_trace)
 
-    def add_moving_average(self, moving_averages: tp.List[float],
-                           timestamps: tp.List[datetime],
-                           window_size: int) -> None:
-        color = px.colors.qualitative.Pastel[len(self.ma_traces)]
-        ma_trace = go.Scatter(visible=False,
-                              x=timestamps,
-                              y=moving_averages,
-                              mode='lines',
-                              name=f'Moving Average {window_size}',
-                              line=dict(color=color)
-                              )
-        self.ma_traces.append(ma_trace)
+    def add_curve(self,
+                  curve: tp.List[float],
+                  timestamps: tp.List[datetime],
+                  line_name: str,
+                  meta: tp.List[str]) -> None:
+        color = px.colors.qualitative.Pastel[len(self.curve_traces)]
+        curve_trace = go.Scatter(visible=False,
+                                 x=timestamps,
+                                 y=curve,
+                                 mode='lines',
+                                 name=line_name,
+                                 line=dict(color=color),
+                                 text=meta,
+                                 )
+        self.curve_traces.append(curve_trace)
 
     def add_buy_events(self, timestamps: tp.List[int], prices: tp.List[float],
                        amount: tp.List[float], meta: tp.List[str]) -> None:
@@ -159,7 +161,7 @@ class GraphicLayer:
         return [self.ts_line, self.left_candle_trace, self.right_candle_trace,
                 self.sell_trace, self.buy_trace,
                 *self.trend_traces,
-                *self.ma_traces]
+                *self.curve_traces]
 
     def get_visibility_params(self,
                               candles_history: tp.Optional[bool] = None,
@@ -168,8 +170,8 @@ class GraphicLayer:
                               trends: tp.Optional[bool] = None,
                               buy: tp.Optional[bool] = None,
                               sell: tp.Optional[bool] = None,
-                              ma: tp.Optional[bool] = None,
-                              default_visibility: bool = True) \
+                              default_visibility: bool = True,
+                              indicators: tp.Optional[tp.List[str]] = None) \
             -> tp.List[bool]:
         visibility = [default_visibility if ts_line is None else ts_line,
                       default_visibility if candles_history is None else
@@ -180,8 +182,10 @@ class GraphicLayer:
                       default_visibility if buy is None else buy]
         for _ in range(len(self.trend_traces)):
             visibility.append(default_visibility if trends is None else trends)
-        for _ in range(len(self.ma_traces)):
-            visibility.append(default_visibility if ma is None else ma)
+        for curve in self.curve_traces:
+            visibility.append(default_visibility
+                              if indicators is None else
+                              curve.name in indicators)
         return visibility
 
 
@@ -239,7 +243,7 @@ class Visualizer:
             self._layers[i].add_candles(self._candle_params, i)
 
     def add_trend_lines(self,
-                        trend_lines: tp.List[tp.Mapping[str, tp.Any]],
+                        trend_lines: tp.List[tp.Dict[str, tp.Any]],
                         trend_length: int = 30) -> None:
         for event in trend_lines:
             lower_trend_line = event['lower_trend_line']
@@ -257,19 +261,27 @@ class Visualizer:
                                                  trend_length,
                                                  name_suffix="lower line")
 
-    def add_moving_average(self,
-                           moving_averages: tp.List[tp.Dict[str, tp.Any]],
-                           window_size: int) -> None:
-        averages = []
+    def add_curve(self,
+                  curve_events: tp.List[tp.Dict[str, tp.Any]],
+                  curve_name: str) -> None:
+        curve = []
         timestamps = []
-        for event in moving_averages:
-            average_value = event['average_value']
-            averages.append(average_value)
+        last_added = -1
+        meta = []
+        for event in curve_events:
+            value = event['value']
+            meta.append(f"{curve_name}<br>{event['value_fmt']}")
+            min_val, max_val = event['min_value'], event['max_value']
+            if min_val is not None:
+                value = self.__scale(value, min_val, max_val)
+            curve.append(value)
             ts = event['ts']
             timestamps.append(to_time(ts))
             ind = self.__get_ind_by_ts(ts)
-            self._layers[ind].add_moving_average(averages, timestamps,
-                                                 window_size)
+            if ind > last_added:
+                self._layers[ind].add_curve(curve, timestamps, curve_name,
+                                            meta)
+                last_added = ind
 
     def add_buy_events(self, timestamps: tp.List[int], prices: tp.List[float],
                        amount: tp.List[float], meta: tp.List[str]) -> None:
@@ -293,6 +305,13 @@ class Visualizer:
         for layer in self._layers:
             traces.extend(layer.get_traces())
         return go.Figure(data=traces, layout=self._layout)
+
+    def __scale(self, value: float, min_val: float, max_val: float) -> float:
+        value = (value - min_val) / (max_val - min_val)
+        border = 0.05 * (self._y_max - self._y_min)
+        value = value * (self._y_max - self._y_min - 2 * border) + \
+                self._y_min + border
+        return value
 
     def __adjust_timestamps_and_price(self, timestamps: tp.List[int],
                                       prices: tp.List[float],

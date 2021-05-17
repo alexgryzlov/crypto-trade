@@ -1,16 +1,18 @@
-import trading_system.trading_system as ts
-from strategies.strategy_base import StrategyBase
+import typing as tp
 
+import trading_system.trading_system as ts
+
+from helpers.typing.common_types import Config
+from strategies.strategy_base import StrategyBase
 from logger.logger import Logger
 
+from trading_system.indicators import TrendHandler
 from trading import Trend, TrendType, Asset, AssetPair
-import trading_system.trading_system as ts
-import typing as tp
 
 
 class TrendStrategy(StrategyBase):
-    def __init__(self, **kwargs: tp.Any) -> None:
-        self.asset_pair = AssetPair(Asset('WAVES'), Asset('USDN'))
+    def __init__(self, config: Config) -> None:
+        self.asset_pair = AssetPair(*config['asset_pair'])
         self.logger = Logger('TrendStrategy')
         self.order_balance = 0
         self.active_trends: tp.List[Trend] = []
@@ -18,6 +20,7 @@ class TrendStrategy(StrategyBase):
 
     def init_trading(self, trading_system: ts.TradingSystem) -> None:
         self.ts = trading_system
+        self.ts.add_handler(TrendHandler, params={})
 
     def update(self) -> None:
         assert self.ts is not None

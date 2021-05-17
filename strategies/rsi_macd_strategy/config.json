@@ -1,0 +1,7 @@
+{
+  "asset_pair": ["WAVES", "USDN"],
+  "timeframe": "1h",
+  "threshold": 10800,
+  "amount_scale": 7,
+  "amount_offset": 3
+}

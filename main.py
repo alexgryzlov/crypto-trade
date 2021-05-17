@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from logger.logger import Logger
 from market_data_api.market_data_downloader import MarketDataDownloader
 from base.config_parser import ConfigParser
 
@@ -11,6 +12,7 @@ from trading import TimeRange
 
 if __name__ == "__main__":
     base_config = ConfigParser.load_config(Path('configs/base.json'))
+    Logger.set_default_config(base_config['default_logger'])
 
     MarketDataDownloader.init(base_config['market_data_downloader'])
 

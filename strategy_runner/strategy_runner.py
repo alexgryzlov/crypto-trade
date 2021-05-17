@@ -1,10 +1,14 @@
+import importlib
 import multiprocessing as mp
 import traceback as tb
 import typing as tp
 from pathlib import Path
 from time import sleep, time
+from os import getpid
 
 from helpers.typing.common_types import Config, ConfigsScope
+from logger.logger import Logger
+from base.config_parser import ConfigParser
 
 from trading_interface.trading_interface import TradingInterface
 from trading_interface.simulator.simulator import Simulator
@@ -34,17 +38,33 @@ class StrategyRunner:
         self.base_config = base_config
         self.simulator_config = simulator_config
         self.exchange_config = exchange_config
+        self.logger = Logger(f"Runner{getpid()}",
+                             config=self.base_config['strategy_runner']['logger'])
         self._ti: tp.Optional[TradingInterface] = None
         self._ts: tp.Optional[TradingSystem] = None
         self._strategy_inst: tp.Optional[StrategyBase] = None
         self._signal_detectors: tp.List[TradingSignalDetector] = []
+        self._stdout_frequency = self.base_config['strategy_runner']['stdout_frequency']
+
+    def _get_strategy_instance(self) -> tp.Any:
+        module = importlib.import_module(self.base_config["strategy"]["strategy_module"])
+        strategy_class = module.__getattribute__(self.base_config["strategy"]["strategy_name"])
+        config = {}
+        if "path_to_config" in self.base_config["strategy"]:
+            config = ConfigParser.load_config(
+                Path(self.base_config["strategy"]["path_to_config"]))
+        strategy_instance = strategy_class(config=config)
+        return strategy_instance
 
     def run_simulation(
             self,
-            strategy: tp.Type[StrategyBase],
-            strategy_config: Config,
             time_range: TimeRange,
-            logs_path: tp.Optional[Path] = None) -> TradingStatistics:
+            logs_path: tp.Optional[Path] = None,
+            pretty_print: bool = True) -> TradingStatistics:
+
+        def get_progress() -> float:
+            return (min(self._ti.get_timestamp(), time_range.to_ts) - time_range.from_ts)\
+                   / time_range.get_range() * 100
 
         Logger.set_log_file_name(Timestamp.to_iso_format(time_range.from_ts))
         if logs_path is not None:
@@ -53,26 +73,34 @@ class StrategyRunner:
         self._ti = Simulator(
             time_range=time_range,
             trading_config=self.base_config['trading_interface'],
-            exchange_config=self.simulator_config )
+            exchange_config=self.simulator_config
+        )
         Logger.set_clock(self._ti.get_clock())
 
-        self._init_trading(strategy, strategy_config)
+        self._init_trading()
 
+        last_checkpoint = 0
+        self.logger.info("Simulation started")
         while self._ti.is_alive():
+            current_checkpoint = get_progress() // self._stdout_frequency * self._stdout_frequency
+            if current_checkpoint != last_checkpoint:
+                last_checkpoint = current_checkpoint
+                self.logger.info(f"{last_checkpoint}% of simulation passed."
+                                 f" Simulation time: {Timestamp.to_iso_format(self._ti.get_timestamp())}")
+
             self._do_trading_iteration()
 
-        return self._stop_trading()
+        return self._stop_trading(pretty_print)
 
     def run_simulation_on_periods(
             self,
-            strategy: tp.Type[StrategyBase],
-            strategy_config: Config,
             time_range: TimeRange,
             period: tp.Optional[int] = None,
             runs: tp.Optional[int] = None,
             visualize: bool = False,
             processes: int = 4,
-            logs_path: tp.Optional[Path] = None) -> TradingStatistics:
+            logs_path: tp.Optional[Path] = None,
+            pretty_print: bool = True) -> TradingStatistics:
 
         if period is None and runs is None:
             raise ValueError('Run type not selected')
@@ -91,8 +119,6 @@ class StrategyRunner:
             pool.apply_async(
                 self.run_simulation,
                 kwds={
-                    'strategy': strategy,
-                    'strategy_config': strategy_config,
                     'time_range': TimeRange(current_ts, next_ts),
                     'logs_path': logs_path},
                 callback=lambda run_result: run_results.append(run_result),
@@ -102,7 +128,10 @@ class StrategyRunner:
         pool.close()
         pool.join()
         stats = TradingStatistics.merge(run_results)
-        print(stats)
+        if pretty_print:
+            stats.pretty_print()
+        else:
+            print(stats)
 
         if visualize:
             TradingStatistics.visualize(run_results)
@@ -125,7 +154,7 @@ class StrategyRunner:
             exchange_config=self.exchange_config)
         Logger.set_clock(self._ti.get_clock())
 
-        self._init_trading(strategy, strategy_config)
+        self._init_trading()
 
         while self._ti.is_alive():
             self._do_trading_iteration()
@@ -133,19 +162,15 @@ class StrategyRunner:
 
         return self._stop_trading()
 
-    def _init_trading(self, strategy: tp.Type[StrategyBase], strategy_config: Config) -> None:
+    def _init_trading(self) -> None:
         self._ts = TradingSystem(
             trading_interface=self._ti,
             config=self.base_config['trading_system'])
 
-        self._signal_detectors = [
-            self._ts,
-            ExtremumSignalDetector(self._ts, 2),
-            MovingAverageSignalDetector(self._ts, 25, 50)
-        ]
-
-        self._strategy_inst = strategy(strategy_config)
+        self._strategy_inst = self._get_strategy_instance()
         self._strategy_inst.init_trading(self._ts)
+        self._signal_detectors = self._strategy_inst.get_signal_detectors()
+        self._signal_detectors.append(self._ts)
 
     def _do_trading_iteration(self) -> None:
         self._ts.update()
@@ -157,13 +182,16 @@ class StrategyRunner:
                 f'handle_{signal.name}_signal')(signal.content)
         self._strategy_inst.update()
 
-    def _stop_trading(self) -> TradingStatistics:
+    def _stop_trading(self, pretty_print: bool) -> TradingStatistics:
         self._ts.stop_trading()
         self._ti.stop_trading()
         self._ts.update()
 
         stats = self._ts.get_trading_statistics()
         Logger.store_log()
-        print(stats)
+        if pretty_print:
+            stats.pretty_print()
+        else:
+            print(stats)
 
         return stats
