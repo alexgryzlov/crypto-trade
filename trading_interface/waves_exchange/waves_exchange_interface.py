@@ -125,7 +125,7 @@ class WAVESExchangeInterface(TradingInterface):
         self._fetch_candles()
         return self._candles[-n:]
 
-    @retry(RuntimeError, tries=3, delay=1)
+    @retry(RuntimeError, tries=15, delay=3)
     def _request(self, request_type: str, api_request: str, body: str = '',
                  headers: tp.Optional[tp.Dict[str, tp.Any]] = None,
                  params: tp.Optional[tp.Dict[str, tp.Any]] = None) -> tp.Any:
@@ -188,6 +188,7 @@ class WAVESExchangeInterface(TradingInterface):
             "version": self._version
         })
         response = self._request('post', 'orderbook', body=data)
+        print(response)
         if response['status'] != "OrderAccepted":
             # Sometimes order is created but response status is something else, so check current active orders
             self._fetch_orders()
@@ -204,7 +205,7 @@ class WAVESExchangeInterface(TradingInterface):
             return self._place_order(direction, amount, price)
 
         order = Order(order_id=response['message']['id'],
-                      asset_pair=self.asset_pair,
+                      asset_pair=self.asset_pair_human_readable,
                       amount=amount,
                       price=price,
                       timestamp=timestamp,
@@ -257,7 +258,7 @@ class WAVESExchangeInterface(TradingInterface):
                                      (10 ** self._decimals[str(self.asset_pair_human_readable.amount_asset)])),
                           timestamp=params['timestamp'],
                           direction=Direction.from_string(params['type']))
-            if params['status'] == 'Accepted' and (fetch_all or active):
+            if (params['status'] == 'Accepted' or params['status'] == 'PartiallyFilled') and (fetch_all or active):
                 self._active_orders.add(order)
             elif params['status'] == 'Cancelled' and (fetch_all or cancelled):
                 self._cancelled_orders_ids.add(order.order_id)
@@ -266,17 +267,15 @@ class WAVESExchangeInterface(TradingInterface):
                 self._filled_order_ids.add(order.order_id)
 
     def _fetch_candles(self) -> None:
-        new_candles: tp.List[Candle] = MarketDataDownloader.get_candles(
-            self.asset_pair_human_readable, self._candles_lifetime,
-            TimeRange(self._clock.get_last_fetch(), self._clock.get_timestamp()))
-        if new_candles:
-            self._clock.update_last_fetch(new_candles[-1].ts)
-            if self._candles and self._candles[-1].ts == new_candles[0].ts:
-                self._candles.pop()
-            self._candles.extend(new_candles)
-
-            # DataDownloader returns a candle full of None if nothing has happened during its timeframe
-            if self._candles[-1].open is None:
-                self._candles.pop()
+        if self.get_timestamp() - self._clock.get_last_request() > self._clock.get_candles_update_rate():
+            new_candles: tp.List[Candle] = MarketDataDownloader.get_candles(
+                self.asset_pair_human_readable, self._candles_lifetime,
+                TimeRange(self._clock.get_last_fetch(), self._clock.get_timestamp()))
+            self._clock.update_last_requeset(self.get_timestamp())
+            if new_candles:
+                self._clock.update_last_fetch(new_candles[-1].ts)
+                if self._candles and self._candles[-1].ts == new_candles[0].ts:
+                    self._candles.pop()
+                self._candles.extend(new_candles)
 
         # TODO: may be use collections.deque(max_len=const) for candles

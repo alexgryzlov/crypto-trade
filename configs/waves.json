@@ -12,7 +12,8 @@
     "version": 3,
     "fee_currency": "WAVES",
     "clock" : {
-      "before_start_offset": 300
+      "before_start_offset": 300,
+      "candles_update_rate": 5
     },
     "asset_translation": {
       "WAVES": "WAVES",
@@ -34,7 +35,8 @@
     "version": 3,
     "fee_currency": "WAVES",
     "clock" : {
-      "before_start_offset": 300
+      "before_start_offset": 300,
+            "candles_update_rate": 5
     },
     "asset_translation": {
       "WAVES": "WAVES",

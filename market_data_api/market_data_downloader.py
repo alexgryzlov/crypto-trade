@@ -52,7 +52,7 @@ class MarketDataDownloader:
         return MarketDataDownloader._fill_gaps(candles)
 
     @staticmethod
-    @retry(RuntimeError, tries=3, delay=2)
+    @retry(RuntimeError, tries=15, delay=3)
     def _load_candles_batch(asset_pair: AssetPair, timeframe: Timeframe,
                             time_range: TimeRange) -> tp.List[tp.Dict[str, tp.Any]]:
         asset_pair_id = MarketDataDownloader._Exchange.markets[str(asset_pair)]['id']
@@ -73,11 +73,15 @@ class MarketDataDownloader:
 
     @staticmethod
     def _fill_gaps(candles: tp.List[Candle]) -> tp.List[Candle]:
+        while candles and candles[0].open is None:
+            candles = candles[1:]
         for index in range(1, len(candles)):
             if candles[index].open is None:
-                ts = candles[index].ts
-                candles[index] = copy(candles[index - 1])
-                candles[index].ts = ts
+                candles[index].open = candles[index - 1].close
+                candles[index].high = candles[index - 1].close
+                candles[index].low = candles[index - 1].close
+                candles[index].close = candles[index - 1].close
+                candles[index].volume = 0
         return candles
 
     @staticmethod

@@ -30,11 +30,13 @@ class GridStrategy(StrategyBase):
 
         for level in range(0, self._base_level):
             order = self._ts.buy(self._asset_pair, self._tranche, self.get_level_price(level))
-            self._grid[order.order_id] = level
+            if order is not None:
+                self._grid[order.order_id] = level
 
         for level in range(self._base_level + 1, self._total_levels):
             order = self._ts.sell(self._asset_pair, self._tranche, self.get_level_price(level))
-            self._grid[order.order_id] = level
+            if order is not None:
+                self._grid[order.order_id] = level
 
     def update(self) -> None:
         pass
@@ -43,10 +45,12 @@ class GridStrategy(StrategyBase):
         if order.direction.value == Direction.SELL.value:
             level = self._grid[order.order_id]
             self._grid.pop(order.order_id)
-            order = self._ts.buy(self._tranche, self.get_level_price(level - 1))
-            self._grid[order.order_id] = level
+            order = self._ts.buy(self._asset_pair, self._tranche, self.get_level_price(level - 1))
+            if order is not None:
+                self._grid[order.order_id] = level - 1
         elif order.direction.value == Direction.BUY.value:
             level = self._grid[order.order_id]
             self._grid.pop(order.order_id)
-            order = self._ts.sell(self._tranche, self.get_level_price(level + 1))
-            self._grid[order.order_id] = level
+            order = self._ts.sell(self._asset_pair, self._tranche, self.get_level_price(level + 1))
+            if order is not None:
+                self._grid[order.order_id] = level + 1

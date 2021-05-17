@@ -129,7 +129,7 @@ class StrategyRunner:
 
         while self._ti.is_alive():
             self._do_trading_iteration()
-            sleep(2)
+            sleep(5)
 
         return self._stop_trading()
 

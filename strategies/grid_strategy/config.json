@@ -1,9 +1,9 @@
 {
   "asset_pair": ["USDT", "USDN"],
-  "total_levels": 13,
-  "base_level": 6,
-  "base_price": 1.501,
-  "interval": 0.002,
-  "tranche": 0.1,
+  "total_levels": 9,
+  "base_level": 5,
+  "base_price": 1.0074,
+  "interval": 0.0002,
+  "tranche": 1,
   "window_size": 20
 }
