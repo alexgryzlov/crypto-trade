@@ -119,7 +119,8 @@ class StrategyRunner:
                 self.run_strategy,
                 kwds={
                     'time_range': TimeRange(current_ts, next_ts),
-                    'logs_path': logs_path},
+                    'logs_path': logs_path,
+                    'pretty_print': pretty_print},
                 callback=lambda run_result: run_results.append(run_result),
                 error_callback=lambda e: tb.print_exception(type(e), e, None))
             current_ts = next_ts
