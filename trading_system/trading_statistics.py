@@ -2,6 +2,7 @@ import math
 import typing as tp
 from copy import copy
 from collections import Counter
+from io import StringIO
 
 import plotly.graph_objects as go
 from rich.box import Box
@@ -77,9 +78,14 @@ class TradingStatistics:
         table = Table(show_footer=True, box=TABLE_STYLE, show_lines=True,
             title=f'{Timestamp.to_iso_format(require(self.start_timestamp))} - '
                   f'{Timestamp.to_iso_format(require(self.finish_timestamp))}')
-        table.add_column('')
+        table.add_column()
         table.add_column('Initial', f'Filled orders: {self.filled_order_count}')
-        table.add_column('Final', f'Profit: [{color}]{self.calc_relative_delta():+.1f}%[/{color}]\nHODL:   [{hodl_color}]{self._calc_relative_hodl_delta():+.1f}%[/{hodl_color}]')
+        profit_table = Table.grid(padding=(0, 1))
+        profit_table.add_column()
+        profit_table.add_column()
+        profit_table.add_row('Profit:', f'[{color}]{self.calc_relative_delta():+.1f}%[/]')
+        profit_table.add_row('HODL:', f'[{hodl_color}]{self._calc_relative_hodl_delta():+.1f}%[/]')
+        table.add_column('Final', profit_table)
         table.add_row('Balance', f'{require(self.initial_balance):.2f} {require(self.price_asset)}',
                       f'{require(self.final_balance):.2f} {require(self.price_asset)}')
         table.add_row('Wallet',
@@ -117,13 +123,16 @@ delta hodl_result(%):   {self._calc_relative_hodl_delta():.1f}%
         return (require(self.hodl_result) - require(self.initial_balance)) / require(self.initial_balance) * 100
 
     def _wallet_pretty_format(self, wallet: tp.Dict[Asset, float]) -> str:
-        assets = [str(asset) + ':' for asset in wallet.keys()]
-        assets_max_len = max(map(len, assets)) + 1
-        assets = list(map(lambda x: x.ljust(assets_max_len), assets))
-        amounts = [f'{amount:2f}' for amount in wallet.values()]
-        amounts_max_len = max(map(len, amounts))
-        amounts = list(map(lambda x: x.rjust(amounts_max_len), amounts))
-        return '\n'.join(map(lambda x: x[0] + x[1], zip(assets, amounts)))
+        wallet_table = Table.grid(padding=(0, 1))
+        wallet_table.add_column(justify='left')
+        wallet_table.add_column(justify='right')
+        for asset, amount in wallet.items():
+            wallet_table.add_row(f'{asset}:', f'{amount:.2f}')
+
+        str_io = StringIO()
+        console = Console(file=str_io)
+        console.print(wallet_table)
+        return str_io.getvalue().rstrip()
 
     @classmethod
     def merge(cls, stats_array: tp.List['TradingStatistics']) -> 'TradingStatistics':
