@@ -48,12 +48,11 @@ class StrategyRunner:
         self._between_iteration_pause = self.base_config['strategy_runner']['between_iteration_pause']
 
     def _get_strategy_instance(self) -> tp.Any:
-        module = importlib.import_module(self.base_config["strategy"]["strategy_module"])
-        strategy_class = module.__getattribute__(self.base_config["strategy"]["strategy_name"])
-        config = {}
-        if "path_to_config" in self.base_config["strategy"]:
-            config = ConfigParser.load_config(
-                Path(self.base_config["strategy"]["path_to_config"]))
+        module_path = 'strategies' + ('.' + self.base_config["strategy"]["dir"]) * 2
+        module = importlib.import_module(module_path)
+        strategy_class = module.__getattribute__(self.base_config["strategy"]["name"])
+        path = 'strategies/' + self.base_config["strategy"]["dir"] + '/config.json'
+        config = ConfigParser.load_config(Path(path))
         strategy_instance = strategy_class(config=config)
         return strategy_instance
 

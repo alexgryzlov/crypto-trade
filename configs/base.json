@@ -2,23 +2,22 @@
   "trading_system": {
     "currency_asset": "USDN",
     "wallet": {
-      "USDN": 45,
-      "WAVES": 5.5,
+      "USDN": 500,
+      "WAVES": 50,
       "USDT": 0
     }
   },
 
   "strategy": {
-    "strategy_name": "GridStrategy",
-    "strategy_module": "strategies.grid_strategy.grid_strategy",
-    "path_to_config": "strategies/grid_strategy/config.json"
+    "name": "RSIMACDStrategy",
+    "dir": "rsi_macd_strategy"
   },
 
   "trading_interface": {
     "private_key": "7WJxqTfaiMmFFHRvxCwiQ8DAE3qVBd5ziaE5F8qJWXWx",
     "public_key": "DuasNP39N7PCNCKfEkjXniR8otVbriYp3MpBrKKZrH1K",
     "asset_pair": ["WAVES", "USDN"],
-    "timeframe": "5m"
+    "timeframe": "1h"
   },
 
   "market_data_downloader": {
