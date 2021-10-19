@@ -16,3 +16,4 @@ varname==0.6.3
 python-dotenv==0.15.0
 base58>=2.1.0
 rich==10.1.0
+requests-mock==1.9.3

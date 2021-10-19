@@ -5,6 +5,7 @@ from copy import copy
 import math
 
 from helpers.typing.common_types import Config
+from trading_interface.trading_interface import TradingInterface
 
 from trading_system.candles_handler import CandlesHandler
 from trading_system.orders_handler import OrdersHandler

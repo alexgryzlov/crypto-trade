@@ -1,9 +1,8 @@
 import pytest
 
-from tests.configs import base_config, simulator_config
 from helpers.typing.common_types import Config, ConfigsScope
 
-from strategy_runner.strategy_runner import StrategyRunner
+from strategies.strategy_runner.strategy_runner import StrategyRunner
 from trading import TimeRange
 
 from tests.logger.empty_logger_mock import empty_logger_mock
