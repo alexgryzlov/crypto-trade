@@ -4,7 +4,7 @@ from logger.logger import Logger
 from market_data_api.market_data_downloader import MarketDataDownloader
 from base.config_parser import ConfigParser
 
-from strategies.strategy_runner.strategy_runner import StrategyRunner
+from strategies.strategy_runner import StrategyRunner
 
 from trading import TimeRange
 

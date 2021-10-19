@@ -8,7 +8,7 @@ from rich.console import Console
 
 from base.config_parser import ConfigParser
 from market_data_api.market_data_downloader import MarketDataDownloader
-from strategies.strategy_runner.strategy_runner import StrategyRunner
+from strategies.strategy_runner import StrategyRunner
 from trading import TimeRange
 from trading_system.trading_statistics import TradingStatistics
 
