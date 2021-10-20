@@ -5,6 +5,7 @@ from helpers.typing.common_types import Config, ConfigsScope
 from strategies.strategy_runner import StrategyRunner
 from trading import TimeRange
 
+from tests.configs.base_config import *
 from tests.logger.empty_logger_mock import empty_logger_mock
 from tests.market_data_api.md_downloader import market_data_downloader
 
@@ -30,6 +31,7 @@ def test_dummy_simulation_run(
             to_ts='2021-02-10 12:00:00'))
 
 
+@pytest.mark.skip(reason="Does not work on Mac")
 def test_dummy_multiple_simulation_run(
         strategy_runner: StrategyRunner,
         empty_logger_mock: empty_logger_mock) -> None:

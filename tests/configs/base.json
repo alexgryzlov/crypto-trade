@@ -8,8 +8,8 @@
   },
 
   "strategy": {
-    "strategy_name": "StrategyMock",
-    "strategy_module": "tests.strategies.strategy_mock"
+    "name": "StrategyMock",
+    "dir": "mock_strategy"
   },
 
   "strategy_runner": {
@@ -18,21 +18,15 @@
       "std_output": true,
       "system_time": true
     },
-    "stdout_frequency": 10
+    "stdout_frequency": 10,
+    "between_iteration_pause": 5
   },
 
   "trading_interface": {
+    "private_key": "7WJxqTfaiMmFFHRvxCwiQ8DAE3qVBd5ziaE5F8qJWXWx",
+    "public_key": "DuasNP39N7PCNCKfEkjXniR8otVbriYp3MpBrKKZrH1K",
     "timeframe": "15m",
-    "asset_pair": ["WAVES", "USDN"],
-
-    "simulator": {
-      "price_simulation_type": "three_interval_path",
-      "price_shift": 0.001,
-
-      "clock_simulator": {
-        "candles_lifetime": 20
-      }
-    }
+    "asset_pair": ["WAVES", "USDN"]
   },
 
   "market_data_downloader": {

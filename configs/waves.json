@@ -15,7 +15,7 @@
       "before_start_offset": 300,
       "candles_update_rate": 5
     },
-    "asset_translation": {
+    "asset_addresses": {
       "WAVES": "WAVES",
       "BTC":  "8LQW8f7P5d5PZM7GtZEBgaqRPGSzS3DfPuiXrURJ4AJS",
       "USDN": "DG2xFkPdDwKUoBkzGAhQtLpSGzfXLiCYPEzeKH2Ad24p",
@@ -38,7 +38,7 @@
       "before_start_offset": 300,
             "candles_update_rate": 5
     },
-    "asset_translation": {
+    "asset_addresses": {
       "WAVES": "WAVES",
       "BTC":  "DWgwcZTMhSvnyYCoWLRUXXSH1RSkzThXLJhww9gwkqdn",
       "USDN": "25FEqEjRkqK6yCkiT7Lz6SAYz7gUFCtxfCChnrVFD5AT",

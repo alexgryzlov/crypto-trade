@@ -20,8 +20,15 @@ def asset_pair(trading_interface_config: Config) -> AssetPair:
 
 
 @pytest.fixture
-def price_shift(testnet_config: Config) -> int:
-    return testnet_config['price_shift']
+def asset_addresses(testnet_config: Config) -> dict:
+    return testnet_config['asset_addresses']
+
+
+@pytest.fixture
+def asset_addresses_pair(asset_addresses: dict, asset_pair: AssetPair) -> AssetPair:
+    return AssetPair(
+        *(asset_addresses[str(asset)] for asset in (asset_pair.amount_asset, asset_pair.price_asset))
+    )
 
 
 @pytest.fixture

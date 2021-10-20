@@ -14,6 +14,8 @@ sample_orderbook = {
     ]
 }
 
+sample_orderbook_price_scale = 10 ** 6
+
 sample_sell_order_accepted = {
     'success': True,
     'message': {

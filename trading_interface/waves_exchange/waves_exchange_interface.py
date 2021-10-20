@@ -18,8 +18,8 @@ from logger.logger import Logger
 
 class WAVESExchangeInterface(TradingInterface):
     def __init__(self, trading_config: Config, exchange_config: Config):
-        self.logger = Logger("TestnetInterface")
-        self._asset_translation: tp.Dict[str, str] = exchange_config['asset_translation']
+        self.logger = Logger("WAVESExchangeInterface")
+        self._asset_addresses: tp.Dict[str, str] = exchange_config['asset_addresses']
         self.asset_pair_human_readable = AssetPair.from_string(*trading_config['asset_pair'])
         self.asset_pair = self._to_waves_format(self.asset_pair_human_readable)
         self._host: str = exchange_config['matcher']
@@ -38,12 +38,15 @@ class WAVESExchangeInterface(TradingInterface):
         self._candles_lifetime = Timeframe(trading_config['timeframe'])
         self._clock = WAVESExchangeClock(exchange_config['clock'])
 
-        self._fetch_orders()
-        self._fetch_candles()
+        try:
+            self._fetch_orders()
+            self._fetch_candles()
+        except Exception as e:
+            self.logger.warning(e)
 
     def _to_waves_format(self, asset_pair: AssetPair) -> AssetPair:
-        return AssetPair.from_string(self._asset_translation[str(asset_pair.amount_asset)],
-                                     self._asset_translation[str(asset_pair.price_asset)])
+        return AssetPair.from_string(self._asset_addresses[str(asset_pair.amount_asset)],
+                                     self._asset_addresses[str(asset_pair.price_asset)])
 
     def is_alive(self) -> bool:
         return len(self._request("get", "")) != 0
