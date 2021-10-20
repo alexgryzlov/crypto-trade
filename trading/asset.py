@@ -23,7 +23,7 @@ class AssetPair:
         self.price_asset: Asset = price_asset if isinstance(price_asset, Asset) else Asset(price_asset)
 
     @classmethod
-    def from_string(cls, amount_asset: str, price_asset: str):
+    def from_string(cls, amount_asset: str, price_asset: str) -> 'AssetPair':
         return cls(Asset(amount_asset), Asset(price_asset))
 
     def __repr__(self) -> str:

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import typing as tp
+
 from collections import OrderedDict
 from copy import copy
 import math
@@ -108,6 +110,8 @@ class TradingSystem:
             return None
         self.wallet[asset_pair.price_asset] -= price * amount
         order = self.ti.buy(amount, price)
+        if not order:
+            return None
         self.logger.trading_event(BuyEvent(asset_pair,
                                            amount,
                                            price,
@@ -123,6 +127,8 @@ class TradingSystem:
             return None
         self.wallet[asset_pair.amount_asset] -= amount
         order = self.ti.sell(amount, price)
+        if not order:
+            return None
         self.logger.trading_event(SellEvent(asset_pair,
                                             amount,
                                             price,

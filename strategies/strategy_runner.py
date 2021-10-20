@@ -61,9 +61,11 @@ class StrategyRunner:
             time_range: TimeRange,
             logs_path: tp.Optional[Path] = None,
             pretty_print: bool = True) -> TradingStatistics:
+        assert self._ti is not None
 
         def get_progress() -> float:
-            return (min(self._ti.get_timestamp(), time_range.to_ts) - time_range.from_ts)\
+            return (min(self._ti.get_timestamp(),  # type: ignore
+                        time_range.to_ts) - time_range.from_ts)\
                    / time_range.get_range() * 100
 
         Logger.set_log_file_name(Timestamp.to_iso_format(time_range.from_ts))
@@ -75,18 +77,19 @@ class StrategyRunner:
             trading_config=self.base_config['trading_interface'],
             exchange_config=self.simulator_config
         )
-        Logger.set_clock(self._ti.get_clock())
+        Logger.set_clock(self._ti.get_clock())  # type: ignore
 
         self._init_trading()
 
         last_checkpoint = 0
         self.logger.info("Simulation started")
-        while self._ti.is_alive():
+        while self._ti.is_alive():  # type: ignore
             current_checkpoint = get_progress() // self._stdout_frequency * self._stdout_frequency
             if current_checkpoint != last_checkpoint:
                 last_checkpoint = current_checkpoint
                 self.logger.info(f"{last_checkpoint}% of simulation passed."
-                                 f" Simulation time: {Timestamp.to_iso_format(self._ti.get_timestamp())}")
+                                 f" Simulation time: "
+                                 f"{Timestamp.to_iso_format(self._ti.get_timestamp())}")  # type: ignore
 
             self._do_trading_iteration()
 
@@ -151,11 +154,11 @@ class StrategyRunner:
         self._ti = WAVESExchangeInterface(
             trading_config=self.base_config['trading_interface'],
             exchange_config=self.exchange_config)
-        Logger.set_clock(self._ti.get_clock())
+        Logger.set_clock(self._ti.get_clock())  # type: ignore
 
         self._init_trading()
 
-        while self._ti.is_alive():
+        while self._ti.is_alive():  # type: ignore
             self._do_trading_iteration()
             sleep(self._between_iteration_pause)
 
@@ -163,30 +166,30 @@ class StrategyRunner:
 
     def _init_trading(self) -> None:
         self._ts = TradingSystem(
-            trading_interface=self._ti,
+            trading_interface=self._ti,  # type: ignore
             config=self.base_config['trading_system'])
 
         self._strategy_inst = self._get_strategy_instance()
-        self._strategy_inst.init_trading(self._ts)
-        self._signal_detectors = self._strategy_inst.get_signal_detectors()
-        self._signal_detectors.append(self._ts)
+        self._strategy_inst.init_trading(self._ts)  # type: ignore
+        self._signal_detectors = self._strategy_inst.get_signal_detectors()  # type: ignore
+        self._signal_detectors.append(self._ts)  # type: ignore
 
     def _do_trading_iteration(self) -> None:
-        self._ts.update()
+        self._ts.update()  # type: ignore
         signals: tp.List[Signal] = []
         for detector in self._signal_detectors:
             signals += detector.get_trading_signals()
         for signal in signals:
             self._strategy_inst.__getattribute__(
                 f'handle_{signal.name}_signal')(signal.content)
-        self._strategy_inst.update()
+        self._strategy_inst.update()  # type: ignore
 
     def _stop_trading(self, pretty_print: bool) -> TradingStatistics:
-        self._ts.stop_trading()
-        self._ti.stop_trading()
-        self._ts.update()
+        self._ts.stop_trading()  # type: ignore
+        self._ti.stop_trading()  # type: ignore
+        self._ts.update()  # type: ignore
 
-        stats = self._ts.get_trading_statistics()
+        stats = self._ts.get_trading_statistics()  # type: ignore
         Logger.store_log()
         if pretty_print:
             stats.pretty_print()

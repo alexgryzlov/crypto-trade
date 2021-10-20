@@ -1,4 +1,4 @@
-def pytest_addoption(parser):
+def pytest_addoption(parser):  # type: ignore
     parser.addoption(
         "--testnet",
         action="store_true",
@@ -7,14 +7,14 @@ def pytest_addoption(parser):
     )
 
 
-def pytest_configure(config):
+def pytest_configure(config):  # type: ignore
     config.addinivalue_line(
         "markers",
         "testnet: mark that the test requires access to testnet (network)"
     )
 
 
-def pytest_collection_modifyitems(config, items):
+def pytest_collection_modifyitems(config, items):  # type: ignore
     run_testnet = config.getoption("testnet")
 
     if not run_testnet:
