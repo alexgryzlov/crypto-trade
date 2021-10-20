@@ -1,0 +1,7 @@
+{
+  "price_simulation_type": "three_interval_path",
+  "price_shift": 0.001,
+  "clock_simulator": {
+    "candles_lifetime": 20
+  }
+}

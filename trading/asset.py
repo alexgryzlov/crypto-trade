@@ -22,6 +22,10 @@ class AssetPair:
         self.amount_asset: Asset = amount_asset if isinstance(amount_asset, Asset) else Asset(amount_asset)
         self.price_asset: Asset = price_asset if isinstance(price_asset, Asset) else Asset(price_asset)
 
+    @classmethod
+    def from_string(cls, amount_asset: str, price_asset: str):
+        return cls(Asset(amount_asset), Asset(price_asset))
+
     def __repr__(self) -> str:
         return f"{self.amount_asset}/{self.price_asset}"
 

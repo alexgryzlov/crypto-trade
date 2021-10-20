@@ -15,7 +15,7 @@ ones_ti.order_is_filled = MagicMock(return_value=True)
 
 @pytest.fixture(scope="module")
 def sample_orders() -> tp.List[Order]:
-    return [Order(i, AssetPair(Asset('WAVES'), Asset('USDN')), 1, 1, Direction.BUY) for i in range(10)]
+    return [Order(str(i), AssetPair(Asset('WAVES'), Asset('USDN')), 1, 1, i, Direction.BUY) for i in range(10)]
 
 
 @pytest.fixture
@@ -29,7 +29,7 @@ def orders_handler(request, sample_orders, empty_logger_mock) -> OrdersHandler:
 @pytest.mark.parametrize("orders_handler", [ones_ti], indirect=True)
 def test_active_orders_copy(sample_orders, orders_handler, empty_logger_mock):
     active_orders = orders_handler.get_active_orders()
-    new_order = Order(1000, AssetPair(Asset('WAVES'), Asset('USDN')), 1, 1, Direction.BUY)
+    new_order = Order('ID', AssetPair(Asset('WAVES'), Asset('USDN')), 1, 1, 42, Direction.BUY)
     active_orders.add(new_order)
     assert len(active_orders) != len(orders_handler.get_active_orders())
 

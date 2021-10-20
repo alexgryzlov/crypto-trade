@@ -6,7 +6,9 @@ import typing as tp
 
 
 class TradingInterfaceMock(TradingInterface):
-    def __init__(self, all_candles: tp.Optional[tp.List[Candle]] = None):
+    def __init__(self, all_candles: tp.Optional[tp.List[Candle]] = None,
+                 asset_pair=AssetPair(Asset('WAVES'), Asset('USDN'))):
+        self.asset_pair = asset_pair
         if all_candles is None:
             all_candles = []
         self.all_candles = all_candles
@@ -43,9 +45,9 @@ class TradingInterfaceMock(TradingInterface):
     def get_last_n_candles(self, n: int) -> tp.List[Candle]:
         return self.processed_candles[-n:]
 
-    def buy(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
+    def buy(self, amount: float, price: float) -> Order:
         self.order_cnt += 1
-        return Order(self.order_cnt, asset_pair, amount, price, Direction.BUY)
+        return Order(str(self.order_cnt), self.asset_pair, amount, price, self.order_cnt, Direction.BUY)
 
     def cancel_all(self) -> None:
         pass
@@ -62,9 +64,9 @@ class TradingInterfaceMock(TradingInterface):
     def order_is_filled(self, order: Order) -> bool:
         pass
 
-    def sell(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
+    def sell(self, amount: float, price: float) -> Order:
         self.order_cnt += 1
-        return Order(self.order_cnt, asset_pair, amount, price, Direction.SELL)
+        return Order(str(self.order_cnt), self.asset_pair, amount, price, self.order_cnt, Direction.SELL)
 
     def stop_trading(self) -> None:
         pass

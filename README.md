@@ -1,1 +1,6 @@
-# waves-trading-bot
+# Trading bot
+
+## Running the tests
+```shell
+pytest .
+```

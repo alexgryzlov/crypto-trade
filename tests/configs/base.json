@@ -4,47 +4,34 @@
     "wallet": {
       "USDN": 100.0,
       "WAVES": 10.0
-    },
-    "risk_checker": {
-      "max_order_amount": 50,
-      "max_order_price": 50,
-      "available_assets": ["WAVES", "USDN", "USDT"],
-      "max_order_count_per_period": 4,
-      "rejection_period": "1m"
     }
   },
 
   "strategy": {
-    "strategy_name": "StrategyMock",
-    "strategy_module": "tests.strategies.strategy_mock"
+    "name": "StrategyMock",
+    "dir": "mock_strategy"
+  },
+
+  "strategy_runner": {
+    "logger": {
+      "file_output": false,
+      "std_output": true,
+      "system_time": true
+    },
+    "stdout_frequency": 10,
+    "between_iteration_pause": 5
   },
 
   "trading_interface": {
+    "private_key": "7WJxqTfaiMmFFHRvxCwiQ8DAE3qVBd5ziaE5F8qJWXWx",
+    "public_key": "DuasNP39N7PCNCKfEkjXniR8otVbriYp3MpBrKKZrH1K",
     "timeframe": "15m",
-    "asset_pair": ["WAVES", "USDN"],
-
-    "simulator": {
-      "price_simulation_type": "three_interval_path",
-      "price_shift": 0.001,
-
-      "clock_simulator": {
-        "candles_lifetime": 20
-      }
-    }
+    "asset_pair": ["WAVES", "USDN"]
   },
 
   "market_data_downloader": {
     "market_data_host": "https://api.wavesplatform.com",
     "matcher_host": "https://matcher.waves.exchange",
     "candles_per_request": 1400
-  },
-
-  "strategy_runner": {
-    "logger": {
-      "file_output": false,
-      "std_output": false,
-      "system_time": false
-    },
-    "stdout_frequency": 10
   }
 }

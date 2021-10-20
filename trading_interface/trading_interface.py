@@ -1,6 +1,7 @@
-from trading import AssetPair, Order, Candle
 import typing as tp
 from abc import ABC, abstractmethod
+
+from trading import AssetPair, Order, Candle
 
 
 class TradingInterface(ABC):
@@ -16,15 +17,16 @@ class TradingInterface(ABC):
     def get_timestamp(self) -> int:
         pass
 
-    def buy(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
+    @abstractmethod
+    def buy(self, amount: float, price: float) -> tp.Optional[Order]:
         pass
 
     @abstractmethod
-    def sell(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
+    def sell(self, amount: float, price: float) -> tp.Optional[Order]:
         pass
 
     @abstractmethod
-    def cancel_order(self, order: Order) -> None:
+    def cancel_order(self, order: Order) -> bool:
         pass
 
     @abstractmethod

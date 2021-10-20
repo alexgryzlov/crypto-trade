@@ -13,22 +13,23 @@ from trading_interface.simulator.price_simulator import PriceSimulator, PriceSim
 
 
 class Simulator(TradingInterface):
-    def __init__(self, time_range: TimeRange, config: Config):
+    def __init__(self, time_range: TimeRange, trading_config: Config, exchange_config: Config):
         ts_offset = int(datetime.timedelta(days=1).total_seconds())
         self.clock = ClockSimulator(
             start_ts=time_range.from_ts,
-            timeframe=Timeframe(config['timeframe']),
-            config=config['simulator']['clock_simulator'])
+            timeframe=Timeframe(trading_config['timeframe']),
+            config=exchange_config['clock_simulator'])
+        self.asset_pair = AssetPair(*trading_config['asset_pair'])
         self.candle_index_offset = ts_offset // self.clock.get_seconds_per_candle()
         self.active_orders: tp.Set[Order] = set()
         self.last_used_order_id = 0
         self.filled_order_ids: tp.Set[int] = set()
-        self.price_shift = float(config['simulator']['price_shift'])
+        self.price_shift = float(exchange_config['price_shift'])
         self.price_simulator = PriceSimulator(
             candles_lifetime=self.clock.candles_lifetime,
-            simulation_type=PriceSimulatorType(config['simulator']['price_simulation_type']))
+            simulation_type=PriceSimulatorType(exchange_config['price_simulation_type']))
         self.candles = MarketDataDownloader.get_candles(
-            asset_pair=AssetPair(*config['asset_pair']),
+            asset_pair=self.asset_pair,
             timeframe=self.clock.get_timeframe(),
             time_range=TimeRange(time_range.from_ts - ts_offset, time_range.to_ts))
 
@@ -46,26 +47,32 @@ class Simulator(TradingInterface):
     def get_timestamp(self) -> int:
         return self.clock.get_timestamp()
 
-    def buy(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
+    def buy(self, amount: float, price: float) -> tp.Optional[Order]:
         order = Order(order_id=self.__get_new_order_id(),
-                      asset_pair=asset_pair,
+                      asset_pair=self.asset_pair,
                       amount=amount,
                       price=price,
+                      timestamp=self.clock.get_timestamp(),
                       direction=Direction.BUY)
         self.active_orders.add(copy(order))
         return order
 
-    def sell(self, asset_pair: AssetPair, amount: float, price: float) -> Order:
+    def sell(self, amount: float, price: float) -> tp.Optional[Order]:
         order = Order(order_id=self.__get_new_order_id(),
-                      asset_pair=asset_pair,
+                      asset_pair=self.asset_pair,
                       amount=amount,
                       price=price,
+                      timestamp=self.clock.get_timestamp(),
                       direction=Direction.SELL)
         self.active_orders.add(copy(order))
         return order
 
-    def cancel_order(self, order: Order) -> None:
-        self.active_orders.discard(order)
+    def cancel_order(self, order: Order) -> bool:
+        try:
+            self.active_orders.remove(order)
+            return True
+        except KeyError:
+            return False
 
     def cancel_all(self) -> None:
         self.active_orders.clear()
@@ -111,6 +118,6 @@ class Simulator(TradingInterface):
             return index
         return min(index, len(self.candles) - 1)
 
-    def __get_new_order_id(self) -> int:
+    def __get_new_order_id(self) -> str:
         self.last_used_order_id += 1
-        return self.last_used_order_id
+        return str(self.last_used_order_id)

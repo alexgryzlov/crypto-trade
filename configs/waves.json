@@ -1,0 +1,48 @@
+{
+  "mainnet": {
+    "matcher": "http://matcher.waves.exchange",
+    "matcher_fee": 300000,
+    "decimals": {
+      "WAVES": 8,
+      "BTC": 8,
+      "USDN": 6,
+      "USDT": 6
+    },
+    "max_lifetime": 2160000,
+    "version": 3,
+    "fee_currency": "WAVES",
+    "clock" : {
+      "before_start_offset": 300,
+      "candles_update_rate": 5
+    },
+    "asset_addresses": {
+      "WAVES": "WAVES",
+      "BTC":  "8LQW8f7P5d5PZM7GtZEBgaqRPGSzS3DfPuiXrURJ4AJS",
+      "USDN": "DG2xFkPdDwKUoBkzGAhQtLpSGzfXLiCYPEzeKH2Ad24p",
+      "USDT": "34N9YcEETLWn93qYQ64EsP1x89tSruJU44RrEMSXXEPJ"
+    }
+  },
+  "testnet": {
+    "matcher": "https://matcher-testnet.waves.exchange",
+    "matcher_fee": 300000,
+    "decimals": {
+      "WAVES": 8,
+      "BTC": 8,
+      "USDN": 6,
+      "USDT": 6
+    },
+    "max_lifetime": 2160000,
+    "version": 3,
+    "fee_currency": "WAVES",
+    "clock" : {
+      "before_start_offset": 300,
+            "candles_update_rate": 5
+    },
+    "asset_addresses": {
+      "WAVES": "WAVES",
+      "BTC":  "DWgwcZTMhSvnyYCoWLRUXXSH1RSkzThXLJhww9gwkqdn",
+      "USDN": "25FEqEjRkqK6yCkiT7Lz6SAYz7gUFCtxfCChnrVFD5AT",
+      "USDT": "5Sh9KghfkZyhjwuodovDhB6PghDUGBHiAPZ4MkrPgKtX"
+    }
+  }
+}

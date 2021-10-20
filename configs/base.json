@@ -2,36 +2,22 @@
   "trading_system": {
     "currency_asset": "USDN",
     "wallet": {
-      "USDN": 100.0,
-      "WAVES": 10.0
-    },
-    "risk_checker": {
-      "max_order_amount": 50,
-      "max_order_price": 50,
-      "available_assets": ["WAVES", "USDN", "USDT"],
-      "max_order_count_per_period": 4,
-      "rejection_period": "1m"
+      "USDN": 500,
+      "WAVES": 50,
+      "USDT": 0
     }
   },
 
   "strategy": {
-    "strategy_name": "TrendStrategy",
-    "strategy_module": "strategies.trend_strategy.trend_strategy",
-    "path_to_config": "strategies/trend_strategy/config.json"
+    "name": "RSIMACDStrategy",
+    "dir": "rsi_macd_strategy"
   },
 
   "trading_interface": {
-    "timeframe": "1h",
+    "private_key": "7WJxqTfaiMmFFHRvxCwiQ8DAE3qVBd5ziaE5F8qJWXWx",
+    "public_key": "DuasNP39N7PCNCKfEkjXniR8otVbriYp3MpBrKKZrH1K",
     "asset_pair": ["WAVES", "USDN"],
-
-    "simulator": {
-      "price_simulation_type": "three_interval_path",
-      "price_shift": 0.001,
-
-      "clock_simulator": {
-        "candles_lifetime": 20
-      }
-    }
+    "timeframe": "1h"
   },
 
   "market_data_downloader": {
@@ -46,7 +32,8 @@
       "std_output": true,
       "system_time": true
     },
-    "stdout_frequency": 10
+    "stdout_frequency": 10,
+    "between_iteration_pause": 5
   },
 
   "default_logger": {
